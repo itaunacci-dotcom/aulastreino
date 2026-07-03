@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>🎈 Estoure o Balão</title>
+
+<style>
+    body {
+        margin: 0;
+        background: linear-gradient(#87CEEB, #E0F6FF);
+        overflow: hidden;
+        font-family: 'Comic Sans MS', cursive, sans-serif;
+        user-select: none;
+    }
+
+    #game {
+        width: 100vw;
+        height: 100vh;
+        position: relative;
+        cursor: crosshair;
+    }
+
+    .balloon {
+        position: absolute;
+        width: 60px;
+        height: 80px;
+        background: red;
+        border-radius: 50% 50% 50% 50%;
+        cursor: pointer;
+        animation-timing-function: linear;
+        animation-fill-mode: forwards;
+        transition: transform 0.1s;
+        box-shadow: inset -5px -5px 10px rgba(0,0,0,0.2);
+    }
+
+    .balloon::after {
+        content: "";
+        position: absolute;
+        width: 2px;
+        height: 25px;
+        background: #555;
+        bottom: -25px;
+        left: 50%;
+    }
+
+    .special {
+        background: gold !important;
+        box-shadow: 0 0 15px gold, inset -5px -5px 10px rgba(0,0,0,0.2);
+    }
+
+    .bomb {
+        background: #222 !important;
+        box-shadow: 0 0 10px #ff4444, inset -5px -5px 10px rgba(0,0,0,0.4);
+    }
+
+    .balloon.popping {
+        transform: scale(1.5);
+        opacity: 0;
+        transition: transform 0.2s, opacity 0.2s;
+    }
+
+    #hud {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(255,255,255,0.9);
+        padding: 12px 20px;
+        border-radius: 15px;
+        font-size: 18px;
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        border: 3px solid #4CAF50;
+        pointer-events: none;
+    }
+
+    #hud div {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    #message {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 52px;
+        color: white;
+        text-shadow: 3px 3px 10px black;
+        display: none;
+        font-weight: bold;
+        z-index: 100;
+        pointer-events: none;
+    }
+
+    #gameOver {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.85);
+        color: white;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        font-size: 36px;
+        z-index: 1000;
+        text-align: center;
+    }
+
+    button {
+        margin-top: 25px;
+        padding: 12px 30px;
+        font-size: 22px;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        background: linear-gradient(to bottom, #4CAF50, #2E7D32);
+        color: white;
+        font-weight: bold;
+        transition: transform 0.2s;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    button:hover {
+        transform: scale(1.05);
+        background: linear-gradient(to bottom, #66BB6A, #388E3C);
+    }
+
+    #level {
+        font-size: 20px;
+        color: #2196F3;
+        font-weight: bold;
+    }
+    
+    #levelProgress {
+        position: absolute;
+        top: 60px;
+        left: 10px;
+        background: rgba(255,255,255,0.9);
+        padding: 5px 10px;
+        border-radius: 10px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        border: 2px solid #2196F3;
+        pointer-events: none;
+    }
+
+    .particle {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 50;
+    }
+
+    #comboDisplay {
+        position: absolute;
+        top: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 24px;
+        color: #FF5722;
+        font-weight: bold;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+    }
+    
+    #difficultyInfo {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255,255,255,0.8);
+        padding: 8px 15px;
+        border-radius: 10px;
+        font-size: 14px;
+        display: none;
+        text-align: center;
+        max-width: 300px;
+        pointer-events: none;
+    }
+    
+    .missEffect {
+        position: absolute;
+        font-size: 24px;
+        font-weight: bold;
+        color: #FF4444;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        pointer-events: none;
+        z-index: 90;
+        animation: fadeUp 1s forwards;
+    }
+    
+    @keyframes fadeUp {
+        0% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        100% {
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+    }
+    
+    .progress-bar {
+        width: 100px;
+        height: 10px;
+        background-color: #ddd;
+        border-radius: 5px;
+        overflow: hidden;
+        margin-left: 5px;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background-color: #4CAF50;
+        width: 0%;
+        transition: width 0.3s;
+    }
+</style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2958125315260710" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+<div id="game">
+    <div id="hud">
+        <div>🎯 <span id="score">0</span></div>
+        <div>❤️ <span id="lives">5</span></div>
+        <div>⚡ <span id="combo">0</span></div>
+        <div>📈 Nível: <span id="level">1</span></div>
+    </div>
+    
+    <div id="levelProgress">
+        Próximo nível: <span id="balloonsToNextLevel">5</span> balões
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+    </div>
+
+    <div id="comboDisplay"></div>
+    <div id="message"></div>
+    <div id="difficultyInfo">Velocidade: Normal | Frequência: Normal</div>
+
+    <div id="gameOver">
+        💥 Fim de Jogo 💥
+        <div style="font-size:26px; margin-top:15px">
+            Pontuação final: <span id="finalScore" style="color:#FFD700">0</span>
+        </div>
+        <div style="font-size:22px; margin-top:10px">
+            Nível alcançado: <span id="finalLevel">1</span>
+        </div>
+        <button onclick="restart()">🎮 Recomeçar</button>
+    </div>
+</div>
+
+<script>
+const game = document.getElementById("game");
+const scoreEl = document.getElementById("score");
+const livesEl = document.getElementById("lives");
+const comboEl = document.getElementById("combo");
+const levelEl = document.getElementById("level");
+const message = document.getElementById("message");
+const gameOverScreen = document.getElementById("gameOver");
+const finalScoreEl = document.getElementById("finalScore");
+const finalLevelEl = document.getElementById("finalLevel");
+const comboDisplay = document.getElementById("comboDisplay");
+const difficultyInfo = document.getElementById("difficultyInfo");
+const balloonsToNextLevelEl = document.getElementById("balloonsToNextLevel");
+const progressFill = document.getElementById("progressFill");
+
+let score = 0;
+let lives = 5;
+let combo = 0;
+let level = 1;
+let running = true;
+let spawnInterval = 1500;
+let balloonSpeed = 8;
+let spawnTimer = null;
+let spawnRateMultiplier = 1.0;
+let speedMultiplier = 1.0;
+
+// Contadores para progressão do nível
+let balloonsPoppedInCurrentLevel = 0;
+const balloonsPerLevel = 5;
+
+// Adicionar evento de clique na área do jogo para penalizar cliques fora dos balões
+game.addEventListener('click', function(event) {
+    if (!running) return;
+    
+    const clickedElement = event.target;
+    
+    if (!clickedElement.classList.contains('balloon') && 
+        !clickedElement.closest('.balloon')) {
+        
+        if (score > 0) {
+            score = Math.max(0, score - 5);
+            scoreEl.textContent = score;
+        }
+        
+        combo = 0;
+        comboEl.textContent = combo;
+        updateComboDisplay();
+        
+        showMissEffect(event.clientX, event.clientY);
+        showMessage("❌ -5", "#FF4444");
+    }
+});
+
+// Mostrar efeito visual de erro (clique fora do balão)
+function showMissEffect(x, y) {
+    const missEffect = document.createElement('div');
+    missEffect.className = 'missEffect';
+    missEffect.textContent = '-5';
+    missEffect.style.left = (x - 20) + 'px';
+    missEffect.style.top = (y - 20) + 'px';
+    
+    game.appendChild(missEffect);
+    
+    setTimeout(() => {
+        if (missEffect.parentNode) {
+            missEffect.remove();
+        }
+    }, 1000);
+}
+
+// Ajustar dificuldade baseado no nível (progressão mais lenta)
+function updateDifficulty() {
+    const difficultyLevel = Math.floor((level - 1) / 2);
+    
+    speedMultiplier = 1.0 + (difficultyLevel * 0.1);
+    balloonSpeed = Math.max(5, 8 / speedMultiplier);
+    
+    spawnRateMultiplier = 1.0 + (difficultyLevel * 0.15);
+    spawnInterval = Math.max(800, 1500 / spawnRateMultiplier);
+    
+    let speedText, frequencyText;
+    
+    if (speedMultiplier < 1.2) {
+        speedText = "Lenta";
+    } else if (speedMultiplier < 1.4) {
+        speedText = "Normal";
+    } else if (speedMultiplier < 1.6) {
+        speedText = "Rápida";
+    } else {
+        speedText = "Muito Rápida";
+    }
+    
+    if (spawnRateMultiplier < 1.3) {
+        frequencyText = "Baixa";
+    } else if (spawnRateMultiplier < 1.6) {
+        frequencyText = "Normal";
+    } else if (spawnRateMultiplier < 2.0) {
+        frequencyText = "Alta";
+    } else {
+        frequencyText = "Muito Alta";
+    }
+    
+    difficultyInfo.textContent = `Velocidade: ${speedText} | Frequência: ${frequencyText}`;
+    difficultyInfo.style.display = "block";
+    
+    if (level % 3 === 0 && level > 1) {
+        lives++;
+        livesEl.textContent = lives;
+        showMessage("❤️ Vida extra!", "#FF4081");
+    }
+    
+    levelEl.textContent = level;
+    
+    if (spawnTimer) {
+        clearInterval(spawnTimer);
+    }
+    spawnTimer = setInterval(createBalloon, spawnInterval);
+}
+
+// Criar balão com diferentes tipos
+function createBalloon() {
+    if (!running) return;
+
+    const balloon = document.createElement("div");
+    balloon.className = "balloon";
+    
+    const type = Math.random();
+    let balloonType = "normal";
+    let points = 10;
+    let isSpecial = false;
+    let isBomb = false;
+    
+    if (type < 0.08 && level >= 3) {
+        balloonType = "special";
+        points = 25;
+        isSpecial = true;
+        balloon.classList.add("special");
+    }
+    else if (type < 0.05 && level >= 5) {
+        balloonType = "bomb";
+        isBomb = true;
+        balloon.classList.add("bomb");
+    }
+    
+    const baseSize = isSpecial ? 70 : (isBomb ? 40 : 50);
+    const sizeVariation = Math.random() * 20 + 10;
+    const size = baseSize + sizeVariation;
+    balloon.style.width = size + "px";
+    balloon.style.height = size * 1.3 + "px";
+    
+    if (!isSpecial && !isBomb) {
+        const colors = ["#FF5252", "#2196F3", "#4CAF50", "#FFC107", "#9C27B0"];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        balloon.style.background = color;
+    }
+    
+    balloon.style.left = Math.random() * (window.innerWidth - size) + "px";
+    
+    const speedVariation = Math.random() * 0.5 + 0.75;
+    const finalSpeed = balloonSpeed * speedVariation;
+    balloon.style.animationDuration = finalSpeed + "s";
+    balloon.style.animationName = "float";
+    
+    const floatKeyframes = `
+        @keyframes float {
+            from { transform: translateY(100vh) rotate(${Math.random() * 8 - 4}deg); }
+            to { transform: translateY(-150px) rotate(${Math.random() * 8 - 4}deg); }
+        }
+    `;
+    
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = floatKeyframes;
+    document.head.appendChild(styleSheet);
+    
+    balloon.onclick = () => popBalloon(balloon, balloonType, points, isBomb);
+    
+    balloon.addEventListener("animationend", () => {
+        if (running && balloon.parentNode) {
+            balloon.remove();
+            if (!isBomb) {
+                loseLife();
+            }
+        }
+    });
+    
+    game.appendChild(balloon);
+}
+
+// Estourar balão
+function popBalloon(balloon, type, points, isBomb) {
+    if (!running) return;
+    
+    if (isBomb) {
+        showMessage("💥 BOOM!", "#FF4444");
+        loseLife();
+        combo = 0;
+        createParticles(balloon, "#FF4444");
+    } else {
+        combo++;
+        
+        const bonus = type === "special" ? 2.5 : 1;
+        score += Math.floor(points * combo * bonus);
+        
+        scoreEl.textContent = score;
+        comboEl.textContent = combo;
+        
+        const pointsText = type === "special" ? "✨ +" + Math.floor(points * combo) : "+" + Math.floor(points * combo);
+        showMessage(pointsText, type === "special" ? "#FFD700" : "#4CAF50");
+        
+        updateComboDisplay();
+        
+        const color = type === "special" ? "#FFD700" : balloon.style.background;
+        createParticles(balloon, color);
+        
+        // Contar balões estourados para progressão de nível
+        balloonsPoppedInCurrentLevel++;
+        updateLevelProgress();
+        
+        // Verificar se subiu de nível (5 balões estourados por nível)
+        if (balloonsPoppedInCurrentLevel >= balloonsPerLevel) {
+            levelUp();
+        }
+    }
+    
+    balloon.classList.add("popping");
+    setTimeout(() => balloon.remove(), 200);
+}
+
+// Atualizar progresso para o próximo nível
+function updateLevelProgress() {
+    const balloonsRemaining = balloonsPerLevel - balloonsPoppedInCurrentLevel;
+    balloonsToNextLevelEl.textContent = balloonsRemaining;
+    
+    // Atualizar barra de progresso
+    const progressPercentage = (balloonsPoppedInCurrentLevel / balloonsPerLevel) * 100;
+    progressFill.style.width = `${progressPercentage}%`;
+}
+
+// Subir de nível
+function levelUp() {
+    level++;
+    balloonsPoppedInCurrentLevel = 0;
+    
+    levelEl.textContent = level;
+    updateLevelProgress();
+    updateDifficulty();
+    
+    // Mostrar mensagem de novo nível por um breve momento
+    showMessage(`Nível ${level}!`, "#2196F3");
+}
+
+// Criar partículas para efeito visual
+function createParticles(element, color) {
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    
+    for (let i = 0; i < 12; i++) {
+        const particle = document.createElement("div");
+        particle.className = "particle";
+        particle.style.backgroundColor = color;
+        particle.style.left = x + "px";
+        particle.style.top = y + "px";
+        
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 2 + Math.random() * 3;
+        const vx = Math.cos(angle) * speed;
+        const vy = Math.sin(angle) * speed;
+        
+        game.appendChild(particle);
+        
+        let posX = x;
+        let posY = y;
+        let opacity = 1;
+        
+        function animateParticle() {
+            posX += vx;
+            posY += vy;
+            opacity -= 0.02;
+            
+            particle.style.left = posX + "px";
+            particle.style.top = posY + "px";
+            particle.style.opacity = opacity;
+            
+            if (opacity > 0) {
+                requestAnimationFrame(animateParticle);
+            } else {
+                particle.remove();
+            }
+        }
+        
+        requestAnimationFrame(animateParticle);
+    }
+}
+
+// Atualizar display do combo
+function updateComboDisplay() {
+    if (combo >= 3) {
+        comboDisplay.textContent = `COMBO x${combo}!`;
+        comboDisplay.style.opacity = "1";
+        comboDisplay.style.color = combo >= 5 ? "#FF5722" : "#FF9800";
+        
+        setTimeout(() => {
+            comboDisplay.style.opacity = "0";
+        }, 1000);
+    } else {
+        comboDisplay.style.opacity = "0";
+    }
+}
+
+// Perder vida
+function loseLife() {
+    lives--;
+    combo = 0;
+    comboEl.textContent = combo;
+    livesEl.textContent = lives;
+    updateComboDisplay();
+    
+    if (lives <= 0) {
+        endGame();
+    } else {
+        showMessage("💔 -1 Vida", "#FF4444");
+    }
+}
+
+// Mensagem rápida
+function showMessage(text, color = "#4CAF50") {
+    message.textContent = text;
+    message.style.color = color;
+    message.style.display = "block";
+    message.style.animation = "none";
+    
+    setTimeout(() => {
+        message.style.animation = "bounce 0.5s";
+    }, 10);
+    
+    setTimeout(() => {
+        message.style.display = "none";
+    }, 800);
+}
+
+// Fim de jogo
+function endGame() {
+    running = false;
+    gameOverScreen.style.display = "flex";
+    finalScoreEl.textContent = score;
+    finalLevelEl.textContent = level;
+    
+    if (spawnTimer) {
+        clearInterval(spawnTimer);
+    }
+    
+    const bounceStyle = document.createElement("style");
+    bounceStyle.textContent = `
+        @keyframes bounce {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+        }
+    `;
+    document.head.appendChild(bounceStyle);
+}
+
+// Reiniciar jogo
+function restart() {
+    document.querySelectorAll(".balloon, .particle, .missEffect").forEach(b => b.remove());
+    score = 0;
+    lives = 5;
+    combo = 0;
+    level = 1;
+    balloonsPoppedInCurrentLevel = 0;
+    running = true;
+    
+    scoreEl.textContent = score;
+    livesEl.textContent = lives;
+    comboEl.textContent = combo;
+    levelEl.textContent = level;
+    
+    gameOverScreen.style.display = "none";
+    comboDisplay.style.opacity = "0";
+    difficultyInfo.style.display = "none";
+    
+    updateLevelProgress();
+    updateDifficulty();
+}
+
+// Inicializar jogo
+updateDifficulty();
+updateLevelProgress();
+
+// Adicionar alguns balões iniciais
+setTimeout(() => {
+    for (let i = 0; i < 2; i++) {
+        setTimeout(createBalloon, i * 800);
+    }
+}, 500);
+
+// Adicionar evento de teclado para reiniciar com R
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'r' || event.key === 'R') {
+        if (!running) {
+            restart();
+        }
+    }
+});
+</script>
+
+
+
+</body>
+</html>

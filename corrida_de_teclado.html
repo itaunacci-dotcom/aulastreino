@@ -1,0 +1,1719 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>TypeRace - Corrida de Digitação</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow: hidden; /* Impede rolagem do body */
+}
+
+.container {
+    max-width: 1000px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-height: 95vh; /* Limita altura máxima */
+    overflow-y: auto; /* Adiciona rolagem apenas no container se necessário */
+    overflow-x: hidden; /* Remove rolagem horizontal */
+}
+
+/* Adiciona scrollbar customizada para o container */
+.container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.container::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 10px;
+}
+
+.container::-webkit-scrollbar-thumb:hover {
+    background: #764ba2;
+}
+
+h1 {
+    text-align: center;
+    color: #667eea;
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.phase-info {
+    text-align: center;
+    color: #666;
+    font-size: 1.1em;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.difficulty-badge {
+    display: inline-block;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    margin-left: 10px;
+    font-weight: bold;
+}
+
+.diff-facil { background: #28a745; color: white; }
+.diff-medio { background: #ffc107; color: #333; }
+.diff-dificil { background: #fd7e14; color: white; }
+.diff-expert { background: #dc3545; color: white; }
+.diff-mestre { background: #6f42c1; color: white; }
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.stat-label {
+    font-size: 0.9em;
+    opacity: 0.9;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 1.8em;
+    font-weight: bold;
+}
+
+.text-box {
+    background: #f8f9fa;
+    padding: 30px;
+    border-radius: 15px;
+    font-size: 24px;
+    line-height: 1.8;
+    min-height: 120px;
+    border: 3px solid #e0e0e0;
+    margin-bottom: 25px;
+    letter-spacing: 1px;
+    max-height: 200px; /* Limita altura máxima */
+    overflow-y: auto; /* Adiciona rolagem apenas se o texto for muito grande */
+    overflow-x: hidden; /* Remove rolagem horizontal */
+}
+
+.text-box::-webkit-scrollbar {
+    width: 6px;
+}
+
+.text-box::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.text-box::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+.text-box span {
+    transition: all 0.1s ease;
+}
+
+.text-box span.current {
+    background: #fff3cd;
+    padding: 2px 4px;
+    border-radius: 4px;
+    animation: pulse 1s infinite;
+}
+
+.text-box span.correct {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.text-box span.incorrect {
+    color: #dc3545;
+    background: #f8d7da;
+    padding: 2px 4px;
+    border-radius: 4px;
+    animation: shake 0.3s;
+}
+
+@keyframes pulse {
+    0%, 100% { background: #fff3cd; }
+    50% { background: #ffc107; }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* Indicador "aguardando primeira tecla" */
+.text-box.waiting-hint::after {
+    content: "⌨️ Digite a primeira letra para iniciar!";
+    display: block;
+    text-align: center;
+    margin-top: 12px;
+    font-size: 0.75em;
+    color: #667eea;
+    font-style: italic;
+    font-weight: 600;
+    animation: waitingPulse 1.2s ease-in-out infinite;
+    letter-spacing: 0.5px;
+}
+
+@keyframes waitingPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+}
+
+.track-container {
+    background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.track {
+    position: relative;
+    height: 140px;
+    background: linear-gradient(180deg, #34495e 0%, #2c3e50 100%);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    border: 2px solid #1a252f;
+}
+
+.road-lines {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: repeating-linear-gradient(
+        90deg,
+        #f39c12 0px,
+        #f39c12 30px,
+        transparent 30px,
+        transparent 60px
+    );
+    transform: translateY(-50%);
+    opacity: 0.6;
+}
+
+.lane {
+    position: absolute;
+    width: 100%;
+    height: 50%;
+    display: flex;
+    align-items: center;
+}
+
+.lane-player {
+    top: 0;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+.lane-bot {
+    bottom: 0;
+}
+
+.car {
+    position: absolute;
+    left: 0;
+    font-size: 40px;
+    transition: left 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.4));
+    z-index: 2;
+
+    /* Direção padrão */
+    --dir: 1;
+    transform: scaleX(var(--dir));
+}
+
+/* Carro do jogador (vai para a direita) */
+#player {
+    --dir: -1;
+}
+
+/* Carro adversário (vai para a esquerda) */
+#bot {
+    --dir: -1;
+}
+
+.car.boost {
+    animation: boost 0.3s;
+}
+
+@keyframes boost {
+    0%, 100% {
+        transform: scaleX(var(--dir)) scale(1);
+    }
+    50% {
+        transform: scaleX(var(--dir)) scale(1.2);
+    }
+}
+
+.finish-line {
+    position: absolute;
+    right: 20px;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    background: repeating-linear-gradient(
+        45deg,
+        white,
+        white 12px,
+        #2c3e50 12px,
+        #2c3e50 24px
+    );
+    z-index: 1;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.start-line {
+    position: absolute;
+    left: 20px;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    background: repeating-linear-gradient(
+        45deg,
+        #28a745,
+        #28a745 12px,
+        white 12px,
+        white 24px
+    );
+    z-index: 1;
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+}
+
+.progress-labels {
+    display: flex;
+    justify-content: space-between;
+    color: white;
+    font-size: 0.9em;
+    margin-top: 10px;
+}
+
+.controls {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+button {
+    padding: 15px 35px;
+    font-size: 18px;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-start {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+}
+
+.btn-start:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.5);
+}
+
+.btn-start:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-reset {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+}
+
+.btn-reset:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.5);
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    max-width: 500px;
+    animation: modalSlide 0.3s ease-out;
+    max-height: 90vh; /* Limita altura do modal */
+    overflow-y: auto; /* Adiciona rolagem se necessário */
+}
+
+@keyframes modalSlide {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-content h2 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: #667eea;
+}
+
+.modal-content .result-stats {
+    margin: 20px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.modal-content .result-stats p {
+    margin: 10px 0;
+    font-size: 1.2em;
+    color: #333;
+}
+
+.typing-hint {
+    text-align: center;
+    color: #666;
+    font-size: 0.9em;
+    margin-top: 15px;
+    font-style: italic;
+}
+
+/* Estilo para a tabela de pontuações */
+.high-scores {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 15px;
+}
+
+.high-scores h3 {
+    color: #667eea;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.score-table-wrapper {
+    max-height: 400px;
+    overflow-y: auto;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.score-table-wrapper::-webkit-scrollbar { width: 6px; }
+.score-table-wrapper::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+.score-table-wrapper::-webkit-scrollbar-thumb { background: #667eea; border-radius: 3px; }
+
+.score-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.score-table th,
+.score-table td {
+    padding: 10px 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.score-table thead th {
+    background: #667eea;
+    color: white;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.score-table tr:nth-child(even) {
+    background: #f2f2f2;
+}
+
+.score-table tr:hover {
+    background: #e6f7ff;
+}
+
+.score-table tr.rank-gold td:first-child { color: #f39c12; font-weight: 900; font-size: 1.1em; }
+.score-table tr.rank-silver td:first-child { color: #95a5a6; font-weight: 800; }
+.score-table tr.rank-bronze td:first-child { color: #cd7f32; font-weight: 800; }
+
+.score-form {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.score-form input {
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #667eea;
+    border-radius: 5px;
+    margin-right: 10px;
+    width: 200px;
+}
+
+.game-over-modal {
+    max-width: 600px;
+}
+
+.lives-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.life {
+    font-size: 24px;
+    color: #dc3545;
+}
+
+/* ===== MENU OCULTO (CHEAT) ===== */
+#cheatOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+}
+#cheatOverlay.show { display: flex; }
+
+#cheatPanel {
+    background: #1a1a2e;
+    border: 2px solid #667eea;
+    border-radius: 16px;
+    padding: 30px 36px;
+    min-width: 340px;
+    box-shadow: 0 0 40px rgba(102,126,234,0.6);
+    animation: modalSlide 0.3s ease-out;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+#cheatPanel h2 {
+    text-align: center;
+    font-size: 1.5em;
+    color: #a78bfa;
+    margin-bottom: 6px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+#cheatPanel .cheat-subtitle {
+    text-align: center;
+    font-size: 0.8em;
+    color: #888;
+    margin-bottom: 24px;
+    letter-spacing: 1px;
+}
+
+.cheat-field {
+    margin-bottom: 18px;
+}
+
+.cheat-field label {
+    display: block;
+    font-size: 0.85em;
+    color: #a78bfa;
+    margin-bottom: 6px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.cheat-field select,
+.cheat-field input[type="number"] {
+    width: 100%;
+    padding: 10px 14px;
+    background: #0f0f1a;
+    border: 2px solid #444;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1em;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.cheat-field select:focus,
+.cheat-field input[type="number"]:focus {
+    border-color: #667eea;
+}
+
+.cheat-field select option {
+    background: #1a1a2e;
+}
+
+.cheat-warning {
+    background: rgba(220,53,69,0.15);
+    border: 1px solid rgba(220,53,69,0.4);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.8em;
+    color: #f88;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.cheat-btn-row {
+    display: flex;
+    gap: 12px;
+}
+
+.cheat-btn-row button {
+    flex: 1;
+    padding: 12px;
+    font-size: 0.95em;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+}
+
+#cheatApplyBtn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+#cheatApplyBtn:hover { filter: brightness(1.2); }
+
+#cheatCancelBtn {
+    background: #333;
+    color: #aaa;
+}
+#cheatCancelBtn:hover { background: #444; color: #fff; }
+
+/* Tabs do menu oculto */
+.cheat-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+.cheat-tab {
+    flex: 1;
+    padding: 8px 0;
+    background: #0f0f1a;
+    border: 2px solid #444;
+    border-radius: 8px;
+    color: #888;
+    font-size: 0.82em;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.cheat-tab.active {
+    border-color: #667eea;
+    color: #a78bfa;
+    background: rgba(102,126,234,0.1);
+}
+.cheat-tab-content { display: none; }
+.cheat-tab-content.active { display: block; }
+
+/* Editor de records */
+#recordsPanel {
+    max-height: 320px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #667eea #0f0f1a;
+}
+#recordsPanel::-webkit-scrollbar { width: 5px; }
+#recordsPanel::-webkit-scrollbar-track { background: #0f0f1a; }
+#recordsPanel::-webkit-scrollbar-thumb { background: #667eea; border-radius: 3px; }
+
+.record-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #0f0f1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+}
+.record-item .rec-rank {
+    color: #667eea;
+    font-weight: 700;
+    min-width: 24px;
+    font-size: 0.85em;
+}
+.record-item .rec-name {
+    flex: 1;
+    color: #e0e0e0;
+    font-size: 0.9em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.record-item .rec-score {
+    color: #a78bfa;
+    font-weight: 700;
+    font-size: 0.9em;
+    min-width: 55px;
+    text-align: right;
+}
+.record-item .rec-del {
+    background: rgba(220,53,69,0.2);
+    border: 1px solid rgba(220,53,69,0.5);
+    color: #f88;
+    border-radius: 5px;
+    padding: 3px 8px;
+    cursor: pointer;
+    font-size: 0.8em;
+    transition: all 0.2s;
+}
+.record-item .rec-del:hover { background: rgba(220,53,69,0.5); color: #fff; }
+
+.cheat-add-record {
+    background: rgba(102,126,234,0.08);
+    border: 1px solid rgba(102,126,234,0.3);
+    border-radius: 10px;
+    padding: 14px;
+    margin-top: 12px;
+}
+.cheat-add-record p {
+    color: #a78bfa;
+    font-size: 0.8em;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+.cheat-add-record .add-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.cheat-add-record input {
+    flex: 1;
+    min-width: 80px;
+    padding: 8px 10px;
+    background: #0f0f1a;
+    border: 2px solid #444;
+    border-radius: 7px;
+    color: #fff;
+    font-size: 0.9em;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.cheat-add-record input:focus { border-color: #667eea; }
+.cheat-add-record input::placeholder { color: #555; }
+.cheat-add-record .btn-add-rec {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    border-radius: 7px;
+    color: white;
+    font-weight: 700;
+    font-size: 0.85em;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: filter 0.2s;
+}
+.cheat-add-record .btn-add-rec:hover { filter: brightness(1.2); }
+.cheat-add-record .btn-clear-all {
+    width: 100%;
+    margin-top: 8px;
+    padding: 7px;
+    background: rgba(220,53,69,0.15);
+    border: 1px solid rgba(220,53,69,0.4);
+    border-radius: 7px;
+    color: #f88;
+    font-size: 0.8em;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+}
+.cheat-add-record .btn-clear-all:hover { background: rgba(220,53,69,0.35); color: #fff; }
+.no-records-msg {
+    text-align: center;
+    color: #555;
+    font-size: 0.85em;
+    padding: 20px 0;
+    font-style: italic;
+}
+#cheatIndicator {
+    display: none;
+    position: fixed;
+    bottom: 10px;
+    right: 12px;
+    background: rgba(102,126,234,0.2);
+    border: 1px solid rgba(102,126,234,0.4);
+    color: #a78bfa;
+    font-size: 0.72em;
+    padding: 4px 10px;
+    border-radius: 20px;
+    z-index: 100;
+    letter-spacing: 1px;
+}
+#cheatIndicator.active { display: block; }
+
+/* Título clicável para ativar */
+h1 { cursor: default; user-select: none; }
+</style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2958125315260710" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>🏎️ TypeRace</h1>
+    <div class="phase-info">
+        Fase <span id="phaseNum">1</span> de 25
+        <span class="difficulty-badge" id="diffBadge">Fácil</span>
+    </div>
+
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-label">Velocidade</div>
+            <div class="stat-value"><span id="wpm">0</span> WPM</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Precisão</div>
+            <div class="stat-value"><span id="accuracy">100</span>%</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Tempo</div>
+            <div class="stat-value"><span id="time">60</span>s</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Pontuação</div>
+            <div class="stat-value"><span id="score">0</span></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Vidas</div>
+            <div class="stat-value"><span id="lives">3</span> ❤️</div>
+        </div>
+    </div>
+
+    <div class="text-box" id="text"></div>
+
+    <div class="track-container">
+        <div class="track">
+            <div class="road-lines"></div>
+            <div class="lane lane-player">
+                <div class="car" id="player">🏎️</div>
+            </div>
+            <div class="lane lane-bot">
+                <div class="car" id="bot">🚙</div>
+            </div>
+            <div class="start-line"></div>
+            <div class="finish-line"></div>
+        </div>
+        <div class="progress-labels">
+            <span>🚦 Largada</span>
+            <span>🏁 Chegada</span>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn-start" id="startBtn" onclick="startGame()">Iniciar Corrida</button>
+        <button class="btn-reset" onclick="resetGame()">Reiniciar</button>
+    </div>
+
+    <div class="typing-hint">💡 Dica: Mantenha o foco e digite com precisão para vencer!</div>
+    
+    <!-- Tabela de Recordes -->
+    <div class="high-scores">
+        <h3>🏆 Maiores Pontuações</h3>
+        <div class="score-table-wrapper">
+        <table class="score-table" id="highScoresTable">
+            <thead>
+                <tr>
+                    <th>Posição</th>
+                    <th>Nome</th>
+                    <th>Pontuação</th>
+                    <th>Fase</th>
+                </tr>
+            </thead>
+            <tbody id="highScoresBody">
+                <!-- As pontuações serão carregadas aqui -->
+            </tbody>
+        </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Resultado -->
+<div class="modal" id="modal">
+    <div class="modal-content">
+        <h2 id="modalTitle">🏆 Vitória!</h2>
+        <div class="lives-display">
+            <span id="remainingLives"></span>
+        </div>
+        <div class="result-stats" id="modalStats"></div>
+        <button class="btn-start" onclick="closeModal()">Continuar</button>
+    </div>
+</div>
+
+<!-- Modal de Game Over -->
+<div class="modal" id="gameOverModal">
+    <div class="modal-content game-over-modal">
+        <h2>😢 Game Over</h2>
+        <div class="result-stats" id="gameOverStats"></div>
+        <div class="score-form" id="scoreForm">
+            <p>🎉 Nova pontuação recorde! 🎉</p>
+            <p>Sua pontuação: <span id="finalScoreDisplay">0</span></p>
+            <p>Digite seu nome para entrar no placar:</p>
+            <input type="text" id="playerName" placeholder="Seu nome (obrigatório)" maxlength="20">
+            <div id="nameError" style="color:#dc3545;font-size:0.85em;margin:6px 0;display:none;">⚠️ Digite um nome para salvar sua pontuação!</div>
+            <button class="btn-start" onclick="saveHighScore()">Salvar Pontuação</button>
+        </div>
+        <button class="btn-reset" onclick="resetGame()">Jogar Novamente</button>
+    </div>
+</div>
+
+<!-- ===== MENU OCULTO ===== -->
+<div id="cheatOverlay">
+    <div id="cheatPanel">
+        <h2>⚙️ Menu Oculto</h2>
+        <div class="cheat-subtitle">Ctrl+Shift+M &nbsp;|&nbsp; ou clique no título 5×</div>
+
+        <!-- Tabs -->
+        <div class="cheat-tabs">
+            <button class="cheat-tab active" onclick="switchCheatTab('game')">🎮 Jogo</button>
+            <button class="cheat-tab" onclick="switchCheatTab('records')">🏆 Records</button>
+        </div>
+
+        <!-- Tab: Jogo -->
+        <div class="cheat-tab-content active" id="cheatTabGame">
+            <div class="cheat-field">
+                <label>📍 Ir para a Fase</label>
+                <select id="cheatPhase">
+                    <!-- Populado via JS -->
+                </select>
+            </div>
+
+            <div class="cheat-field">
+                <label>❤️ Número de Vidas</label>
+                <input type="number" id="cheatLives" min="1" max="99" value="3">
+            </div>
+
+            <div class="cheat-warning">
+                ⚠️ Usar este menu pode afetar a pontuação no placar.
+            </div>
+
+            <div class="cheat-btn-row">
+                <button id="cheatCancelBtn" onclick="closeCheatMenu()">Cancelar</button>
+                <button id="cheatApplyBtn" onclick="applyCheat()">Aplicar</button>
+            </div>
+        </div>
+
+        <!-- Tab: Records -->
+        <div class="cheat-tab-content" id="cheatTabRecords">
+            <div id="recordsPanel">
+                <!-- Populado via JS -->
+            </div>
+
+            <div class="cheat-add-record">
+                <p>➕ Adicionar Registro</p>
+                <div class="add-row">
+                    <input type="text" id="recAddName" placeholder="Nome" maxlength="20">
+                    <input type="number" id="recAddScore" placeholder="Pontos" min="0">
+                    <input type="number" id="recAddPhase" placeholder="Fase" min="1" max="25">
+                    <button class="btn-add-rec" onclick="addRecordManual()">Adicionar</button>
+                </div>
+                <button class="btn-clear-all" onclick="clearAllRecords()">🗑️ Apagar Todos os Records</button>
+            </div>
+
+            <div class="cheat-btn-row" style="margin-top:14px;">
+                <button id="cheatCancelBtn2" onclick="closeCheatMenu()">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Indicador de cheat ativo -->
+<div id="cheatIndicator">🔧 CHEAT ATIVO</div>
+
+<script>
+const phases = [
+    // Fase 1-5: Fácil
+    { name: "Fase 1", difficulty: "Fácil", speed: 0.7, texts: [
+        "Aprender a digitar é muito importante.",
+        "Treinar todos os dias traz resultados.",
+        "Digitar rápido melhora a produtividade."
+    ]},
+    { name: "Fase 2", difficulty: "Fácil", speed: 0.85, texts: [
+        "A prática leva à perfeição sempre.",
+        "Cada tecla pressionada é um progresso.",
+        "Concentração é a chave do sucesso."
+    ]},
+    { name: "Fase 3", difficulty: "Fácil", speed: 1.0, texts: [
+        "Velocidade vem com o tempo de prática.",
+        "Erros são oportunidades de aprender.",
+        "Paciência e dedicação são fundamentais."
+    ]},
+    { name: "Fase 4", difficulty: "Fácil", speed: 1.15, texts: [
+        "Manter a postura correta ajuda muito.",
+        "Olhos na tela, dedos no teclado.",
+        "Respire fundo e mantenha o ritmo."
+    ]},
+    { name: "Fase 5", difficulty: "Fácil", speed: 1.3, texts: [
+        "Você está melhorando a cada fase.",
+        "Continue assim e chegará longe.",
+        "A persistência sempre vale a pena."
+    ]},
+    
+    // Fase 6-10: Médio
+    { name: "Fase 6", difficulty: "Médio", speed: 1.45, texts: [
+        "A prática constante desenvolve a memória muscular.",
+        "Velocidade e precisão andam juntas na digitação.",
+        "A repetição torna qualquer habilidade melhor."
+    ]},
+    { name: "Fase 7", difficulty: "Médio", speed: 1.6, texts: [
+        "Mantenha o ritmo constante sem pausas desnecessárias.",
+        "Cada erro é uma lição valiosa para o futuro.",
+        "Confie nos seus dedos e não olhe para baixo."
+    ]},
+    { name: "Fase 8", difficulty: "Médio", speed: 1.75, texts: [
+        "A digitação eficiente economiza tempo precioso no dia.",
+        "Desenvolver agilidade requer disciplina e foco total.",
+        "Quanto mais você pratica, mais natural se torna tudo."
+    ]},
+    { name: "Fase 9", difficulty: "Médio", speed: 1.9, texts: [
+        "Profissionais digitam sem pensar nas teclas individuais.",
+        "Seu cérebro e dedos trabalham em harmonia perfeita.",
+        "A velocidade aumenta quando você para de duvidar."
+    ]},
+    { name: "Fase 10", difficulty: "Médio", speed: 2.05, texts: [
+        "Atenção plena é essencial para evitar erros bobos.",
+        "Mantenha um ritmo confortável mas desafiador sempre.",
+        "Você está na metade do caminho, não desista agora."
+    ]},
+    
+    // Fase 11-15: Difícil
+    { name: "Fase 11", difficulty: "Difícil", speed: 2.2, texts: [
+        "Dominar a digitação exige foco, paciência e persistência constante.",
+        "Quanto mais você pratica, mais natural o processo se torna sempre.",
+        "O domínio do teclado é essencial no mundo moderno e conectado."
+    ]},
+    { name: "Fase 12", difficulty: "Difícil", speed: 2.35, texts: [
+        "A excelência não acontece por acaso, mas através do esforço contínuo.",
+        "Cada sessão de treino te aproxima da maestria que você deseja alcançar.",
+        "Transforme a digitação em uma segunda natureza através da repetição."
+    ]},
+    { name: "Fase 13", difficulty: "Difícil", speed: 2.5, texts: [
+        "Profissionais não nascem prontos, eles se constroem dia após dia com dedicação.",
+        "A velocidade impressionante vem da combinação perfeita de técnica e prática.",
+        "Seus dedos dançam sobre o teclado quando você atinge o estado de fluxo."
+    ]},
+    { name: "Fase 14", difficulty: "Difícil", speed: 2.65, texts: [
+        "Precisão sob pressão é o que separa amadores de verdadeiros especialistas.",
+        "Mantenha a calma mesmo quando o desafio parecer impossível de superar.",
+        "A confiança cresce exponencialmente com cada obstáculo que você vence."
+    ]},
+    { name: "Fase 15", difficulty: "Difícil", speed: 2.8, texts: [
+        "Você já percorreu um longo caminho desde o início desta jornada desafiadora.",
+        "A resistência mental é tão importante quanto a habilidade técnica na digitação.",
+        "Continue avançando com determinação, pois grandes conquistas estão por vir."
+    ]},
+    
+    // Fase 16-20: Expert
+    { name: "Fase 16", difficulty: "Expert", speed: 3.0, texts: [
+        "Apenas os mais dedicados e persistentes chegam até este nível avançado de maestria.",
+        "A zona de conforto ficou para trás, agora você está testando seus limites reais.",
+        "Velocidades extremas exigem concentração absoluta e controle milimétrico dos movimentos."
+    ]},
+    { name: "Fase 17", difficulty: "Expert", speed: 3.2, texts: [
+        "Seus reflexos foram afiados através de incontáveis horas de prática deliberada e focada.",
+        "A sincronia entre mente e dedos atinge níveis que pareciam impossíveis no começo.",
+        "Profissionais de elite mantêm a precisão mesmo sob as condições mais desafiadoras."
+    ]},
+    { name: "Fase 18", difficulty: "Expert", speed: 3.4, texts: [
+        "Cada tecla pressionada é calculada com precisão cirúrgica e timing perfeito neste momento.",
+        "A pressão do tempo se intensifica, mas você permanece calmo e totalmente no controle.",
+        "Sua capacidade de manter alta performance sob estresse é verdadeiramente impressionante."
+    ]},
+    { name: "Fase 19", difficulty: "Expert", speed: 3.6, texts: [
+        "Pouquíssimas pessoas no mundo conseguem digitar com esta velocidade e precisão combinadas.",
+        "Você transcendeu o nível de simples usuário e entrou no reino dos verdadeiros mestres.",
+        "A excelência técnica que você demonstra agora é resultado de determinação incansável."
+    ]},
+    { name: "Fase 20", difficulty: "Expert", speed: 3.8, texts: [
+        "O desafio se multiplica exponencialmente, testando cada fibra da sua habilidade conquistada.",
+        "Manter o foco absoluto quando tudo ao redor parece um borrão é a marca de campeões.",
+        "Você está provando que limites são apenas barreiras temporárias para serem superadas."
+    ]},
+    
+    // Fase 21-25: Mestre
+    { name: "Fase 21", difficulty: "Mestre", speed: 4.0, texts: [
+        "Bem-vindo ao panteão dos mestres da digitação, onde apenas lendas conseguem prosperar com sucesso.",
+        "A velocidade atingiu níveis sobre-humanos e a precisão permanece inabalável sob qualquer pressão.",
+        "Seus dedos se movem tão rápido que se tornam praticamente invisíveis para observadores externos."
+    ]},
+    { name: "Fase 22", difficulty: "Mestre", speed: 4.3, texts: [
+        "Neste estágio, você não está mais digitando - está performando uma arte marcial com o teclado.",
+        "A fusão completa entre intenção e execução elimina qualquer atraso entre pensamento e ação.",
+        "Observadores ficam boquiabertos com a aparente facilidade com que você domina essa habilidade complexa."
+    ]},
+    { name: "Fase 23", difficulty: "Mestre", speed: 4.6, texts: [
+        "Pouquíssimos seres humanos alcançaram este patamar de excelência técnica na história da digitação.",
+        "Cada movimento é executado com a precisão de um cirurgião e a velocidade de um relâmpago cortante.",
+        "Você transcendeu as limitações físicas normais através de treino intenso e dedicação absoluta."
+    ]},
+    { name: "Fase 24", difficulty: "Mestre", speed: 4.9, texts: [
+        "A penúltima prova de sua jornada épica testa se você realmente possui o espírito de um campeão nato.",
+        "Adversários lendários caem diante da sua velocidade estonteante e precisão absolutamente impecável.",
+        "Você está a um passo de completar uma conquista que pouquíssimos mortais jamais alcançarão."
+    ]},
+    { name: "Fase 25", difficulty: "Mestre", speed: 5.5, texts: [
+        "O desafio final e definitivo separa os imortais dos simples mortais comuns nesta arte milenar da digitação.",
+        "Todas as horas de prática, suor, determinação e perseverança culminam neste momento glorioso e épico.",
+        "Prove ao mundo e a si mesmo que você é digno do título supremo de Mestre Absoluto da Digitação!"
+    ]}
+];
+
+let phaseIndex = 0;
+let text = "";
+let index = 0;
+let correct = 0;
+let totalTyped = 0;
+let time = 60;
+let started = false;
+let waitingForFirstKey = false;
+let timer;
+let playerPos = 0;
+let botPos = 0;
+let score = 0;
+let lives = 3;
+let gameActive = true;
+
+const textBox = document.getElementById("text");
+const wpmEl = document.getElementById("wpm");
+const accEl = document.getElementById("accuracy");
+const timeEl = document.getElementById("time");
+const scoreEl = document.getElementById("score");
+const livesEl = document.getElementById("lives");
+const phaseNumEl = document.getElementById("phaseNum");
+const diffBadgeEl = document.getElementById("diffBadge");
+const player = document.getElementById("player");
+const bot = document.getElementById("bot");
+const startBtn = document.getElementById("startBtn");
+const modal = document.getElementById("modal");
+const gameOverModal = document.getElementById("gameOverModal");
+const highScoresBody = document.getElementById("highScoresBody");
+const finalScoreDisplay = document.getElementById("finalScoreDisplay");
+
+// Carregar pontuações salvas
+let highScores = JSON.parse(localStorage.getItem("typeraceHighScores")) || [];
+
+// Função para calcular a pontuação da fase
+function calculatePhaseScore(wpm, accuracy, difficulty) {
+    let difficultyMultiplier = 1;
+    switch(difficulty) {
+        case "Fácil": difficultyMultiplier = 1; break;
+        case "Médio": difficultyMultiplier = 1.5; break;
+        case "Difícil": difficultyMultiplier = 2; break;
+        case "Expert": difficultyMultiplier = 3; break;
+        case "Mestre": difficultyMultiplier = 5; break;
+    }
+    
+    const baseScore = wpm * (accuracy / 100);
+    return Math.round(baseScore * difficultyMultiplier * 10);
+}
+
+// Função para atualizar o placar
+function updateHighScoresTable() {
+    highScoresBody.innerHTML = "";
+    
+    // Ordenar pontuações do maior para o menor
+    highScores.sort((a, b) => b.score - a.score);
+    
+    // Mostrar as top 100
+    const topScores = highScores.slice(0, 100);
+    
+    if (topScores.length === 0) {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td colspan="4" style="color:#aaa;font-style:italic;padding:20px;">Nenhuma pontuação registrada ainda.</td>`;
+        highScoresBody.appendChild(row);
+        return;
+    }
+
+    topScores.forEach((scoreData, i) => {
+        const row = document.createElement("tr");
+        if (i === 0) row.classList.add("rank-gold");
+        else if (i === 1) row.classList.add("rank-silver");
+        else if (i === 2) row.classList.add("rank-bronze");
+        const medals = ["🥇", "🥈", "🥉"];
+        const pos = i < 3 ? medals[i] : (i + 1);
+        row.innerHTML = `
+            <td>${pos}</td>
+            <td>${scoreData.name}</td>
+            <td>${scoreData.score.toLocaleString('pt-BR')}</td>
+            <td>${scoreData.phase || "N/A"}</td>
+        `;
+        highScoresBody.appendChild(row);
+    });
+}
+
+// Função para verificar se é um novo recorde
+function isNewHighScore(score) {
+    if (highScores.length < 100) return true;
+    
+    const lowestScore = Math.min(...highScores.map(s => s.score));
+    return score > lowestScore;
+}
+
+// Função para salvar nova pontuação
+function saveHighScore() {
+    const playerName = document.getElementById("playerName").value.trim();
+    const nameError = document.getElementById("nameError");
+    
+    if (!playerName) {
+        nameError.style.display = "block";
+        document.getElementById("playerName").focus();
+        return;
+    }
+    nameError.style.display = "none";
+    
+    const newScore = {
+        name: playerName,
+        score: score,
+        phase: phaseIndex,
+        date: new Date().toLocaleDateString()
+    };
+    
+    highScores.push(newScore);
+    
+    // Ordenar e manter apenas as 100 melhores
+    highScores.sort((a, b) => b.score - a.score);
+    highScores = highScores.slice(0, 100);
+    
+    // Salvar no localStorage
+    localStorage.setItem("typeraceHighScores", JSON.stringify(highScores));
+    
+    // Atualizar tabela
+    updateHighScoresTable();
+    
+    // Fechar modal
+    gameOverModal.classList.remove("show");
+    
+    // Resetar jogo
+    resetGame();
+}
+
+function startGame() {
+    if (!gameActive || started) return;
+    started = true;
+    waitingForFirstKey = true;
+    startBtn.disabled = true;
+    startBtn.textContent = "⌨️ Aguardando...";
+
+    loadPhase();
+}
+
+function loadPhase() {
+    const phase = phases[phaseIndex];
+    text = phase.texts[Math.floor(Math.random() * phase.texts.length)];
+
+    textBox.innerHTML = "";
+    [...text].forEach((c, i) => {
+        const span = document.createElement("span");
+        span.textContent = c;
+        if (i === 0) span.classList.add("current");
+        textBox.appendChild(span);
+    });
+
+    index = 0;
+    correct = 0;
+    totalTyped = 0;
+    time = 60;
+    playerPos = 0;
+    botPos = 0;
+    
+    player.style.left = "0%";
+    bot.style.left = "0%";
+    
+    phaseNumEl.textContent = phaseIndex + 1;
+    diffBadgeEl.textContent = phase.difficulty;
+    diffBadgeEl.className = "difficulty-badge";
+    
+    if (phase.difficulty === "Fácil") diffBadgeEl.classList.add("diff-facil");
+    else if (phase.difficulty === "Médio") diffBadgeEl.classList.add("diff-medio");
+    else if (phase.difficulty === "Difícil") diffBadgeEl.classList.add("diff-dificil");
+    else if (phase.difficulty === "Expert") diffBadgeEl.classList.add("diff-expert");
+    else if (phase.difficulty === "Mestre") diffBadgeEl.classList.add("diff-mestre");
+
+    // Mostra dica visual se estiver aguardando primeira tecla
+    if (waitingForFirstKey) {
+        textBox.classList.add("waiting-hint");
+    } else {
+        textBox.classList.remove("waiting-hint");
+    }
+    
+    updateStats();
+}
+
+function gameLoop() {
+    time--;
+    timeEl.textContent = time;
+
+    botPos += phases[phaseIndex].speed;
+    botPos = Math.min(botPos, 92);
+    bot.style.left = botPos + "%";
+
+    if (botPos >= 92) endGame(false);
+    if (time <= 0) endGame(false);
+}
+
+// Previne a rolagem da página durante a digitação
+function preventPageScroll(e) {
+    // Permite apenas teclas de seta quando o jogo não está ativo
+    if (!started && !waitingForFirstKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+        return;
+    }
+    
+    // Para todas as outras teclas durante o jogo ou espera, previne o comportamento padrão
+    if (started || waitingForFirstKey) {
+        e.preventDefault();
+    }
+}
+
+// Modifica o event listener de keydown para prevenir rolagem
+document.addEventListener("keydown", e => {
+    // Impede rolagem da página
+    preventPageScroll(e);
+    
+    if (!started || !gameActive) return;
+
+    // Se a tecla for de navegação (setas, tab, etc.), não fazemos nada
+    if (e.key.length > 1 && e.key !== 'Backspace' && e.key !== ' ') return;
+
+    // Se estiver aguardando a primeira tecla, inicia o timer agora
+    if (waitingForFirstKey) {
+        waitingForFirstKey = false;
+        startBtn.textContent = "Digitando...";
+        textBox.classList.remove("waiting-hint");
+        timer = setInterval(gameLoop, 1000);
+    }
+
+    const chars = document.querySelectorAll(".text-box span");
+    if (!chars[index]) return;
+
+    totalTyped++;
+    
+    chars[index].classList.remove("current");
+    
+    if (e.key === text[index]) {
+        chars[index].classList.add("correct");
+        index++;
+        correct++;
+        
+        const progress = (index / text.length) * 92;
+        playerPos = progress;
+        player.style.left = playerPos + "%";
+        player.classList.add("boost");
+        setTimeout(() => player.classList.remove("boost"), 300);
+        
+        if (index < text.length) {
+            chars[index].classList.add("current");
+        }
+    } else {
+        chars[index].classList.add("incorrect");
+        setTimeout(() => {
+            chars[index].classList.remove("incorrect");
+            if (index < text.length) {
+                chars[index].classList.add("current");
+            }
+        }, 500);
+    }
+
+    updateStats();
+
+    if (index >= text.length) {
+        endGame(true);
+    }
+});
+
+function updateStats() {
+    const elapsed = Math.max(1, 60 - time);
+    const wpm = Math.round((correct / 5) / (elapsed / 60));
+    const acc = Math.round((correct / Math.max(1, totalTyped)) * 100);
+    
+    wpmEl.textContent = wpm;
+    accEl.textContent = acc;
+    scoreEl.textContent = score;
+    livesEl.textContent = lives + " ❤️";
+}
+
+function endGame(win) {
+    clearInterval(timer);
+    started = false;
+    waitingForFirstKey = false;
+    startBtn.disabled = false;
+
+    const elapsed = 60 - time;
+    const wpm = Math.round((correct / 5) / (elapsed / 60));
+    const acc = Math.round((correct / Math.max(1, totalTyped)) * 100);
+
+    if (win) {
+        // Calcular pontuação da fase
+        const phaseScore = calculatePhaseScore(wpm, acc, phases[phaseIndex].difficulty);
+        score += phaseScore;
+        
+        const currentPhase = phases[phaseIndex];
+        showModal(
+            "🏆 Vitória!",
+            `<p><strong>Parabéns!</strong> Você completou a ${currentPhase.name}!</p>
+             <p>⚡ Velocidade: <strong>${wpm} WPM</strong></p>
+             <p>🎯 Precisão: <strong>${acc}%</strong></p>
+             <p>⏱️ Tempo: <strong>${elapsed}s</strong></p>
+             <p>🏅 Pontos ganhos: <strong>+${phaseScore}</strong></p>
+             <p>💰 Pontuação total: <strong>${score}</strong></p>`,
+            lives
+        );
+        
+        phaseIndex++;
+        if (phaseIndex >= phases.length) {
+            setTimeout(() => {
+                showModal(
+                    "👑 MESTRE SUPREMO!",
+                    `<p><strong>🎉 INCRÍVEL! 🎉</strong></p>
+                     <p>Você conquistou TODAS as 25 fases!</p>
+                     <p>Pontuação final: <strong>${score}</strong></p>
+                     <p>Você é um verdadeiro <strong>MESTRE DA DIGITAÇÃO</strong>! 🏅</p>`,
+                    lives
+                );
+                // Verificar se é recorde
+                if (isNewHighScore(score)) {
+                    setTimeout(() => {
+                        finalScoreDisplay.textContent = score;
+                        document.getElementById("scoreForm").style.display = "block";
+                        gameOverModal.classList.add("show");
+                    }, 1500);
+                }
+            }, 500);
+        }
+        startBtn.textContent = phaseIndex < phases.length ? "Próxima Fase" : "Reiniciar Jogo";
+    } else {
+        lives--;
+        
+        if (lives <= 0) {
+            gameActive = false;
+            showGameOverModal(wpm, acc, elapsed);
+        } else {
+            showModal(
+                "😢 Derrota",
+                `<p>O oponente chegou primeiro!</p>
+                 <p>⚡ Sua velocidade: <strong>${wpm} WPM</strong></p>
+                 <p>🎯 Sua precisão: <strong>${acc}%</strong></p>
+                 <p>💪 Vidas restantes: <strong>${lives}</strong></p>
+                 <p>💰 Pontuação atual: <strong>${score}</strong></p>
+                 <p>Continue praticando e tente novamente!</p>`,
+                lives
+            );
+            startBtn.textContent = "Tentar Novamente";
+        }
+    }
+    
+    updateStats();
+}
+
+function showModal(title, content, remainingLives) {
+    document.getElementById("modalTitle").textContent = title;
+    document.getElementById("modalStats").innerHTML = content;
+    
+    // Mostrar vidas restantes
+    let livesHTML = "";
+    for (let i = 0; i < remainingLives; i++) {
+        livesHTML += "❤️ ";
+    }
+    document.getElementById("remainingLives").innerHTML = livesHTML;
+    
+    modal.classList.add("show");
+}
+
+function showGameOverModal(wpm, accuracy, elapsed) {
+    document.getElementById("gameOverStats").innerHTML = `
+        <p>Suas vidas acabaram!</p>
+        <p>⚡ Velocidade final: <strong>${wpm} WPM</strong></p>
+        <p>🎯 Precisão final: <strong>${accuracy}%</strong></p>
+        <p>⏱️ Tempo total: <strong>${elapsed}s</strong></p>
+        <p>💰 Pontuação final: <strong>${score}</strong></p>
+        <p>🏆 Fase alcançada: <strong>${phaseIndex + 1}</strong></p>
+    `;
+    
+    finalScoreDisplay.textContent = score;
+    
+    // Verificar se é um novo recorde
+    if (isNewHighScore(score)) {
+        document.getElementById("scoreForm").style.display = "block";
+    } else {
+        document.getElementById("scoreForm").style.display = "none";
+    }
+    
+    gameOverModal.classList.add("show");
+}
+
+function closeModal() {
+    modal.classList.remove("show");
+}
+
+function resetGame() {
+    clearInterval(timer);
+    started = false;
+    waitingForFirstKey = false;
+    phaseIndex = 0;
+    score = 0;
+    lives = 3;
+    gameActive = true;
+    startBtn.disabled = false;
+    startBtn.textContent = "Iniciar Corrida";
+    
+    // Fechar modais
+    modal.classList.remove("show");
+    gameOverModal.classList.remove("show");
+    
+    loadPhase();
+    updateHighScoresTable();
+}
+
+// Inicializar
+loadPhase();
+updateHighScoresTable();
+
+// ===== MENU OCULTO =====
+let cheatActive = false;
+let titleClickCount = 0;
+let titleClickTimer = null;
+
+// Popular o select de fases
+const cheatPhaseSelect = document.getElementById("cheatPhase");
+phases.forEach((phase, i) => {
+    const opt = document.createElement("option");
+    opt.value = i;
+    opt.textContent = `${phase.name} — ${phase.difficulty}`;
+    cheatPhaseSelect.appendChild(opt);
+});
+
+// Atualizar o select para refletir fase atual
+function syncCheatMenu() {
+    cheatPhaseSelect.value = phaseIndex;
+    document.getElementById("cheatLives").value = lives;
+}
+
+// Troca de aba no menu oculto
+function switchCheatTab(tab) {
+    document.querySelectorAll(".cheat-tab").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".cheat-tab-content").forEach(t => t.classList.remove("active"));
+    if (tab === 'game') {
+        document.querySelectorAll(".cheat-tab")[0].classList.add("active");
+        document.getElementById("cheatTabGame").classList.add("active");
+    } else {
+        document.querySelectorAll(".cheat-tab")[1].classList.add("active");
+        document.getElementById("cheatTabRecords").classList.add("active");
+        renderRecordsEditor();
+    }
+}
+
+// Renderizar painel de edição de records
+function renderRecordsEditor() {
+    const panel = document.getElementById("recordsPanel");
+    const sorted = [...highScores].sort((a, b) => b.score - a.score);
+    
+    if (sorted.length === 0) {
+        panel.innerHTML = `<div class="no-records-msg">Nenhum record cadastrado.</div>`;
+        return;
+    }
+    
+    panel.innerHTML = sorted.map((s, i) => `
+        <div class="record-item">
+            <span class="rec-rank">#${i+1}</span>
+            <span class="rec-name" title="${s.name}">${s.name}</span>
+            <span class="rec-score">${s.score.toLocaleString('pt-BR')}</span>
+            <button class="rec-del" onclick="deleteRecord(${i})">✕</button>
+        </div>
+    `).join('');
+}
+
+// Excluir record pelo índice (ordenado)
+function deleteRecord(sortedIndex) {
+    const sorted = [...highScores].sort((a, b) => b.score - a.score);
+    const target = sorted[sortedIndex];
+    // Encontrar e remover do array original
+    const idx = highScores.findIndex(s => s.name === target.name && s.score === target.score && s.date === target.date);
+    if (idx !== -1) {
+        highScores.splice(idx, 1);
+        localStorage.setItem("typeraceHighScores", JSON.stringify(highScores));
+        updateHighScoresTable();
+        renderRecordsEditor();
+    }
+}
+
+// Adicionar record manualmente
+function addRecordManual() {
+    const name = document.getElementById("recAddName").value.trim();
+    const scoreVal = parseInt(document.getElementById("recAddScore").value);
+    const phase = parseInt(document.getElementById("recAddPhase").value) || 1;
+    
+    if (!name) { alert("Digite um nome!"); return; }
+    if (isNaN(scoreVal) || scoreVal < 0) { alert("Pontuação inválida!"); return; }
+    
+    highScores.push({ name, score: scoreVal, phase, date: new Date().toLocaleDateString() });
+    highScores.sort((a, b) => b.score - a.score);
+    highScores = highScores.slice(0, 100);
+    localStorage.setItem("typeraceHighScores", JSON.stringify(highScores));
+    updateHighScoresTable();
+    renderRecordsEditor();
+    
+    document.getElementById("recAddName").value = "";
+    document.getElementById("recAddScore").value = "";
+    document.getElementById("recAddPhase").value = "";
+}
+
+// Apagar todos os records
+function clearAllRecords() {
+    if (!confirm("Tem certeza que deseja apagar TODOS os records? Esta ação não pode ser desfeita.")) return;
+    highScores = [];
+    localStorage.setItem("typeraceHighScores", JSON.stringify(highScores));
+    updateHighScoresTable();
+    renderRecordsEditor();
+}
+
+// Abrir menu oculto
+function openCheatMenu() {
+    if (started) return;
+    syncCheatMenu();
+    switchCheatTab('game');
+    document.getElementById("cheatOverlay").classList.add("show");
+}
+
+// Fechar menu oculto
+function closeCheatMenu() {
+    document.getElementById("cheatOverlay").classList.remove("show");
+}
+
+// Aplicar configurações do cheat
+function applyCheat() {
+    const newPhase = parseInt(cheatPhaseSelect.value);
+    const newLives = parseInt(document.getElementById("cheatLives").value);
+
+    if (isNaN(newLives) || newLives < 1) {
+        alert("Número de vidas inválido! Mínimo: 1");
+        return;
+    }
+
+    // Parar qualquer jogo em curso
+    clearInterval(timer);
+    started = false;
+    waitingForFirstKey = false;
+    gameActive = true;
+
+    phaseIndex = newPhase;
+    lives = Math.min(newLives, 99);
+    score = 0;
+
+    startBtn.disabled = false;
+    startBtn.textContent = "Iniciar Corrida";
+    modal.classList.remove("show");
+    gameOverModal.classList.remove("show");
+
+    loadPhase();
+    updateStats();
+
+    cheatActive = true;
+    document.getElementById("cheatIndicator").classList.add("active");
+
+    closeCheatMenu();
+}
+
+// Ativação por Ctrl+Shift+M
+document.addEventListener("keydown", e => {
+    if (e.ctrlKey && e.shiftKey && e.key === "M") {
+        e.preventDefault();
+        if (document.getElementById("cheatOverlay").classList.contains("show")) {
+            closeCheatMenu();
+        } else {
+            openCheatMenu();
+        }
+    }
+    // Fechar com Escape
+    if (e.key === "Escape") {
+        closeCheatMenu();
+    }
+});
+
+// Ativação clicando 5× no título
+document.querySelector("h1").addEventListener("click", () => {
+    titleClickCount++;
+    clearTimeout(titleClickTimer);
+    titleClickTimer = setTimeout(() => { titleClickCount = 0; }, 1500);
+    if (titleClickCount >= 5) {
+        titleClickCount = 0;
+        openCheatMenu();
+    }
+});
+</script>
+
+
+
+</body>
+</html>

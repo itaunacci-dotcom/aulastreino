@@ -1,0 +1,1865 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desenhar o Traçado - 49 Niveis</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        background: linear-gradient(160deg, #4a5a9a 0%, #6b5aad 40%, #7c5295 70%, #6a4c93 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+        padding: 24px;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+    }
+
+    #layout {
+        display: flex;
+        gap: 0;
+        max-width: 1300px;
+        width: 100%;
+        align-items: stretch;
+        filter: drop-shadow(0 8px 32px rgba(0,0,0,0.18));
+    }
+
+    /* === LEFT PANEL === */
+    #leftPanel {
+        background: #fff;
+        border-radius: 20px 0 0 20px;
+        padding: 30px 22px;
+        min-width: 300px;
+        max-width: 320px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #leftPanel h1 {
+        color: #2d3047;
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: -0.3px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    #statsRow {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .stat {
+        background: linear-gradient(135deg, #f0f1f8 0%, #e8eaf6 100%);
+        padding: 14px 6px 12px;
+        border-radius: 12px;
+        flex: 1;
+        text-align: center;
+        border: 1px solid rgba(91, 106, 191, 0.1);
+    }
+
+    .stat-label {
+        font-size: 10px;
+        color: #8e90a6;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .stat-value {
+        font-size: 22px;
+        font-weight: 800;
+        color: #5b6abf;
+    }
+
+    #levelBox {
+        background: linear-gradient(135deg, #f0f1f8 0%, #e8eaf6 100%);
+        padding: 14px 20px;
+        border-radius: 12px;
+        width: 100%;
+        text-align: center;
+        border: 1px solid rgba(91, 106, 191, 0.1);
+    }
+
+    #levelBox .stat-label {
+        font-size: 10px;
+        color: #8e90a6;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    #levelBox .stat-value {
+        font-size: 30px;
+        font-weight: 800;
+        color: #5b6abf;
+    }
+
+    /* === CENTER PANEL === */
+    #centerPanel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0 20px;
+        background: #fff;
+    }
+
+    canvas {
+        border: 3px solid #c5cae9;
+        border-radius: 16px;
+        background: #fafbff;
+        cursor: crosshair;
+        display: block;
+        touch-action: none;
+        width: 100%;
+        max-width: 500px;
+        aspect-ratio: 1;
+        margin-top: 2px;
+    }
+
+    .progress-bar {
+        width: 100%;
+        max-width: 500px;
+        height: 8px;
+        background: #e8eaf6;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 12px;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #66bb6a, #aed581, #43a047);
+        background-size: 200% 100%;
+        width: 0%;
+        transition: width 0.4s ease;
+        border-radius: 4px;
+    }
+
+    .precision-info {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 500px;
+        margin-top: 8px;
+        font-size: 13px;
+        color: #8e90a6;
+    }
+
+    #liveAccuracy {
+        margin-top: 4px;
+        font-size: 13px;
+        color: #8e90a6;
+    }
+
+    .coverage-info {
+        margin-top: 3px;
+        font-size: 13px;
+        color: #8e90a6;
+    }
+
+    #levelName {
+        font-size: 15px;
+        color: #5b6abf;
+        font-weight: 700;
+        margin-top: 8px;
+        letter-spacing: -0.2px;
+    }
+
+    #tierBadge {
+        display: inline-block;
+        padding: 3px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        color: white;
+        margin-top: 4px;
+        letter-spacing: 0.3px;
+    }
+
+    /* === RIGHT PANEL === */
+    #rightPanel {
+        background: #fff;
+        border-radius: 0 20px 20px 0;
+        padding: 22px 24px;
+        min-width: 300px;
+        max-width: 340px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #message {
+        font-size: 15px;
+        min-height: 48px;
+        font-weight: 700;
+        color: #2d3047;
+        text-align: center;
+        margin-bottom: 14px;
+        line-height: 1.45;
+    }
+
+    .success { color: #2e7d32; animation: pulse 0.5s; }
+    .warning { color: #e65100; }
+    .error { color: #c62828; }
+
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+
+    .score-breakdown {
+        background: #f5f6fb;
+        padding: 14px 12px;
+        border-radius: 12px;
+        font-size: 13px;
+        text-align: left;
+        margin-bottom: 16px;
+        border: 1px solid #e8eaf6;
+    }
+
+    .score-item {
+        display: flex;
+        justify-content: space-between;
+        margin: 4px 0;
+        color: #555;
+    }
+
+    .score-item.total {
+        border-top: 1px solid #dde0f0;
+        padding-top: 7px;
+        margin-top: 6px;
+        font-weight: 700;
+        color: #2d3047;
+        font-size: 14px;
+    }
+
+    #controls {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 16px;
+    }
+
+    button {
+        padding: 10px 24px;
+        font-size: 14px;
+        border: 2px solid #c5cae9;
+        border-radius: 24px;
+        cursor: pointer;
+        background: #fff;
+        color: #5b6abf;
+        font-weight: 700;
+        transition: all 0.25s ease;
+        letter-spacing: 0.2px;
+    }
+
+    button:hover {
+        background: linear-gradient(135deg, #5b6abf 0%, #6e5dc6 100%);
+        color: #fff;
+        border-color: #5b6abf;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 14px rgba(91, 106, 191, 0.35);
+    }
+
+    button:active { transform: translateY(0); box-shadow: none; }
+
+    #difficulty {
+        text-align: center;
+    }
+
+    #difficulty label {
+        font-size: 13px;
+        color: #555;
+        margin-right: 6px;
+        font-weight: 600;
+    }
+
+    select {
+        padding: 8px 14px;
+        font-size: 14px;
+        border: 2px solid #c5cae9;
+        border-radius: 10px;
+        background: #fff;
+        cursor: pointer;
+        color: #2d3047;
+        font-weight: 600;
+        transition: border-color 0.2s;
+    }
+
+    select:focus { outline: none; border-color: #5b6abf; }
+
+    /* === SECRET MENU === */
+    #secretOverlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #secretOverlay.show {
+        display: flex;
+    }
+
+    #secretCard {
+        background: #1a1a2e;
+        border: 2px solid #e94560;
+        border-radius: 16px;
+        padding: 36px 32px;
+        text-align: center;
+        max-width: 380px;
+        width: 90%;
+        box-shadow: 0 0 40px rgba(233, 69, 96, 0.4);
+        animation: glitch 0.3s ease;
+    }
+
+    @keyframes glitch {
+        0% { transform: translate(0); }
+        20% { transform: translate(-3px, 3px); }
+        40% { transform: translate(3px, -3px); }
+        60% { transform: translate(-2px, 2px); }
+        80% { transform: translate(2px, -2px); }
+        100% { transform: translate(0); }
+    }
+
+    #secretCard h3 {
+        color: #e94560;
+        font-size: 20px;
+        margin-bottom: 20px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+
+    #secretCard input {
+        width: 100%;
+        padding: 12px 16px;
+        font-size: 18px;
+        border: 2px solid #333;
+        border-radius: 8px;
+        background: #0f0f23;
+        color: #00ff88;
+        text-align: center;
+        letter-spacing: 6px;
+        font-family: monospace;
+        font-weight: 700;
+        margin-bottom: 16px;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+
+    #secretCard input:focus {
+        border-color: #e94560;
+    }
+
+    #secretCard input::placeholder {
+        color: #555;
+        letter-spacing: 2px;
+        font-size: 14px;
+    }
+
+    #secretLevelSelect {
+        display: none;
+        margin-top: 12px;
+    }
+
+    #secretLevelSelect label {
+        color: #aaa;
+        font-size: 14px;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    #secretLevelSelect select {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        border: 2px solid #333;
+        border-radius: 8px;
+        background: #0f0f23;
+        color: #00ff88;
+        font-weight: 700;
+        cursor: pointer;
+        outline: none;
+    }
+
+    #secretLevelSelect select:focus {
+        border-color: #e94560;
+    }
+
+    #secretLevelSelect button {
+        margin-top: 16px;
+        padding: 12px 32px;
+        font-size: 16px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 700;
+        transition: all 0.3s;
+        margin-right: 8px;
+    }
+
+    .secret-btn-go {
+        background: #e94560;
+        color: #fff;
+    }
+
+    .secret-btn-go:hover {
+        background: #ff6b81;
+        transform: translateY(-2px);
+    }
+
+    .secret-btn-close {
+        background: #333;
+        color: #aaa;
+    }
+
+    .secret-btn-close:hover {
+        background: #444;
+    }
+
+    #secretError {
+        color: #e94560;
+        font-size: 13px;
+        margin-top: 8px;
+        display: none;
+    }
+
+    #leftPanel h1 {
+        cursor: default;
+        user-select: none;
+    }
+
+    /* === CONGRATULATIONS SCREEN === */
+    #congratsOverlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(91, 106, 191, 0.95) 0%, rgba(110, 93, 198, 0.95) 100%);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.5s ease;
+    }
+
+    #congratsOverlay.show {
+        display: flex;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    #congratsCard {
+        background: #fff;
+        border-radius: 24px;
+        padding: 50px 40px;
+        text-align: center;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.6s ease;
+    }
+
+    @keyframes slideUp {
+        from { transform: translateY(50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    #congratsCard h2 {
+        font-size: 32px;
+        color: #5b6abf;
+        margin-bottom: 16px;
+        font-weight: 800;
+    }
+
+    #congratsCard .trophy {
+        font-size: 72px;
+        margin-bottom: 16px;
+        animation: bounce 1s ease infinite;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-12px); }
+    }
+
+    #congratsCard p {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 10px;
+        line-height: 1.6;
+    }
+
+    #congratsCard .final-score {
+        font-size: 28px;
+        font-weight: 800;
+        color: #5b6abf;
+        margin: 20px 0;
+    }
+
+    #congratsCard button {
+        padding: 14px 40px;
+        font-size: 18px;
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        background: linear-gradient(135deg, #5b6abf 0%, #6e5dc6 100%);
+        color: #fff;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+        letter-spacing: 0.5px;
+    }
+
+    #congratsCard button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(91, 106, 191, 0.5);
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 1100px) {
+        #layout {
+            flex-direction: column;
+            align-items: center;
+            border-radius: 20px;
+        }
+        #leftPanel, #rightPanel {
+            max-width: 500px;
+            width: 100%;
+            border-radius: 20px;
+        }
+        #leftPanel { border-radius: 20px 20px 0 0; }
+        #rightPanel { border-radius: 0 0 20px 20px; }
+        #centerPanel {
+            width: 100%;
+            max-width: 500px;
+        }
+    }
+</style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2958125315260710" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<div id="layout">
+    <!-- LEFT PANEL -->
+    <div id="leftPanel">
+        <h1>Desenhar o Traçado</h1>
+        <div id="statsRow">
+            <div class="stat">
+                <div class="stat-label">Precisao</div>
+                <div class="stat-value" id="accuracy">0%</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Cobertura</div>
+                <div class="stat-value" id="coverage">0%</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Pontos</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+        </div>
+        <div id="levelBox">
+            <div class="stat-label">Nivel</div>
+            <div class="stat-value" id="level">1</div>
+        </div>
+    </div>
+
+    <!-- CENTER PANEL -->
+    <div id="centerPanel">
+        <canvas id="canvas" width="500" height="500"></canvas>
+
+        <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+        <div class="precision-info">
+            <span id="distanceDisplay">Distancia: 0px</span>
+            <span id="streakDisplay">Sequencia: 0</span>
+        </div>
+
+        <div id="liveAccuracy">Tracando: 0 pontos corretos / 0 pontos desenhados</div>
+        <div class="coverage-info" id="coverageInfo">Cobertura do caminho: 0%</div>
+        <div id="levelName"></div>
+        <div id="tierBadge"></div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div id="rightPanel">
+        <div id="message">Siga a linha pontilhada completamente! Voce precisa de 90% de precisao E 85% de cobertura.</div>
+
+        <div class="score-breakdown" id="scoreBreakdown" style="display: none;">
+            <div class="score-item"><span>Pontos Base:</span> <span id="baseScore">0</span></div>
+            <div class="score-item"><span>Bonus Precisao:</span> <span id="precisionBonus">0</span></div>
+            <div class="score-item"><span>Bonus Sequencia:</span> <span id="streakBonus">0</span></div>
+            <div class="score-item"><span>Bonus Velocidade:</span> <span id="speedBonus">0</span></div>
+            <div class="score-item total">
+                <span>Total:</span> <span id="totalScore">0</span>
+            </div>
+        </div>
+
+        <div id="controls">
+            <button onclick="reset()">Recomecar</button>
+            <button onclick="nextLevel()" title="Precisa de 90% de precisao E 85% de cobertura">Proximo Nivel</button>
+        </div>
+
+        <div id="difficulty">
+            <label>Dificuldade:</label>
+            <select id="difficultySelect" onchange="changeDifficulty()">
+                <option value="easy">Facil (20px)</option>
+                <option value="medium" selected>Medio (15px)</option>
+                <option value="hard">Dificil (10px)</option>
+                <option value="expert">Especialista (7px)</option>
+            </select>
+        </div>
+
+    </div>
+</div>
+
+<div id="congratsOverlay">
+    <div id="congratsCard">
+        <div class="trophy">🏆</div>
+        <h2>Parabens!</h2>
+        <p>Voce completou todas as 49 fases do jogo!</p>
+        <p>Voce e um verdadeiro mestre em desenhar tracados!</p>
+        <div class="final-score">Pontuacao Final: <span id="finalScore">0</span></div>
+        <p>Precisao media: <span id="finalAccuracy">0</span>% | Cobertura media: <span id="finalCoverage">0</span>%</p>
+        <button onclick="restartGame()">Jogar Novamente</button>
+    </div>
+</div>
+
+<div id="secretOverlay">
+    <div id="secretCard">
+        <h3>Painel Admin</h3>
+        <input type="password" id="secretPassword" placeholder="Digite a senha" maxlength="6">
+        <div id="secretError">Senha incorreta!</div>
+        <div id="secretLevelSelect">
+            <label>Selecione a fase (1-49):</label>
+            <select id="secretLevelPicker"></select>
+            <br>
+            <button class="secret-btn-go" onclick="goToSecretLevel()">Iniciar</button>
+            <button class="secret-btn-close" onclick="closeSecretMenu()">Fechar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+let drawing = false;
+let guidePoints = [];
+let coveredPoints = new Set();
+let userPath = [];
+let currentLevel = 1;
+let score = 0;
+let baseTolerance = 15;
+let currentTolerance = baseTolerance;
+let goodPoints = 0;
+let totalPoints = 0;
+let currentStreak = 0;
+let maxStreak = 0;
+let drawingStartTime = 0;
+let lastAccuracy = 0;
+let lastCoverage = 0;
+let previousPos = null;
+
+const precisionZones = {
+    perfect: { min: 0, max: 5, color: "#4CAF50", bonus: 3, name: "Perfeito" },
+    good: { min: 5, max: 12, color: "#8BC34A", bonus: 2, name: "Bom" },
+    ok: { min: 12, max: 20, color: "#FFC107", bonus: 1, name: "Regular" },
+    bad: { min: 20, max: Infinity, color: "#F44336", bonus: 0, name: "Ruim" }
+};
+
+const tiers = [
+    { name: "Muito Facil", color: "#4CAF50" },
+    { name: "Facil", color: "#8BC34A" },
+    { name: "Leve", color: "#CDDC39" },
+    { name: "Moderado", color: "#FFC107" },
+    { name: "Medio", color: "#FF9800" },
+    { name: "Dificil", color: "#FF5722" },
+    { name: "Muito Dificil", color: "#f44336" },
+    { name: "Expert", color: "#E91E63" },
+    { name: "Mestre", color: "#9C27B0" }
+];
+
+const levels = [
+    {
+        tier: 0, name: "Linha Reta Horizontal",
+        draw: (ctx) => {
+            ctx.beginPath(); ctx.moveTo(70, 250); ctx.lineTo(430, 250);
+            return generatePolygonPoints([{x:70,y:250},{x:430,y:250}], 200);
+        }
+    },
+    {
+        tier: 0, name: "Linha Reta Vertical",
+        draw: (ctx) => {
+            ctx.beginPath(); ctx.moveTo(250, 70); ctx.lineTo(250, 430);
+            return generatePolygonPoints([{x:250,y:70},{x:250,y:430}], 200);
+        }
+    },
+    {
+        tier: 0, name: "Linha Diagonal",
+        draw: (ctx) => {
+            ctx.beginPath(); ctx.moveTo(80, 420); ctx.lineTo(420, 80);
+            return generatePolygonPoints([{x:80,y:420},{x:420,y:80}], 200);
+        }
+    },
+    {
+        tier: 0, name: "Quadrado",
+        draw: (ctx) => {
+            ctx.beginPath();
+            const pts = [{x:130,y:130},{x:370,y:130},{x:370,y:370},{x:130,y:370},{x:130,y:130}];
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return generatePolygonPoints(pts, 80);
+        }
+    },
+    {
+        tier: 0, name: "Retangulo",
+        draw: (ctx) => {
+            ctx.beginPath();
+            const pts = [{x:80,y:160},{x:420,y:160},{x:420,y:340},{x:80,y:340},{x:80,y:160}];
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return generatePolygonPoints(pts, 80);
+        }
+    },
+    {
+        tier: 1, name: "Triangulo",
+        draw: (ctx) => {
+            ctx.beginPath();
+            const pts = [{x:250,y:100},{x:410,y:380},{x:90,y:380},{x:250,y:100}];
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return generatePolygonPoints(pts, 100);
+        }
+    },
+    {
+        tier: 1, name: "Losango",
+        draw: (ctx) => {
+            ctx.beginPath();
+            const pts = [{x:250,y:80},{x:420,y:250},{x:250,y:420},{x:80,y:250},{x:250,y:80}];
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return generatePolygonPoints(pts, 100);
+        }
+    },
+    {
+        tier: 1, name: "Cruz",
+        draw: (ctx) => {
+            ctx.beginPath();
+            const pts = [
+                {x:200,y:80},{x:300,y:80},{x:300,y:200},{x:420,y:200},{x:420,y:300},
+                {x:300,y:300},{x:300,y:420},{x:200,y:420},{x:200,y:300},{x:80,y:300},
+                {x:80,y:200},{x:200,y:200},{x:200,y:80}
+            ];
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return generatePolygonPoints(pts, 40);
+        }
+    },
+    {
+        tier: 1, name: "Pentagono",
+        draw: (ctx) => {
+            const cx = 250, cy = 250, r = 150;
+            ctx.beginPath();
+            const pts = [];
+            for (let i = 0; i <= 5; i++) {
+                const a = (i * 2 * Math.PI / 5) - Math.PI / 2;
+                pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+            }
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return generatePolygonPoints(pts, 80);
+        }
+    },
+    {
+        tier: 1, name: "Hexagono",
+        draw: (ctx) => {
+            const cx = 250, cy = 250, r = 150;
+            ctx.beginPath();
+            const pts = [];
+            for (let i = 0; i <= 6; i++) {
+                const a = (i * 2 * Math.PI / 6) - Math.PI / 2;
+                pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+            }
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return generatePolygonPoints(pts, 80);
+        }
+    },
+    {
+        tier: 2, name: "Circulo",
+        draw: (ctx) => {
+            ctx.beginPath(); ctx.arc(250, 250, 130, 0, Math.PI * 2);
+            return generateCirclePoints(250, 250, 130, 300);
+        }
+    },
+    {
+        tier: 2, name: "Oval",
+        draw: (ctx) => {
+            ctx.beginPath();
+            let pts = [];
+            for (let i = 0; i <= 360; i += 2) {
+                const a = i * Math.PI / 180;
+                pts.push({ x: 250 + 180 * Math.cos(a), y: 250 + 100 * Math.sin(a) });
+            }
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return pts;
+        }
+    },
+    {
+        tier: 2, name: "Meia Lua",
+        draw: (ctx) => {
+            ctx.beginPath();
+            let pts = [];
+            for (let i = 0; i <= 360; i += 2) {
+                const a = i * Math.PI / 180;
+                pts.push({ x: 250 + 120 * Math.cos(a), y: 250 + 120 * Math.sin(a) });
+            }
+            for (let i = 360; i >= 0; i -= 2) {
+                const a = i * Math.PI / 180;
+                pts.push({ x: 300 + 85 * Math.cos(a), y: 220 + 85 * Math.sin(a) });
+            }
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return pts;
+        }
+    },
+    {
+        tier: 2, name: "Octogono",
+        draw: (ctx) => {
+            const cx = 250, cy = 250, r = 150;
+            ctx.beginPath();
+            const pts = [];
+            for (let i = 0; i <= 8; i++) {
+                const a = (i * 2 * Math.PI / 8) - Math.PI / 2;
+                pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+            }
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return generatePolygonPoints(pts, 60);
+        }
+    },
+    {
+        tier: 2, name: "Trapezio",
+        draw: (ctx) => {
+            ctx.beginPath();
+            const pts = [{x:160,y:130},{x:340,y:130},{x:420,y:370},{x:80,y:370},{x:160,y:130}];
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return generatePolygonPoints(pts, 80);
+        }
+    },
+    {
+        tier: 3, name: "Onda Suave",
+        draw: (ctx) => {
+            ctx.beginPath(); ctx.moveTo(50, 250);
+            ctx.bezierCurveTo(160, 130, 340, 370, 450, 250);
+            return generateBezierPoints(50, 250, 160, 130, 340, 370, 450, 250, 150);
+        }
+    },
+    {
+        tier: 3, name: "Seta",
+        draw: (ctx) => {
+            ctx.beginPath();
+            const pts = [{x:80,y:250},{x:320,y:250},{x:320,y:180},{x:430,y:250},{x:320,y:320},{x:320,y:250}];
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return generatePolygonPoints(pts, 40);
+        }
+    },
+    {
+        tier: 3, name: "Coracao Pequeno",
+        draw: (ctx) => {
+            ctx.beginPath();
+            const cx = 250, cy = 240, s = 7;
+            let pts = [];
+            for (let i = 0; i <= 360; i += 2) {
+                const t = i * Math.PI / 180;
+                const x = cx + s * 16 * Math.pow(Math.sin(t), 3);
+                const y = cy - s * (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+                pts.push({x, y});
+            }
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return pts;
+        }
+    },
+    {
+        tier: 3, name: "Estrela 4 Pontas",
+        draw: (ctx) => {
+            const cx = 250, cy = 250, spikes = 4, outer = 150, inner = 50;
+            ctx.beginPath();
+            const pts = [];
+            for (let i = 0; i < spikes * 2; i++) {
+                const r = i % 2 === 0 ? outer : inner;
+                const a = (i * Math.PI) / spikes - Math.PI / 2;
+                pts.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r });
+            }
+            pts.push(pts[0]);
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return generatePolygonPoints(pts, 60);
+        }
+    },
+    {
+        tier: 3, name: "Triangulo Invertido",
+        draw: (ctx) => {
+            ctx.beginPath();
+            const pts = [{x:250,y:400},{x:90,y:130},{x:410,y:130},{x:250,y:400}];
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return generatePolygonPoints(pts, 100);
+        }
+    },
+    {
+        tier: 4, name: "Curva S",
+        draw: (ctx) => {
+            ctx.beginPath(); ctx.moveTo(50, 170);
+            ctx.bezierCurveTo(170, 110, 230, 280, 250, 250);
+            ctx.bezierCurveTo(270, 220, 330, 390, 450, 330);
+            const p1 = generateBezierPoints(50, 170, 170, 110, 230, 280, 250, 250, 100);
+            const p2 = generateBezierPoints(250, 250, 270, 220, 330, 390, 450, 330, 100);
+            return [...p1, ...p2];
+        }
+    },
+    {
+        tier: 4, name: "Onda Senoidal",
+        draw: (ctx) => {
+            ctx.beginPath();
+            let pts = [];
+            for (let x = 50; x <= 450; x += 2) {
+                const y = 250 + 70 * Math.sin(0.04 * x) * Math.sin(0.04 * x * 0.3);
+                pts.push({x, y});
+            }
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return pts;
+        }
+    },
+    {
+        tier: 4, name: "Estrela 5 Pontas",
+        draw: (ctx) => {
+            const cx = 250, cy = 250, spikes = 5, outer = 150, inner = 60;
+            ctx.beginPath();
+            const pts = [];
+            for (let i = 0; i < spikes * 2; i++) {
+                const r = i % 2 === 0 ? outer : inner;
+                const a = (i * Math.PI) / spikes - Math.PI / 2;
+                pts.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r });
+            }
+            pts.push(pts[0]);
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return generatePolygonPoints(pts, 60);
+        }
+    },
+    {
+        tier: 4, name: "Infinito",
+        draw: (ctx) => {
+            ctx.beginPath();
+            let pts = [];
+            for (let i = 0; i <= 360; i += 2) {
+                const a = i * Math.PI / 180;
+                const d = 180;
+                const den = 1 + Math.sin(a) * Math.sin(a);
+                pts.push({ x: 250 + d * Math.cos(a) / den, y: 250 + d * Math.sin(a) * Math.cos(a) / den });
+            }
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return pts;
+        }
+    },
+    {
+        tier: 4, name: "Asa de Borboleta",
+        draw: (ctx) => {
+            ctx.beginPath();
+            let pts = [];
+            for (let i = 0; i <= 720; i += 2) {
+                const a = i * Math.PI / 180;
+                const r = 120 * Math.exp(Math.cos(a)) - 25 * Math.cos(4 * a) + Math.pow(Math.sin(a / 12), 5);
+                pts.push({ x: 250 + r * Math.cos(a) * 0.8, y: 250 + r * Math.sin(a) * 0.8 });
+            }
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return pts;
+        }
+    },
+    {
+        tier: 5, name: "Flor 6 Petalas",
+        draw: (ctx) => {
+            const cx = 250, cy = 250;
+            ctx.beginPath();
+            let pts = [];
+            for (let i = 0; i <= 360; i += 1.5) {
+                const a = i * Math.PI / 180;
+                const r = 70 + 70 * Math.cos(6 * a);
+                pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+            }
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return pts;
+        }
+    },
+    {
+        tier: 5, name: "Yin Yang",
+        draw: (ctx) => {
+            ctx.beginPath();
+            let pts = [];
+            for (let i = 0; i <= 360; i += 2) {
+                const a = i * Math.PI / 180;
+                pts.push({ x: 250 + 130 * Math.cos(a), y: 250 + 130 * Math.sin(a) });
+            }
+            for (let i = 0; i <= 180; i += 2) {
+                const a = i * Math.PI / 180;
+                pts.push({ x: 250 + 65 * Math.cos(a - Math.PI / 2), y: 185 + 65 * Math.sin(a - Math.PI / 2) });
+            }
+            for (let i = 180; i <= 360; i += 2) {
+                const a = i * Math.PI / 180;
+                pts.push({ x: 250 + 65 * Math.cos(a - Math.PI / 2), y: 315 + 65 * Math.sin(a - Math.PI / 2) });
+            }
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return pts;
+        }
+    },
+    {
+        tier: 5, name: "Rosa 5 Petalas",
+        draw: (ctx) => {
+            const cx = 250, cy = 250;
+            ctx.beginPath();
+            let pts = [];
+            for (let i = 0; i <= 360; i += 1.5) {
+                const a = i * Math.PI / 180;
+                const r = 140 * Math.cos(5 * a);
+                pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+            }
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return pts;
+        }
+    },
+    {
+        tier: 5, name: "Coracao Grande",
+        draw: (ctx) => {
+            ctx.beginPath();
+            const cx = 250, cy = 240, s = 12;
+            let pts = [];
+            for (let i = 0; i <= 360; i += 2) {
+                const t = i * Math.PI / 180;
+                const x = cx + s * 16 * Math.pow(Math.sin(t), 3);
+                const y = cy - s * (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+                pts.push({x, y});
+            }
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return pts;
+        }
+    },
+    {
+        tier: 5, name: "Estrela 6 Pontas",
+        draw: (ctx) => {
+            const cx = 250, cy = 250, spikes = 6, outer = 150, inner = 65;
+            ctx.beginPath();
+            const pts = [];
+            for (let i = 0; i < spikes * 2; i++) {
+                const r = i % 2 === 0 ? outer : inner;
+                const a = (i * Math.PI) / spikes - Math.PI / 2;
+                pts.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r });
+            }
+            pts.push(pts[0]);
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return generatePolygonPoints(pts, 60);
+        }
+    },
+    {
+        tier: 6, name: "Espiral Simples",
+        draw: (ctx) => {
+            ctx.beginPath();
+            const cx = 250, cy = 250;
+            let pts = [];
+            for (let i = 0; i <= 540; i += 3) {
+                const a = i * Math.PI / 180;
+                const r = 5 + (i / 5);
+                pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+            }
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return pts;
+        }
+    },
+    {
+        tier: 6, name: "Onda Complexa",
+        draw: (ctx) => {
+            ctx.beginPath();
+            let pts = [];
+            for (let x = 50; x <= 450; x += 2) {
+                const y = 250 + 60 * Math.sin(x * 0.035) + 25 * Math.sin(x * 0.11) + 12 * Math.cos(x * 0.018);
+                pts.push({x, y});
+            }
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return pts;
+        }
+    },
+    {
+        tier: 6, name: "Letra M Cursiva",
+        draw: (ctx) => {
+            ctx.beginPath();
+            ctx.moveTo(100, 380);
+            ctx.bezierCurveTo(100, 210, 150, 140, 185, 140);
+            const p1 = generateBezierPoints(100, 380, 100, 210, 150, 140, 185, 140, 60);
+            ctx.bezierCurveTo(220, 140, 220, 230, 250, 230);
+            const p2 = generateBezierPoints(185, 140, 220, 140, 220, 230, 250, 230, 60);
+            ctx.bezierCurveTo(280, 230, 280, 140, 315, 140);
+            const p3 = generateBezierPoints(250, 230, 280, 230, 280, 140, 315, 140, 60);
+            ctx.bezierCurveTo(350, 140, 400, 210, 400, 380);
+            const p4 = generateBezierPoints(315, 140, 350, 140, 400, 210, 400, 380, 60);
+            return [...p1, ...p2, ...p3, ...p4];
+        }
+    },
+    {
+        tier: 6, name: "Engrenagem Simples",
+        draw: (ctx) => {
+            const cx = 250, cy = 250, teeth = 8, outer = 140, inner = 100;
+            ctx.beginPath();
+            const pts = [];
+            for (let i = 0; i < teeth * 2; i++) {
+                const a = (i * Math.PI) / teeth;
+                const r = i % 2 === 0 ? outer : inner;
+                pts.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r });
+            }
+            pts.push(pts[0]);
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return generatePolygonPoints(pts, 40);
+        }
+    },
+    {
+        tier: 7, name: "Circulo Secundario",
+        draw: (ctx) => {
+            ctx.beginPath();
+            ctx.arc(200, 250, 90, 0, Math.PI * 2);
+            ctx.moveTo(340, 250);
+            ctx.arc(300, 250, 90, 0, Math.PI * 2);
+            const p1 = generateCirclePoints(200, 250, 90, 150);
+            const p2 = generateCirclePoints(300, 250, 90, 150);
+            return [...p1, ...p2];
+        }
+    },
+    {
+        tier: 7, name: "Estrela do Mar",
+        draw: (ctx) => {
+            const cx = 250, cy = 250, spikes = 7, outer = 140, inner = 55;
+            ctx.beginPath();
+            const pts = [];
+            for (let i = 0; i < spikes * 2; i++) {
+                const r = i % 2 === 0 ? outer : inner;
+                const a = (i * Math.PI) / spikes - Math.PI / 2;
+                pts.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r });
+            }
+            pts.push(pts[0]);
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return generatePolygonPoints(pts, 60);
+        }
+    },
+    {
+        tier: 7, name: "Letra Cursiva",
+        draw: (ctx) => {
+            ctx.beginPath();
+            ctx.moveTo(170, 170);
+            ctx.bezierCurveTo(110, 110, 140, 280, 210, 320);
+            ctx.bezierCurveTo(290, 360, 370, 230, 320, 140);
+            ctx.bezierCurveTo(280, 70, 200, 90, 170, 170);
+            const p1 = generateBezierPoints(170, 170, 110, 110, 140, 280, 210, 320, 100);
+            const p2 = generateBezierPoints(210, 320, 290, 360, 370, 230, 320, 140, 100);
+            const p3 = generateBezierPoints(320, 140, 280, 70, 200, 90, 170, 170, 100);
+            return [...p1, ...p2, ...p3];
+        }
+    },
+    {
+        tier: 7, name: "Labirinto Simples",
+        draw: (ctx) => {
+            ctx.beginPath();
+            const pts = [
+                {x:80,y:80},{x:420,y:80},{x:420,y:180},{x:180,y:180},{x:180,y:270},
+                {x:420,y:270},{x:420,y:420},{x:80,y:420},{x:80,y:270},{x:320,y:270},
+                {x:320,y:180},{x:80,y:180},{x:80,y:80}
+            ];
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return generatePolygonPoints(pts, 40);
+        }
+    },
+    {
+        tier: 7, name: "Cristal",
+        draw: (ctx) => {
+            ctx.beginPath();
+            const pts = [
+                {x:250,y:60},{x:350,y:160},{x:350,y:340},{x:250,y:440},{x:150,y:340},{x:150,y:160},{x:250,y:60}
+            ];
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return generatePolygonPoints(pts, 80);
+        }
+    },
+    {
+        tier: 8, name: "Flor Complexa",
+        draw: (ctx) => {
+            const cx = 250, cy = 250;
+            ctx.beginPath();
+            let pts = [];
+            for (let i = 0; i <= 360; i += 1.5) {
+                const a = i * Math.PI / 180;
+                const r = 100 + 40 * Math.cos(8 * a);
+                pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+            }
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return pts;
+        }
+    },
+    {
+        tier: 8, name: "Engrenagem 12 Dentes",
+        draw: (ctx) => {
+            const cx = 250, cy = 250, teeth = 12, outer = 140, inner = 95;
+            ctx.beginPath();
+            const pts = [];
+            for (let i = 0; i < teeth * 2; i++) {
+                const a = (i * Math.PI) / teeth;
+                const r = i % 2 === 0 ? outer : inner;
+                pts.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r });
+            }
+            pts.push(pts[0]);
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return generatePolygonPoints(pts, 40);
+        }
+    },
+    {
+        tier: 8, name: "Mandala Simples",
+        draw: (ctx) => {
+            const cx = 250, cy = 250;
+            ctx.beginPath();
+            let allPts = [];
+            for (let circle = 0; circle < 3; circle++) {
+                const radius = 40 + circle * 35;
+                const pts = [];
+                for (let i = 0; i <= 120; i++) {
+                    const a = (i * 2 * Math.PI) / 120;
+                    let r = radius;
+                    if (circle > 0) r += 12 * Math.sin(a * 8);
+                    pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+                }
+                allPts = allPts.concat(pts);
+            }
+            ctx.moveTo(allPts[0].x, allPts[0].y);
+            allPts.forEach(p => ctx.lineTo(p.x, p.y));
+            ctx.stroke();
+            return allPts;
+        }
+    },
+    {
+        tier: 8, name: "Labirinto Complexo",
+        draw: (ctx) => {
+            ctx.beginPath();
+            const pts = [
+                {x:50,y:50},{x:450,y:50},{x:450,y:140},{x:140,y:140},{x:140,y:230},
+                {x:360,y:230},{x:360,y:320},{x:50,y:320},{x:50,y:230},{x:270,y:230},
+                {x:270,y:140},{x:50,y:140},{x:50,y:50}
+            ];
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return generatePolygonPoints(pts, 40);
+        }
+    },
+    {
+        tier: 8, name: "Espiral Dupla",
+        draw: (ctx) => {
+            ctx.beginPath();
+            const cx = 250, cy = 250;
+            let pts = [];
+            for (let i = 0; i <= 360; i += 2) {
+                const a = i * Math.PI / 180;
+                const r = 5 + (i / 4.5);
+                pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+            }
+            for (let i = 0; i <= 360; i += 2) {
+                const a = i * Math.PI / 180 + Math.PI;
+                const r = 5 + (i / 4.5);
+                pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+            }
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return pts;
+        }
+    },
+    {
+        tier: 9, name: "Flor de Vida",
+        draw: (ctx) => {
+            const cx = 250, cy = 250, r = 70;
+            ctx.beginPath();
+            let allPts = generateCirclePoints(cx, cy, r, 100);
+            for (let i = 0; i < 6; i++) {
+                const a = (i * Math.PI) / 3;
+                allPts = allPts.concat(generateCirclePoints(cx + r * Math.cos(a), cy + r * Math.sin(a), r, 60));
+            }
+            allPts.forEach(p => { ctx.moveTo(p.x + 1, p.y); ctx.arc(p.x, p.y, 1, 0, Math.PI * 2); });
+            ctx.stroke();
+            return allPts;
+        }
+    },
+    {
+        tier: 9, name: "No Celta",
+        draw: (ctx) => {
+            const cx = 250, cy = 250, size = 110;
+            ctx.beginPath();
+            ctx.moveTo(cx - size, cy - size/2);
+            ctx.bezierCurveTo(cx - size, cy - size, cx - size/2, cy - size, cx - size/2, cy - size/2);
+            ctx.bezierCurveTo(cx - size/2, cy, cx, cy, cx, cy + size/2);
+            ctx.bezierCurveTo(cx, cy + size, cx + size/2, cy + size, cx + size/2, cy + size/2);
+            ctx.bezierCurveTo(cx + size/2, cy, cx + size, cy, cx + size, cy - size/2);
+            ctx.bezierCurveTo(cx + size, cy - size, cx + size/2, cy - size, cx + size/2, cy - size/2);
+            ctx.bezierCurveTo(cx + size/2, cy, cx, cy, cx, cy - size/2);
+            const p1 = generateBezierPoints(cx - size, cy - size/2, cx - size, cy - size, cx - size/2, cy - size, cx - size/2, cy - size/2, 80);
+            const p2 = generateBezierPoints(cx - size/2, cy - size/2, cx - size/2, cy, cx, cy, cx, cy + size/2, 80);
+            const p3 = generateBezierPoints(cx, cy + size/2, cx, cy + size, cx + size/2, cy + size, cx + size/2, cy + size/2, 80);
+            const p4 = generateBezierPoints(cx + size/2, cy + size/2, cx + size/2, cy, cx + size, cy, cx + size, cy - size/2, 80);
+            const p5 = generateBezierPoints(cx + size, cy - size/2, cx + size, cy - size, cx + size/2, cy - size, cx + size/2, cy - size/2, 80);
+            const p6 = generateBezierPoints(cx + size/2, cy - size/2, cx + size/2, cy, cx, cy, cx, cy - size/2, 80);
+            return [...p1, ...p2, ...p3, ...p4, ...p5, ...p6];
+        }
+    },
+    {
+        tier: 9, name: "Nebulosa",
+        draw: (ctx) => {
+            const cx = 250, cy = 250;
+            ctx.beginPath();
+            let pts = [];
+            for (let i = 0; i <= 720; i += 2) {
+                const a = i * Math.PI / 180;
+                const r = 40 + 70 * Math.sin(a * 3) + 25 * Math.cos(a * 7) + 12 * Math.sin(a * 13);
+                pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+            }
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return pts;
+        }
+    },
+    {
+        tier: 9, name: "Espiral Completa",
+        draw: (ctx) => {
+            ctx.beginPath();
+            const cx = 250, cy = 250;
+            let pts = [];
+            for (let i = 0; i <= 720; i += 2) {
+                const a = i * Math.PI / 180;
+                const r = 5 + (i / 4);
+                pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+            }
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return pts;
+        }
+    },
+    {
+        tier: 9, name: "Mandala Completa",
+        draw: (ctx) => {
+            const cx = 250, cy = 250;
+            ctx.beginPath();
+            let allPts = [];
+            for (let circle = 0; circle < 4; circle++) {
+                const radius = 30 + circle * 28;
+                const pts = [];
+                for (let i = 0; i <= 150; i++) {
+                    const a = (i * 2 * Math.PI) / 150;
+                    let r = radius;
+                    if (circle > 0) r += 14 * Math.sin(a * (4 + circle * 2));
+                    pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+                }
+                allPts = allPts.concat(pts);
+            }
+            ctx.moveTo(allPts[0].x, allPts[0].y);
+            allPts.forEach(p => ctx.lineTo(p.x, p.y));
+            ctx.stroke();
+            return allPts;
+        }
+    },
+    {
+        tier: 9, name: "Flor de Patagaros",
+        draw: (ctx) => {
+            const cx = 250, cy = 250;
+            ctx.beginPath();
+            let pts = [];
+            for (let i = 0; i <= 720; i += 2) {
+                const a = i * Math.PI / 180;
+                const r = 80 + 50 * Math.cos(3 * a) + 30 * Math.sin(5 * a);
+                pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+            }
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return pts;
+        }
+    },
+    {
+        tier: 9, name: "Labirinto Espiral",
+        draw: (ctx) => {
+            ctx.beginPath();
+            const pts = [
+                {x:250,y:250},{x:280,y:250},{x:280,y:220},{x:220,y:220},{x:220,y:280},
+                {x:310,y:280},{x:310,y:190},{x:190,y:190},{x:190,y:310},{x:340,y:310},
+                {x:340,y:160},{x:160,y:160},{x:160,y:340},{x:370,y:340},{x:370,y:130},
+                {x:130,y:130},{x:130,y:370},{x:400,y:370},{x:400,y:100},{x:100,y:100},
+                {x:100,y:400},{x:430,y:400},{x:430,y:70},{x:70,y:70},{x:70,y:430},
+                {x:460,y:430}
+            ];
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return generatePolygonPoints(pts, 30);
+        }
+    },
+    {
+        tier: 9, name: "Estrela 8 Pontas",
+        draw: (ctx) => {
+            const cx = 250, cy = 250, spikes = 8, outer = 150, inner = 55;
+            ctx.beginPath();
+            const pts = [];
+            for (let i = 0; i < spikes * 2; i++) {
+                const r = i % 2 === 0 ? outer : inner;
+                const a = (i * Math.PI) / spikes - Math.PI / 2;
+                pts.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r });
+            }
+            pts.push(pts[0]);
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return generatePolygonPoints(pts, 50);
+        }
+    },
+    {
+        tier: 9, name: "Coracao Eterno",
+        draw: (ctx) => {
+            ctx.beginPath();
+            const cx = 250, cy = 235, s = 14;
+            let pts = [];
+            for (let i = 0; i <= 360; i += 1.5) {
+                const t = i * Math.PI / 180;
+                const x = cx + s * 16 * Math.pow(Math.sin(t), 3);
+                const y = cy - s * (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+                pts.push({x, y});
+            }
+            ctx.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctx.lineTo(p.x, p.y));
+            return pts;
+        }
+    }
+];
+
+function generateBezierPoints(x0, y0, x1, y1, x2, y2, x3, y3, steps) {
+    const points = [];
+    for (let i = 0; i <= steps; i++) {
+        const t = i / steps, mt = 1 - t;
+        points.push({
+            x: mt*mt*mt*x0 + 3*mt*mt*t*x1 + 3*mt*t*t*x2 + t*t*t*x3,
+            y: mt*mt*mt*y0 + 3*mt*mt*t*y1 + 3*mt*t*t*y2 + t*t*t*y3
+        });
+    }
+    return points;
+}
+
+function generateCirclePoints(cx, cy, radius, numPoints) {
+    const points = [];
+    for (let i = 0; i <= numPoints; i++) {
+        const angle = (i * 2 * Math.PI) / numPoints;
+        points.push({ x: cx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle) });
+    }
+    return points;
+}
+
+function generatePolygonPoints(vertices, pointsPerSide) {
+    const points = [];
+    for (let i = 0; i < vertices.length - 1; i++) {
+        const start = vertices[i], end = vertices[i + 1];
+        for (let j = 0; j <= pointsPerSide; j++) {
+            const t = j / pointsPerSide;
+            points.push({ x: start.x + t * (end.x - start.x), y: start.y + t * (end.y - start.y) });
+        }
+    }
+    return points;
+}
+
+function drawGuide() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const levelIndex = (currentLevel - 1) % levels.length;
+    const currentShape = levels[levelIndex];
+
+    document.getElementById("levelName").textContent = currentShape.name;
+    const tier = tiers[currentShape.tier] || tiers[0];
+    const badge = document.getElementById("tierBadge");
+    badge.textContent = tier.name;
+    badge.style.background = tier.color;
+
+    ctx.setLineDash([10, 8]);
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = "#bbb";
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    guidePoints = currentShape.draw(ctx);
+    ctx.stroke();
+    ctx.setLineDash([]);
+}
+
+function distanceToSegment(px, py, x1, y1, x2, y2) {
+    const dx = x2 - x1, dy = y2 - y1;
+    const lenSq = dx * dx + dy * dy;
+    if (lenSq === 0) return Math.sqrt((px - x1) * (px - x1) + (py - y1) * (py - y1));
+    let t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / lenSq));
+    const projX = x1 + t * dx, projY = y1 + t * dy;
+    return Math.sqrt((px - projX) * (px - projX) + (py - projY) * (py - projY));
+}
+
+function findMinDistanceToPath(x, y) {
+    if (guidePoints.length === 0) return { distance: Infinity, closestIndex: -1 };
+    let minDist = Infinity, closestIndex = -1;
+    for (let i = 0; i < guidePoints.length; i++) {
+        const dx = x - guidePoints[i].x, dy = y - guidePoints[i].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < minDist) { minDist = dist; closestIndex = i; }
+    }
+    for (let i = 0; i < guidePoints.length - 1; i++) {
+        const dist = distanceToSegment(x, y, guidePoints[i].x, guidePoints[i].y, guidePoints[i+1].x, guidePoints[i+1].y);
+        if (dist < minDist) { minDist = dist; closestIndex = i; }
+    }
+    return { distance: minDist, closestIndex };
+}
+
+function getPrecisionZone(distance) {
+    for (const [zoneName, zone] of Object.entries(precisionZones)) {
+        if (distance >= zone.min && distance < zone.max) return zoneName;
+    }
+    return "bad";
+}
+
+function startDrawing(e) {
+    e.preventDefault();
+    drawing = true;
+    drawingStartTime = Date.now();
+    userPath = [];
+    goodPoints = 0;
+    totalPoints = 0;
+    currentStreak = 0;
+    maxStreak = 0;
+    coveredPoints = new Set();
+    const pos = getMousePos(e);
+    previousPos = pos;
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+    const { distance } = findMinDistanceToPath(pos.x, pos.y);
+    updateDistanceDisplay(distance);
+}
+
+function stopDrawing(e) {
+    if (drawing) {
+        if (e) e.preventDefault();
+        drawing = false;
+        previousPos = null;
+        calculateAccuracy();
+    }
+}
+
+function draw(e) {
+    if (!drawing) return;
+    e.preventDefault();
+    const pos = getMousePos(e);
+    if (previousPos) {
+        const dx = pos.x - previousPos.x, dy = pos.y - previousPos.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const steps = Math.max(1, Math.ceil(distance / 2));
+        for (let i = 0; i <= steps; i++) {
+            const t = i / steps;
+            checkPoint(previousPos.x + dx * t, previousPos.y + dy * t);
+        }
+    } else {
+        checkPoint(pos.x, pos.y);
+    }
+    previousPos = pos;
+}
+
+function checkPoint(x, y) {
+    totalPoints++;
+    const { distance, closestIndex } = findMinDistanceToPath(x, y);
+    const zone = getPrecisionZone(distance);
+    const isCorrect = distance <= currentTolerance;
+
+    updateDistanceDisplay(distance);
+
+    if (isCorrect) {
+        goodPoints++;
+        currentStreak++;
+        maxStreak = Math.max(maxStreak, currentStreak);
+        if (closestIndex >= 0) {
+            const coverageRadius = currentTolerance * 1.5;
+            for (let i = Math.max(0, closestIndex - 5); i <= Math.min(guidePoints.length - 1, closestIndex + 5); i++) {
+                const dx = x - guidePoints[i].x, dy = y - guidePoints[i].y;
+                if (Math.sqrt(dx * dx + dy * dy) <= coverageRadius) coveredPoints.add(i);
+            }
+        }
+    } else {
+        currentStreak = 0;
+    }
+
+    userPath.push({ x, y, correct: isCorrect, distance, zone });
+
+    const liveAccuracy = totalPoints > 0 ? Math.round((goodPoints / totalPoints) * 100) : 0;
+    const coverage = guidePoints.length > 0 ? Math.round((coveredPoints.size / guidePoints.length) * 100) : 0;
+
+    document.getElementById("liveAccuracy").textContent = `Tracando: ${goodPoints} corretos / ${totalPoints} pontos (${liveAccuracy}%)`;
+    document.getElementById("coverageInfo").textContent = `Cobertura do caminho: ${coverage}%`;
+    document.getElementById("streakDisplay").textContent = `Sequencia: ${currentStreak}`;
+
+    ctx.lineWidth = 6;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = precisionZones[zone].color;
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = precisionZones[zone].color + "80";
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.shadowBlur = 0;
+}
+
+function updateDistanceDisplay(distance) {
+    document.getElementById("distanceDisplay").textContent = `Distancia: ${distance.toFixed(1)}px`;
+}
+
+function getMousePos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    let clientX, clientY;
+    if (e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+    } else if (e.changedTouches && e.changedTouches.length > 0) {
+        clientX = e.changedTouches[0].clientX;
+        clientY = e.changedTouches[0].clientY;
+    } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+    }
+    return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY
+    };
+}
+
+function calculateAccuracy() {
+    if (totalPoints === 0) { showMessage("Voce precisa desenhar algo!", "error"); return; }
+
+    const accuracy = Math.round((goodPoints / totalPoints) * 100);
+    const coverage = guidePoints.length > 0 ? Math.round((coveredPoints.size / guidePoints.length) * 100) : 0;
+
+    lastAccuracy = accuracy;
+    lastCoverage = coverage;
+
+    document.getElementById("accuracy").textContent = accuracy + "%";
+    document.getElementById("coverage").textContent = coverage + "%";
+    document.getElementById("progress").style.width = accuracy + "%";
+
+    const perfectCount = userPath.filter(p => p.distance <= 5).length;
+    const levelIndex = (currentLevel - 1) % levels.length;
+    const tierMultiplier = (levels[levelIndex].tier || 0) + 1;
+
+    let basePoints = Math.round(accuracy * currentLevel * 5 * tierMultiplier / 3);
+    let precisionBonus = perfectCount * 2;
+    let streakBonus = maxStreak * 3;
+    let speedBonus = 0;
+
+    const drawingTime = (Date.now() - drawingStartTime) / 1000;
+    if (drawingTime < 20 && coverage >= 85) speedBonus = Math.round((20 - drawingTime) * 5);
+
+    const totalPointsEarned = basePoints + precisionBonus + streakBonus + speedBonus;
+    score += totalPointsEarned;
+    document.getElementById("score").textContent = score;
+
+    document.getElementById("scoreBreakdown").style.display = "block";
+    document.getElementById("baseScore").textContent = basePoints;
+    document.getElementById("precisionBonus").textContent = precisionBonus;
+    document.getElementById("streakBonus").textContent = streakBonus;
+    document.getElementById("speedBonus").textContent = speedBonus;
+    document.getElementById("totalScore").textContent = totalPointsEarned;
+
+    const message = document.getElementById("message");
+    if (accuracy >= 90 && coverage >= 85) {
+        message.textContent = `Perfeito! ${accuracy}% precisao, ${coverage}% cobertura! Pode avancar!`;
+        message.className = "success";
+    } else if (accuracy >= 90 && coverage < 85) {
+        message.textContent = `Precisa cobrir pelo menos 85% do caminho. Atual: ${coverage}%`;
+        message.className = "warning";
+    } else if (accuracy < 90 && coverage >= 85) {
+        message.textContent = `Precisa ${accuracy}%/90% de precisao!`;
+        message.className = "warning";
+    } else {
+        message.textContent = `Precisao: ${accuracy}%/90% | Cobertura: ${coverage}%/85% - Continue praticando!`;
+        message.className = "error";
+    }
+
+    if (accuracy >= 70 || coverage >= 70) {
+        message.textContent += ` | Perfeitos: ${perfectCount} | Sequencia: ${maxStreak}`;
+    }
+}
+
+function showMessage(text, className) {
+    const message = document.getElementById("message");
+    message.textContent = text;
+    message.className = className;
+}
+
+function reset() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawGuide();
+    userPath = [];
+    goodPoints = 0;
+    totalPoints = 0;
+    currentStreak = 0;
+    maxStreak = 0;
+    lastAccuracy = 0;
+    lastCoverage = 0;
+    coveredPoints = new Set();
+    previousPos = null;
+    document.getElementById("message").textContent = "Siga a linha pontilhada completamente! Voce precisa de 90% de precisao E 85% de cobertura.";
+    document.getElementById("message").className = "";
+    document.getElementById("accuracy").textContent = "0%";
+    document.getElementById("coverage").textContent = "0%";
+    document.getElementById("progress").style.width = "0%";
+    document.getElementById("liveAccuracy").textContent = "Tracando: 0 pontos corretos / 0 pontos desenhados";
+    document.getElementById("coverageInfo").textContent = "Cobertura do caminho: 0%";
+    document.getElementById("distanceDisplay").textContent = "Distancia: 0px";
+    document.getElementById("streakDisplay").textContent = "Sequencia: 0";
+    document.getElementById("scoreBreakdown").style.display = "none";
+}
+
+function nextLevel() {
+    if (lastAccuracy < 90) { showMessage(`Precisa de pelo menos 90% de precisao. Atual: ${lastAccuracy}%`, "error"); return; }
+    if (lastCoverage < 85) { showMessage(`Precisa cobrir pelo menos 85% do caminho. Atual: ${lastCoverage}%`, "error"); return; }
+    if (totalPoints === 0) { showMessage("Complete o nivel atual primeiro!", "error"); return; }
+
+    currentLevel++;
+
+    if (currentLevel > 49) {
+        showCongratulations();
+        return;
+    }
+
+    if ((currentLevel - 1) % levels.length === 0 && currentLevel > 1) {
+        const difficultySelect = document.getElementById("difficultySelect");
+        const currentDifficulty = difficultySelect.value;
+        let newDifficulty = currentDifficulty;
+        let difficultyMessage = "";
+
+        if (currentDifficulty === "easy") { newDifficulty = "medium"; difficultyMessage = "Parabens! Todos os niveis completos! Dificuldade: MEDIO!"; }
+        else if (currentDifficulty === "medium") { newDifficulty = "hard"; difficultyMessage = "Incrivel! Modo medio dominado! Dificuldade: DIFICIL!"; }
+        else if (currentDifficulty === "hard") { newDifficulty = "expert"; difficultyMessage = "Fantastico! Voce e um mestre! Dificuldade: ESPECIALISTA!"; }
+        else if (currentDifficulty === "expert") { difficultyMessage = "LEGENDARIO! TODOS os niveis no ESPECIALISTA! Campeao absoluto!"; }
+
+        if (newDifficulty !== currentDifficulty) { difficultySelect.value = newDifficulty; changeDifficulty(); }
+        if (difficultyMessage) {
+            showMessage(difficultyMessage, "success");
+            setTimeout(() => { document.getElementById("level").textContent = currentLevel; reset(); }, 3000);
+            return;
+        }
+    }
+
+    document.getElementById("level").textContent = currentLevel;
+    reset();
+    showMessage(`Nivel ${currentLevel} - ${levels[(currentLevel - 1) % levels.length].name} - Vamos la!`, "");
+}
+
+function changeDifficulty() {
+    const difficulty = document.getElementById("difficultySelect").value;
+    switch (difficulty) {
+        case "easy": baseTolerance = 20; break;
+        case "medium": baseTolerance = 15; break;
+        case "hard": baseTolerance = 10; break;
+        case "expert": baseTolerance = 7; break;
+    }
+    currentTolerance = baseTolerance;
+    reset();
+}
+
+function showCongratulations() {
+    document.getElementById("finalScore").textContent = score;
+    document.getElementById("finalAccuracy").textContent = lastAccuracy;
+    document.getElementById("finalCoverage").textContent = lastCoverage;
+    document.getElementById("congratsOverlay").classList.add("show");
+}
+
+function restartGame() {
+    document.getElementById("congratsOverlay").classList.remove("show");
+    currentLevel = 1;
+    score = 0;
+    lastAccuracy = 0;
+    lastCoverage = 0;
+    document.getElementById("level").textContent = 1;
+    document.getElementById("score").textContent = 0;
+    document.getElementById("accuracy").textContent = "0%";
+    document.getElementById("coverage").textContent = "0%";
+    reset();
+}
+
+// === SECRET MENU ===
+let titleClickCount = 0;
+let titleClickTimer = null;
+
+document.getElementById("leftPanel").querySelector("h1").addEventListener("click", function() {
+    titleClickCount++;
+    clearTimeout(titleClickTimer);
+    titleClickTimer = setTimeout(() => { titleClickCount = 0; }, 800);
+    if (titleClickCount >= 3) {
+        titleClickCount = 0;
+        openSecretMenu();
+    }
+});
+
+function openSecretMenu() {
+    const picker = document.getElementById("secretLevelPicker");
+    picker.innerHTML = "";
+    for (let i = 1; i <= 49; i++) {
+        const opt = document.createElement("option");
+        opt.value = i;
+        opt.textContent = `Nivel ${i} - ${levels[(i - 1) % levels.length].name}`;
+        picker.appendChild(opt);
+    }
+    picker.value = currentLevel;
+    document.getElementById("secretPassword").value = "";
+    document.getElementById("secretError").style.display = "none";
+    document.getElementById("secretLevelSelect").style.display = "none";
+    document.getElementById("secretOverlay").classList.add("show");
+    setTimeout(() => document.getElementById("secretPassword").focus(), 100);
+}
+
+document.getElementById("secretPassword").addEventListener("input", function() {
+    if (this.value.length === 6) {
+        if (this.value === "272010") {
+            document.getElementById("secretError").style.display = "none";
+            document.getElementById("secretLevelSelect").style.display = "block";
+        } else {
+            document.getElementById("secretError").style.display = "block";
+            document.getElementById("secretLevelSelect").style.display = "none";
+            this.value = "";
+            setTimeout(() => document.getElementById("secretError").style.display = "none", 1500);
+        }
+    }
+});
+
+function goToSecretLevel() {
+    const level = parseInt(document.getElementById("secretLevelPicker").value);
+    currentLevel = level;
+    score = 0;
+    document.getElementById("level").textContent = level;
+    document.getElementById("score").textContent = 0;
+    document.getElementById("congratsOverlay").classList.remove("show");
+    closeSecretMenu();
+    reset();
+    showMessage(`Modo Admin: Nivel ${level} - ${levels[(level - 1) % levels.length].name}`, "");
+}
+
+function closeSecretMenu() {
+    document.getElementById("secretOverlay").classList.remove("show");
+}
+
+document.getElementById("secretOverlay").addEventListener("click", function(e) {
+    if (e.target === this) closeSecretMenu();
+});
+
+canvas.addEventListener("mousedown", startDrawing);
+canvas.addEventListener("mouseup", stopDrawing);
+canvas.addEventListener("mousemove", draw);
+canvas.addEventListener("mouseleave", stopDrawing);
+canvas.addEventListener("touchstart", startDrawing, { passive: false });
+canvas.addEventListener("touchend", stopDrawing, { passive: false });
+canvas.addEventListener("touchmove", draw, { passive: false });
+
+drawGuide();
+</script>
+
+
+</body>
+</html>

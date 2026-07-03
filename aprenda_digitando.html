@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⌨️ Aprenda Digitando</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f0f4ff;
+            --surface: #ffffff;
+            --surface2: #eef1fb;
+            --border: #d1d9f0;
+            --text: #2d3561;
+            --text-soft: #7580a8;
+            --accent: #5b73e8;
+            --accent-light: #e8ecff;
+            --green: #22a06b;
+            --green-bg: #d3f5e9;
+            --red: #e03b3b;
+            --red-bg: #fde8e8;
+            --yellow: #d97706;
+            --yellow-bg: #fef3c7;
+            --orange: #f97316;
+            --shadow: 0 4px 20px rgba(91,115,232,0.12);
+            --radius: 20px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 24px 16px 60px;
+        }
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image:
+                radial-gradient(circle at 15% 20%, #c7d2fe 0%, transparent 45%),
+                radial-gradient(circle at 85% 80%, #bfdbfe 0%, transparent 45%);
+            z-index: 0; pointer-events: none;
+        }
+
+        .game-wrap {
+            position: relative; z-index: 1;
+            max-width: 860px; width: 100%;
+        }
+
+        /* Header */
+        .header { text-align: center; margin-bottom: 24px; }
+        .badge {
+            display: inline-block;
+            background: var(--accent); color: white;
+            font-size: 0.78rem; font-weight: 700;
+            letter-spacing: 1px; text-transform: uppercase;
+            padding: 4px 16px; border-radius: 100px; margin-bottom: 10px;
+        }
+        .header h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); line-height: 1.2; }
+        .header h1 span { color: var(--accent); }
+        .header p { color: var(--text-soft); font-size: 1rem; margin-top: 6px; }
+
+        /* Legenda de cores */
+        .legend {
+            display: flex; gap: 10px; justify-content: center;
+            flex-wrap: wrap; margin-bottom: 20px;
+        }
+        .legend-chip {
+            display: flex; align-items: center; gap: 7px;
+            background: var(--surface); border: 1.5px solid var(--border);
+            border-radius: 100px; padding: 7px 16px;
+            font-size: 0.88rem; font-weight: 700; color: var(--text);
+            box-shadow: var(--shadow);
+        }
+        .dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+        .dot-pending { background: #bcc5e4; }
+        .dot-green   { background: var(--green); }
+        .dot-red     { background: var(--red); }
+        .dot-cursor  { background: var(--accent); }
+
+        /* Dica */
+        .hint-box {
+            background: var(--yellow-bg); border: 1.5px solid #fde68a;
+            border-radius: 14px; padding: 11px 18px;
+            font-size: 0.9rem; color: #92400e; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
+            font-weight: 600; transition: 0.3s;
+        }
+
+        /* Card do texto */
+        .card {
+            background: var(--surface); border-radius: var(--radius);
+            border: 1.5px solid var(--border); box-shadow: var(--shadow);
+            padding: 26px 26px 22px; margin-bottom: 18px;
+        }
+        .card-header {
+            display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
+        }
+        .step-badge {
+            background: var(--accent); color: white;
+            font-size: 0.8rem; font-weight: 700;
+            padding: 5px 14px; border-radius: 100px; white-space: nowrap;
+        }
+        .step-title { font-size: 1.2rem; font-weight: 800; color: var(--text); }
+
+        /* Área de texto interativa */
+        .text-display {
+            background: var(--surface2);
+            border-radius: 14px; padding: 22px 24px;
+            font-family: 'Nunito Sans', sans-serif;
+            font-size: 1.28rem; line-height: 2.1;
+            white-space: pre-wrap; word-break: break-word;
+            border: 2px solid var(--border);
+            color: var(--text);
+            min-height: 140px;
+            cursor: text;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .text-display:focus,
+        .text-display.active {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(91,115,232,0.12);
+        }
+
+        /* Caracteres */
+        .char { white-space: pre; border-radius: 3px; transition: background 0.05s, color 0.05s; }
+        .char-pending  { color: #333; } /* ALTERADO: de #8590b8 para cinza escuro */
+        .char-correct  { color: var(--green);  background: var(--green-bg); }
+        .char-wrong    { color: var(--red);    background: var(--red-bg); text-decoration: underline wavy var(--red); }
+        .char-cursor   {
+            color: var(--accent); background: var(--accent-light);
+            border-bottom: 2.5px solid var(--accent);
+            animation: blink 0.75s ease infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
+
+        /* Barra de progresso */
+        .progress-wrap {
+            margin-top: 14px; background: var(--surface2);
+            border-radius: 100px; height: 10px;
+            overflow: hidden; border: 1px solid var(--border);
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #818cf8);
+            border-radius: 100px; transition: width 0.25s ease;
+        }
+        .progress-label {
+            margin-top: 5px; font-size: 0.83rem;
+            color: var(--text-soft); font-weight: 700; text-align: right;
+        }
+
+        /* Stats */
+        .stats-bar {
+            display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 18px;
+        }
+        .stat-card {
+            flex: 1; min-width: 105px;
+            background: var(--surface); border: 1.5px solid var(--border);
+            border-radius: 16px; padding: 13px 14px;
+            text-align: center; box-shadow: var(--shadow);
+        }
+        .stat-icon  { font-size: 1.35rem; margin-bottom: 3px; }
+        .stat-label { font-size: 0.76rem; font-weight: 700; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-value { font-size: 1.45rem; font-weight: 800; color: var(--text); margin-top: 2px; }
+        .stat-value.green { color: var(--green); }
+        .stat-value.red   { color: var(--red); }
+
+        /* Botões */
+        .button-group {
+            display: flex; flex-wrap: wrap; gap: 12px;
+            justify-content: center; margin-bottom: 18px;
+        }
+        .btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 13px 26px; border-radius: 100px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.97rem; font-weight: 700;
+            cursor: pointer; border: 2px solid transparent; transition: 0.15s;
+        }
+        .btn-secondary { background: var(--surface); border-color: var(--border); color: var(--text); box-shadow: var(--shadow); }
+        .btn-secondary:hover { background: var(--surface2); transform: translateY(-1px); }
+        .btn-primary   { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 14px rgba(91,115,232,0.3); }
+        .btn-primary:hover { background: #4a62d8; transform: translateY(-1px); }
+        .btn-success   { background: var(--green); color: white; border-color: var(--green); box-shadow: 0 4px 14px rgba(34,160,107,0.3); }
+        .btn-success:hover { background: #1a8c5b; transform: translateY(-1px); }
+        .btn:active { transform: translateY(1px); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+
+        /* Quiz */
+        .quiz-card {
+            background: var(--surface); border-radius: var(--radius);
+            border: 2px solid #fb923c;
+            box-shadow: 0 4px 20px rgba(251,146,60,0.15);
+            padding: 26px; margin-bottom: 18px;
+            animation: fadeInUp 0.4s ease both;
+        }
+        .quiz-title { font-size: 1.35rem; font-weight: 800; color: var(--orange); margin-bottom: 4px; }
+        .quiz-sub   { color: var(--text-soft); font-size: 0.88rem; margin-bottom: 22px; }
+
+        .quiz-question-block {
+            background: var(--surface2); border-radius: 14px;
+            padding: 18px; margin-bottom: 14px; border: 1.5px solid var(--border);
+        }
+        .question-text {
+            font-weight: 700; font-size: 1.02rem;
+            color: var(--text); margin-bottom: 12px;
+        }
+        .option-label {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 16px; margin: 5px 0; border-radius: 100px;
+            background: var(--surface); border: 1.5px solid var(--border);
+            cursor: pointer; font-weight: 600; font-size: 0.95rem;
+            color: var(--text); transition: 0.15s;
+        }
+        .option-label:hover { border-color: var(--orange); background: #fff7ed; color: var(--orange); }
+        .option-label input[type="radio"] { accent-color: var(--orange); width: 17px; height: 17px; flex-shrink: 0; }
+        .option-label.correct-ans { border-color: var(--green); background: var(--green-bg); color: var(--green); }
+        .option-label.wrong-ans   { border-color: var(--red);   background: var(--red-bg);   color: var(--red); }
+
+        .quiz-feedback {
+            margin-top: 18px; padding: 14px 22px;
+            border-radius: 100px; font-weight: 700;
+            font-size: 1.05rem; text-align: center;
+        }
+        .feedback-great { background: var(--green-bg); color: var(--green); border: 1.5px solid var(--green); }
+        .feedback-ok    { background: var(--yellow-bg); color: var(--yellow); border: 1.5px solid var(--yellow); }
+        .feedback-try   { background: var(--red-bg);   color: var(--red);   border: 1.5px solid var(--red); }
+
+        /* Tela final */
+        .finish-card {
+            background: var(--surface); border-radius: var(--radius);
+            border: 2px solid var(--green); box-shadow: 0 4px 20px rgba(34,160,107,0.2);
+            padding: 40px 24px; text-align: center; margin-bottom: 18px;
+            animation: fadeInUp 0.4s ease both;
+        }
+        .finish-emoji  { font-size: 3.8rem; }
+        .finish-title  { font-size: 1.9rem; font-weight: 800; color: var(--text); margin: 12px 0 6px; }
+        .finish-sub    { color: var(--text-soft); font-size: 0.97rem; }
+
+        .hidden { display: none !important; }
+
+        /* Seletor secreto de textos */
+        .secret-selector {
+            position: fixed;
+            bottom: 24px; right: 24px;
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(91,115,232,0.18);
+            padding: 16px 18px;
+            z-index: 200;
+            min-width: 230px;
+            animation: popIn 0.25s cubic-bezier(.34,1.56,.64,1) both;
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.85) translateY(16px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .secret-selector-title {
+            font-size: 0.78rem; font-weight: 700; color: var(--text-soft);
+            text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .secret-btn {
+            display: block; width: 100%;
+            background: var(--surface2); border: 1.5px solid var(--border);
+            border-radius: 12px; padding: 9px 14px;
+            font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 700;
+            color: var(--text); cursor: pointer; text-align: left;
+            margin-bottom: 6px; transition: 0.15s;
+        }
+        .secret-btn:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+        .secret-btn.active-text { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+        .secret-btn:last-child { margin-bottom: 0; }
+        .secret-close {
+            display: block; width: 100%; margin-top: 10px;
+            background: none; border: none; cursor: pointer;
+            font-size: 0.78rem; color: var(--text-soft); font-family: 'Nunito', sans-serif;
+            font-weight: 700; text-align: center; padding: 4px;
+        }
+        .secret-close:hover { color: var(--text); }
+
+        .step-badge { cursor: pointer; }
+        .step-badge.hint-glow {
+            animation: glowHint 0.6s ease 3;
+        }
+        @keyframes glowHint {
+            0%,100% { box-shadow: none; }
+            50% { box-shadow: 0 0 0 4px rgba(91,115,232,0.35); }
+        }
+
+        .footer {
+            text-align: center; color: var(--text-soft);
+            font-size: 0.83rem; margin-top: 10px;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .card, .stats-bar { animation: fadeInUp 0.35s ease both; }
+
+        /* Tela de parabéns rápida ao terminar */
+        .complete-flash {
+            position: fixed; inset: 0;
+            background: rgba(34,160,107,0.18);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 999; pointer-events: none;
+            animation: flashIn 0.5s ease forwards;
+        }
+        @keyframes flashIn {
+            0%   { opacity: 0; }
+            30%  { opacity: 1; }
+            80%  { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        .complete-flash-inner {
+            background: white; border-radius: 24px;
+            padding: 32px 48px; text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            font-size: 1.4rem; font-weight: 800; color: var(--green);
+        }
+        .complete-flash-inner span { display: block; font-size: 3rem; }
+    </style>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2958125315260710" crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="game-wrap">
+
+    <div class="header">
+        <div class="badge">Aula de Informática</div>
+        <h1>⌨️ Aprenda <span>Digitando</span></h1>
+        <p>Clique no texto e comece a digitar — as letras vão ficando coloridas!</p>
+    </div>
+
+    <div class="legend">
+        <div class="legend-chip"><div class="dot dot-pending"></div>Ainda não digitado</div>
+        <div class="legend-chip"><div class="dot dot-cursor"></div>Próxima letra</div>
+        <div class="legend-chip"><div class="dot dot-green"></div>Correto ✔</div>
+        <div class="legend-chip"><div class="dot dot-red"></div>Errado ✘</div>
+    </div>
+
+    <div class="hint-box" id="hintBox">
+        💡 <span>Dica: Clique no texto abaixo para ativar e comece a digitar. Não precisa de caixa de digitação — é direto no texto!</span>
+    </div>
+
+    <!-- Card principal -->
+    <div class="card">
+        <div class="card-header">
+            <div class="step-badge" id="textIndex">Texto 1 de 4</div>
+            <div class="step-title" id="textTitle">Carregando...</div>
+        </div>
+        <div class="text-display" id="textDisplay" tabindex="0"></div>
+        <div class="progress-wrap">
+            <div class="progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
+        <div class="progress-label" id="progressLabel">0% concluído</div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="stats-bar">
+        <div class="stat-card">
+            <div class="stat-icon">⏱️</div>
+            <div class="stat-label">Tempo</div>
+            <div class="stat-value" id="timerDisplay">0:00</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">❌</div>
+            <div class="stat-label">Erros</div>
+            <div class="stat-value red" id="errorsDisplay">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🚀</div>
+            <div class="stat-label">Palavras/min</div>
+            <div class="stat-value" id="wpmDisplay">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-label">Precisão</div>
+            <div class="stat-value green" id="accDisplay">100%</div>
+        </div>
+    </div>
+
+    <!-- Botão recomeçar -->
+    <div class="button-group">
+        <button class="btn btn-secondary" id="resetBtn">🔄 Recomeçar este texto</button>
+    </div>
+
+    <!-- Quiz -->
+    <div id="quizContainer" class="quiz-card hidden">
+        <div class="quiz-title">📋 Perguntas sobre o texto</div>
+        <div class="quiz-sub">Responda o que você aprendeu enquanto digitava:</div>
+        <div id="quizQuestions"></div>
+        <div class="button-group" style="margin-top:18px;">
+            <button class="btn btn-secondary" id="submitQuiz">📩 Ver resultado</button>
+            <button class="btn btn-success hidden" id="nextTextBtn">▶ Próximo texto</button>
+        </div>
+        <div id="quizFeedback" class="quiz-feedback hidden"></div>
+    </div>
+
+    <!-- Tela final -->
+    <div id="finishScreen" class="finish-card hidden">
+        <div class="finish-emoji">🏆</div>
+        <div class="finish-title">Parabéns, você concluiu tudo!</div>
+        <div class="finish-sub">Você completou todos os textos e respondeu as perguntas. Continue praticando!</div>
+        <br>
+        <button class="btn btn-primary" onclick="location.reload()">🔁 Jogar novamente</button>
+    </div>
+
+    <div class="footer" id="footerHint">As letras mudam de cor conforme você digita • Ao terminar o texto, o quiz aparece automaticamente!</div>
+</div>
+
+<!-- Seletor secreto (aparece ao clicar 3x no badge "Texto X de 4") -->
+<div id="secretSelector" class="secret-selector hidden">
+    <div class="secret-selector-title">🔍 Escolher texto</div>
+    <button class="secret-btn" data-idx="0">🖥️ 1. O que é um Computador?</button>
+    <button class="secret-btn" data-idx="1">⌨️ 2. Como Usar o Teclado</button>
+    <button class="secret-btn" data-idx="2">🌐 3. O que é a Internet?</button>
+    <button class="secret-btn" data-idx="3">📱 4. O Celular Moderno</button>
+    <button class="secret-close" id="secretClose">✕ fechar</button>
+</div>
+
+<!-- Input oculto para capturar teclas em mobile -->
+<input id="hiddenInput" type="text"
+    style="position:fixed;opacity:0;pointer-events:none;left:-9999px;top:0;width:1px;height:1px;"
+    autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+<script>
+(function () {
+
+    const texts = [
+        {
+            title: "🖥️ O que é um Computador?",
+            content: "O computador é uma máquina que processa informações. Ele foi inventado para facilitar o trabalho das pessoas. Os primeiros computadores eram enormes e pesados, como o ENIAC de 1946 que ocupava uma grande sala e pesava 30 toneladas. Os primeiros a popularizar o computador pessoal foram o Apple II e o IBM. Hoje usamos computadores para trabalhar e estudar.",
+            questions: [
+                { q: "Para que serve o computador?", opts: [ "Para cozinhar alimentos", "Para processar informações", "Para dirigir carros", "Para plantar árvores"], correct: 1 },
+                { q: "Como eram os primeiros computadores?", opts: ["Enormes e pesados", "Pequenos e leves", "Do tamanho de um celular", "Invisíveis"], correct: 0 },
+                { q: "Para que usamos computadores hoje em dia?", opts: ["Somente para jogar", "Apenas em hospitais", "Para trabalhar e estudar", "Somente em escolas"], correct: 2 }
+            ]
+        },
+        {
+            title: "⌨️ Como Usar o Teclado",
+            content: "O teclado é usado para digitar letras e números. Cada tecla tem uma função diferente. A barra de espaço serve para separar as palavras. O Enter serve para ir para a próxima linha. Além disso existem várias teclas que se pressionadas juntas executam funções como teclas de atalho.",
+            questions: [
+                { q: "Para que serve o teclado?", opts: ["Para digitar letras e números", "Para mover o cursor na tela", "Para ligar o computador", "Para imprimir documentos"], correct: 0 },
+                { q: "Para que serve a barra de espaço?", opts: ["Apagar letras", "Ir para próxima linha", "Salvar o arquivo", "Separar as palavras"], correct: 3 },
+                { q: "O que acontece quando você aperta Enter?", opts: ["Apaga tudo", "Vai para a próxima linha", "Fecha o programa", "Abre um arquivo"], correct: 1 }
+            ]
+        },
+        {
+            title: "🌐 O que é a Internet?",
+            content: "A internet conecta computadores do mundo inteiro. Mas ela começou como uma rede do exército americano que interligava todas as bases militares durante a guerra fria. Depois foi fundada a grande rede mundial que interliga todos os lugares do mundo. Com ela podemos acessar sites, vídeos e notícias. Podemos nos comunicar com pessoas de qualquer lugar. É importante usar a internet com cuidado.",
+            questions: [
+                { q: "O que a internet faz?", opts: ["Faz o computador funcionar", "Liga a impressora", "Armazena arquivos no teclado", "Conecta computadores do mundo inteiro"], correct: 3 },
+                { q: "O que podemos acessar pela internet?", opts: ["Sites, vídeos e notícias", "Somente jogos", "Apenas músicas", "Somente textos"], correct: 0 },
+                { q: "Como devemos usar a internet?", opts: ["Sem nenhum cuidado", "Somente à noite", "Com cuidado", "Apenas para trabalho"], correct: 2 }
+            ]
+        },
+        {
+            title: "📱 O Celular Moderno",
+            content: "O celular moderno é um computador de bolso. Mas começou em 1983 como um tijolão de mais de um quilo, só fazia ligações e era caríssimo. Agora com ele podemos tirar fotos e mandar mensagens, ver vídeos e acessar nossas redes sociais. O primeiro iPhone foi lançado em 2007 e foi uma revolução gigantesca. O Android é o sistema mais usado no mundo em celulares.",
+            questions: [
+                { q: "O que é um celular moderno?", opts: ["Um computador de bolso", "Um rádio portátil", "Um aparelho de TV", "Um teclado sem fio"], correct: 0 },
+                { q: "Em que ano foi lançado o primeiro iPhone?", opts: ["2003", "2007", "1995", "2015"], correct: 1 },
+                { q: "Qual é o sistema de celular mais usado no mundo?", opts: ["iOS", "Windows Phone", "Symbian", "Android"], correct: 3 }
+            ]
+        }
+    ];
+
+    // ── Estado ──────────────────────────────────────────────
+    let currentIndex = 0;
+    let typed = '';          // string digitada até agora
+    let targetText = '';     // texto alvo (sem acentos para facilitar iniciantes)
+    let startTime = null;
+    let timerInterval = null;
+    let timerRunning = false;
+    let finished = false;    // já terminou este texto?
+
+    // ── Elementos ───────────────────────────────────────────
+    const textDisplayEl  = document.getElementById('textDisplay');
+    const textTitleEl    = document.getElementById('textTitle');
+    const textIndexEl    = document.getElementById('textIndex');
+    const timerDisplay   = document.getElementById('timerDisplay');
+    const errorsDisplay  = document.getElementById('errorsDisplay');
+    const wpmDisplay     = document.getElementById('wpmDisplay');
+    const accDisplay     = document.getElementById('accDisplay');
+    const progressFill   = document.getElementById('progressFill');
+    const progressLabel  = document.getElementById('progressLabel');
+    const resetBtn       = document.getElementById('resetBtn');
+    const quizContainer  = document.getElementById('quizContainer');
+    const quizQuestionsDiv = document.getElementById('quizQuestions');
+    const submitQuizBtn  = document.getElementById('submitQuiz');
+    const nextTextBtn    = document.getElementById('nextTextBtn');
+    const quizFeedback   = document.getElementById('quizFeedback');
+    const finishScreen   = document.getElementById('finishScreen');
+    const hintBox        = document.getElementById('hintBox');
+    const hiddenInput    = document.getElementById('hiddenInput');
+
+    // ── Render do texto como spans ───────────────────────────
+    function renderText() {
+        textDisplayEl.innerHTML = '';
+        for (let i = 0; i < targetText.length; i++) {
+            const ch = targetText[i];
+            if (ch === '\n') {
+                textDisplayEl.appendChild(document.createElement('br'));
+            } else {
+                const span = document.createElement('span');
+                span.className = 'char char-pending';
+                span.dataset.i = i;
+                span.textContent = ch;
+                textDisplayEl.appendChild(span);
+            }
+        }
+    }
+
+    function getSpans() {
+        return Array.from(textDisplayEl.querySelectorAll('span.char'));
+    }
+
+    // ── Atualiza visual baseado em `typed` ───────────────────
+    function updateDisplay() {
+        const spans = getSpans();
+        let errors = 0;
+
+        for (let i = 0; i < spans.length; i++) {
+            const s = spans[i];
+            if (i < typed.length) {
+                if (typed[i] === targetText[i]) {
+                    s.className = 'char char-correct';
+                } else {
+                    s.className = 'char char-wrong';
+                    errors++;
+                }
+            } else if (i === typed.length) {
+                s.className = 'char char-cursor';
+            } else {
+                s.className = 'char char-pending';
+            }
+        }
+
+        // Progresso
+        const pct = spans.length > 0 ? Math.min(100, Math.round((typed.length / spans.length) * 100)) : 0;
+        progressFill.style.width = pct + '%';
+        progressLabel.textContent = pct + '% concluído';
+
+        // Stats
+        errorsDisplay.innerText = errors;
+        const matches = typed.split('').filter((c, i) => c === targetText[i]).length;
+        const maxLen  = Math.max(typed.length, spans.length);
+        const acc     = maxLen > 0 ? Math.max(0, Math.round((matches / maxLen) * 100)) : 100;
+        accDisplay.innerText = acc + '%';
+
+        if (timerRunning && startTime) {
+            const mins = (Date.now() - startTime) / 60000;
+            wpmDisplay.innerText = mins > 0 ? Math.round((typed.length / 5) / mins) : 0;
+        }
+    }
+
+    // ── Timer ────────────────────────────────────────────────
+    function startTimer() {
+        if (!timerRunning) {
+            startTime = Date.now();
+            timerRunning = true;
+            hintBox.classList.add('hidden');
+            timerInterval = setInterval(() => {
+                const secs = Math.floor((Date.now() - startTime) / 1000);
+                const m = Math.floor(secs / 60);
+                const s = secs % 60;
+                timerDisplay.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+                updateDisplay();
+            }, 300);
+        }
+    }
+
+    function stopTimer() {
+        if (timerInterval) clearInterval(timerInterval);
+        timerRunning = false;
+    }
+
+    // ── Ao completar o texto ─────────────────────────────────
+    function onComplete() {
+        finished = true;
+        stopTimer();
+        updateDisplay();
+
+        // Flash verde de parabéns
+        const flash = document.createElement('div');
+        flash.className = 'complete-flash';
+        flash.innerHTML = '<div class="complete-flash-inner"><span>🎉</span>Texto concluído!</div>';
+        document.body.appendChild(flash);
+        setTimeout(() => flash.remove(), 1400);
+
+        // Abre quiz após animação
+        setTimeout(() => {
+            showQuiz();
+        }, 1500);
+    }
+
+    // ── Captura de teclas ────────────────────────────────────
+    function handleKey(key) {
+        if (finished) return;
+
+        const spans = getSpans();
+
+        if (key === 'Backspace') {
+            if (typed.length > 0) {
+                typed = typed.slice(0, -1);
+                updateDisplay();
+            }
+            return;
+        }
+
+        // Ignora teclas de controle
+        if (key.length !== 1) return;
+
+        if (!timerRunning && typed.length === 0) startTimer();
+
+        // Só aceita se ainda há caracteres para digitar
+        if (typed.length < spans.length) {
+            typed += key;
+            updateDisplay();
+
+            // Verifica se completou
+            if (typed.length === spans.length) {
+                onComplete();
+            }
+        }
+    }
+
+    // Eventos de teclado no div
+    textDisplayEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' || e.key.length === 1) {
+            e.preventDefault();
+            handleKey(e.key);
+        }
+    });
+
+    // Clique no texto → foca
+    textDisplayEl.addEventListener('click', () => {
+        if (!finished) {
+            textDisplayEl.focus();
+            // Mobile: também foca o input oculto
+            hiddenInput.focus();
+        }
+    });
+
+    // Mobile: captura do input oculto
+    hiddenInput.addEventListener('input', (e) => {
+        const val = hiddenInput.value;
+        if (val.length > 0) {
+            const lastChar = val[val.length - 1];
+            handleKey(lastChar);
+            hiddenInput.value = '';
+        }
+    });
+    hiddenInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace') {
+            e.preventDefault();
+            handleKey('Backspace');
+        }
+    });
+
+    // Garante foco visual
+    textDisplayEl.addEventListener('focus', () => textDisplayEl.classList.add('active'));
+    textDisplayEl.addEventListener('blur',  () => {
+        // Mantém visual de active se quiser, mas não é obrigatório
+    });
+
+    // ── Reset ────────────────────────────────────────────────
+    function resetTyping() {
+        typed = '';
+        finished = false;
+        stopTimer();
+        startTime = null;
+        timerDisplay.innerText = '0:00';
+        errorsDisplay.innerText = '0';
+        wpmDisplay.innerText = '0';
+        accDisplay.innerText = '100%';
+        progressFill.style.width = '0%';
+        progressLabel.textContent = '0% concluído';
+        quizContainer.classList.add('hidden');
+        nextTextBtn.classList.add('hidden');
+        quizFeedback.className = 'quiz-feedback hidden';
+        hintBox.classList.remove('hidden');
+        renderText();
+        textDisplayEl.focus();
+    }
+
+    function loadText(index) {
+        const t = texts[index];
+        targetText = t.content;
+        textTitleEl.innerText = t.title;
+        textIndexEl.innerText = `Texto ${index + 1} de ${texts.length}`;
+        resetTyping();
+    }
+
+    // ── Quiz ─────────────────────────────────────────────────
+    function showQuiz() {
+        const qs = texts[currentIndex].questions;
+        let html = '';
+        qs.forEach((item, i) => {
+            html += `<div class="quiz-question-block">
+                <div class="question-text">❓ ${i + 1}. ${item.q}</div>`;
+            item.opts.forEach((opt, j) => {
+                html += `<label class="option-label" id="opt-${i}-${j}">
+                    <input type="radio" name="q${i}" value="${j}"> ${opt}
+                </label>`;
+            });
+            html += `</div>`;
+        });
+        quizQuestionsDiv.innerHTML = html;
+        quizContainer.classList.remove('hidden');
+        quizFeedback.className = 'quiz-feedback hidden';
+        nextTextBtn.classList.add('hidden');
+        submitQuizBtn.disabled = false;
+        setTimeout(() => quizContainer.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    }
+
+    submitQuizBtn.addEventListener('click', () => {
+        const qs = texts[currentIndex].questions;
+        let correct = 0;
+        qs.forEach((q, i) => {
+            const radios = document.getElementsByName(`q${i}`);
+            let sel = null;
+            for (let r of radios) { if (r.checked) { sel = parseInt(r.value); break; } }
+            q.opts.forEach((_, j) => {
+                const lbl = document.getElementById(`opt-${i}-${j}`);
+                if (j === q.correct) lbl.classList.add('correct-ans');
+                else if (j === sel && sel !== q.correct) lbl.classList.add('wrong-ans');
+                lbl.querySelector('input').disabled = true;
+            });
+            if (sel === q.correct) correct++;
+        });
+        const total = qs.length;
+        quizFeedback.classList.remove('hidden', 'feedback-great', 'feedback-ok', 'feedback-try');
+        if (correct === total) {
+            quizFeedback.textContent = `🌟 Incrível! Você acertou todas as ${total} perguntas!`;
+            quizFeedback.classList.add('feedback-great');
+        } else if (correct >= Math.ceil(total / 2)) {
+            quizFeedback.textContent = `👏 Muito bem! Você acertou ${correct} de ${total} perguntas!`;
+            quizFeedback.classList.add('feedback-ok');
+        } else {
+            quizFeedback.textContent = `💪 Você acertou ${correct} de ${total}. Não desista, tente de novo!`;
+            quizFeedback.classList.add('feedback-try');
+        }
+        nextTextBtn.classList.remove('hidden');
+        submitQuizBtn.disabled = true;
+    });
+
+    nextTextBtn.addEventListener('click', () => {
+        if (currentIndex < texts.length - 1) {
+            currentIndex++;
+            loadText(currentIndex);
+            quizContainer.classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            quizContainer.classList.add('hidden');
+            finishScreen.classList.remove('hidden');
+            setTimeout(() => finishScreen.scrollIntoView({ behavior: 'smooth' }), 100);
+        }
+    });
+
+    resetBtn.addEventListener('click', () => {
+        if (confirm('Quer mesmo recomeçar este texto do zero?')) loadText(currentIndex);
+    });
+
+    // ── Seletor Secreto ──────────────────────────────────────
+    // Ativado com 3 cliques rápidos no badge "Texto X de 4"
+    const secretSelector = document.getElementById('secretSelector');
+    const secretClose    = document.getElementById('secretClose');
+    const footerHint     = document.getElementById('footerHint');
+    let badgeClickCount  = 0;
+    let badgeClickTimer  = null;
+
+    textIndexEl.addEventListener('click', () => {
+        badgeClickCount++;
+        if (badgeClickTimer) clearTimeout(badgeClickTimer);
+        badgeClickTimer = setTimeout(() => { badgeClickCount = 0; }, 600);
+
+        if (badgeClickCount === 3) {
+            badgeClickCount = 0;
+            openSecretSelector();
+        }
+    });
+
+    // Hint sutil: ficar com o mouse parado no rodapé por 3s faz o badge piscar
+    let footerHoverTimer = null;
+    footerHint.addEventListener('mouseenter', () => {
+        footerHoverTimer = setTimeout(() => {
+            textIndexEl.classList.add('hint-glow');
+            footerHint.title = 'Psst... tente clicar 3 vezes ali em cima 😉';
+            setTimeout(() => textIndexEl.classList.remove('hint-glow'), 2000);
+        }, 3000);
+    });
+    footerHint.addEventListener('mouseleave', () => clearTimeout(footerHoverTimer));
+
+    function openSecretSelector() {
+        secretSelector.querySelectorAll('.secret-btn').forEach(btn => {
+            btn.classList.toggle('active-text', parseInt(btn.dataset.idx) === currentIndex);
+        });
+        secretSelector.classList.remove('hidden');
+    }
+
+    secretClose.addEventListener('click', () => secretSelector.classList.add('hidden'));
+
+    secretSelector.querySelectorAll('.secret-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = parseInt(btn.dataset.idx);
+            secretSelector.classList.add('hidden');
+            currentIndex = idx;
+            loadText(currentIndex);
+            quizContainer.classList.add('hidden');
+            finishScreen.classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    });
+
+    // ── Iniciar ──────────────────────────────────────────────
+    loadText(0);
+
+})();
+</script>
+
+
+
+</body>
+</html>

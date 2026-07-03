@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Torre de Hanói</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-attachment: fixed;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            letter-spacing: -2px;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 40px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            align-items: center;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 25px;
+        }
+        
+        .stat-box {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+            border-radius: 15px;
+            padding: 15px 25px;
+            text-align: center;
+            min-width: 130px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+        }
+        
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.85);
+            margin-top: 5px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 12px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            border: none;
+            color: #667eea;
+            padding: 12px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, #fff 0%, #fff 100%);
+        }
+        
+        button:active {
+            transform: translateY(0px);
+        }
+        
+        .game-area {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 50px;
+            position: relative;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tower {
+            width: 30%;
+            height: 350px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tower:hover::after {
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+        }
+        
+        .tower::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            width: 18px;
+            height: 280px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.6) 100%);
+            border-radius: 12px;
+            z-index: 1;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .tower::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            width: 85%;
+            max-width: 280px;
+            height: 18px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.6) 50%, rgba(255, 255, 255, 0.4) 100%);
+            border-radius: 12px;
+            z-index: 1;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .tower-label {
+            position: absolute;
+            top: -40px;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #fff;
+            z-index: 10;
+            text-shadow: 0 3px 15px rgba(0, 0, 0, 0.4);
+            letter-spacing: 1px;
+        }
+        
+        .disk-container {
+            position: absolute;
+            bottom: 18px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 5;
+            padding-bottom: 10px;
+        }
+        
+        .disk {
+            height: 28px;
+            margin-bottom: 3px;
+            border-radius: 20px;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: #fff;
+            user-select: none;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            z-index: 2;
+            position: relative;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            font-size: 1.1rem;
+        }
+        
+        .disk::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, transparent 100%);
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .disk:hover {
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 35px;
+            margin-top: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .instructions h3 {
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        
+        .instructions ol {
+            padding-left: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 12px;
+            line-height: 1.7;
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 1rem;
+        }
+        
+        .rules {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 25px;
+        }
+        
+        .rule {
+            flex: 1;
+            min-width: 200px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            transition: all 0.3s ease;
+        }
+        
+        .rule:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .rule h4 {
+            color: #fff;
+            margin-bottom: 10px;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        .rule p {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+        }
+        
+        .message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 60px;
+            border-radius: 25px;
+            font-size: 2.2rem;
+            font-weight: 800;
+            text-align: center;
+            z-index: 100;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            display: none;
+            animation: winPulse 0.6s ease-out forwards;
+            backdrop-filter: blur(10px);
+        }
+        
+        @keyframes winPulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .disk.dragging {
+            opacity: 0.7;
+            transform: scale(1.1) rotate(3deg);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+        }
+        
+        .tower.highlight {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.3);
+        }
+        
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            padding: 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+        }
+        
+        footer p {
+            margin: 5px 0;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .game-area {
+                flex-direction: column;
+                align-items: center;
+                gap: 100px;
+                padding: 40px 15px;
+            }
+            
+            .tower {
+                width: 90%;
+                max-width: 350px;
+            }
+            
+            .game-info {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .stats {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .controls {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            button {
+                font-size: 0.85rem;
+                padding: 10px 18px;
+            }
+        }
+    </style>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2958125315260710" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>TORRE DE HANÓI</h1>
+            <p class="subtitle">Mova todos os discos da primeira torre para a última, respeitando as regras do jogo</p>
+        </header>
+        
+        <div class="game-info">
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-value" id="move-counter">0</div>
+                    <div class="stat-label">Movimentos</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="disk-count">5</div>
+                    <div class="stat-label">Discos</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="min-moves">31</div>
+                    <div class="stat-label">Mínimo possível</div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="restart-btn">Reiniciar</button>
+                <button id="change-disks">Discos</button>
+                <button id="hint-btn">Dica</button>
+            </div>
+        </div>
+        
+        <div class="game-area">
+            <div class="tower" id="tower-1" data-tower="1">
+                <div class="tower-label">Torre A</div>
+                <div class="disk-container" id="container-1"></div>
+            </div>
+            
+            <div class="tower" id="tower-2" data-tower="2">
+                <div class="tower-label">Torre B</div>
+                <div class="disk-container" id="container-2"></div>
+            </div>
+            
+            <div class="tower" id="tower-3" data-tower="3">
+                <div class="tower-label">Torre C</div>
+                <div class="disk-container" id="container-3"></div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>Como Jogar</h3>
+            <ol>
+                <li>O objetivo é mover todos os discos da torre A para a torre C.</li>
+                <li>Clique em um disco para selecioná-lo, depois clique na torre de destino.</li>
+                <li>Você também pode arrastar e soltar os discos entre as torres.</li>
+                <li>Apenas um disco pode ser movido por vez.</li>
+                <li>Um disco maior nunca pode ficar em cima de um disco menor.</li>
+            </ol>
+            
+            <div class="rules">
+                <div class="rule">
+                    <h4>Regra 1</h4>
+                    <p>Só pode mover um disco de cada vez, sempre do topo de uma torre.</p>
+                </div>
+                <div class="rule">
+                    <h4>Regra 2</h4>
+                    <p>Um disco só pode ser colocado sobre um disco maior que ele, ou em uma torre vazia.</p>
+                </div>
+                <div class="rule">
+                    <h4>Regra 3</h4>
+                    <p>O número mínimo de movimentos para resolver com N discos é 2<sup>N</sup> - 1.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="message" id="win-message">
+            🎉 Parabéns! Você resolveu o quebra-cabeça! 🎉
+        </div>
+    </div>
+    
+    <footer>
+        <p>Jogo da Torre de Hanói - Desenvolvido com HTML, CSS e JavaScript</p>
+        <p>© 2023 - Todos os direitos reservados</p>
+    </footer>
+
+    <script>
+        // Estado do jogo
+        let gameState = {
+            towers: [[], [], []],
+            selectedDisk: null,
+            selectedTower: null,
+            moveCount: 0,
+            diskCount: 5,
+            isSolved: false
+        };
+
+        // Cores para os discos - paleta moderna e vibrante
+        const diskColors = [
+            'linear-gradient(135deg, #FF6B6B 0%, #EE5A6F 100%)', // Vermelho coral
+            'linear-gradient(135deg, #FFA500 0%, #FF8C00 100%)', // Laranja
+            'linear-gradient(135deg, #FFD93D 0%, #FFC107 100%)', // Amarelo dourado
+            'linear-gradient(135deg, #6BCF7F 0%, #4CAF50 100%)', // Verde esmeralda
+            'linear-gradient(135deg, #4FC3F7 0%, #2196F3 100%)', // Azul céu
+            'linear-gradient(135deg, #BA68C8 0%, #9C27B0 100%)', // Roxo
+            'linear-gradient(135deg, #FF6EC7 0%, #E91E63 100%)', // Rosa pink
+            'linear-gradient(135deg, #26C6DA 0%, #00BCD4 100%)', // Ciano
+            'linear-gradient(135deg, #9CCC65 0%, #8BC34A 100%)', // Verde claro
+            'linear-gradient(135deg, #FFCA28 0%, #FFC107 100%)'  // Âmbar
+        ];
+
+        // Elementos DOM
+        const towers = document.querySelectorAll('.tower');
+        const moveCounterElement = document.getElementById('move-counter');
+        const diskCountElement = document.getElementById('disk-count');
+        const minMovesElement = document.getElementById('min-moves');
+        const restartBtn = document.getElementById('restart-btn');
+        const changeDisksBtn = document.getElementById('change-disks');
+        const hintBtn = document.getElementById('hint-btn');
+        const winMessage = document.getElementById('win-message');
+
+        // Inicializar o jogo
+        function initGame() {
+            resetGameState();
+            createDisks();
+            renderDisks();
+            updateUI();
+            setupEventListeners();
+        }
+
+        // Reiniciar o estado do jogo
+        function resetGameState() {
+            gameState.towers = [[], [], []];
+            gameState.selectedDisk = null;
+            gameState.selectedTower = null;
+            gameState.moveCount = 0;
+            gameState.isSolved = false;
+            
+            // Adicionar discos à primeira torre
+            for (let i = gameState.diskCount; i > 0; i--) {
+                gameState.towers[0].push(i);
+            }
+        }
+
+        // Criar discos visualmente
+        function createDisks() {
+            // Limpar containers de disco
+            document.querySelectorAll('.disk-container').forEach(container => {
+                container.innerHTML = '';
+            });
+            
+            // Criar elementos de disco para a primeira torre
+            for (let i = 0; i < gameState.diskCount; i++) {
+                const diskSize = gameState.diskCount - i;
+                const disk = document.createElement('div');
+                disk.className = 'disk';
+                disk.id = `disk-${diskSize}`;
+                disk.dataset.size = diskSize;
+                
+                // Estilo do disco
+                const colorIndex = diskSize - 1;
+                const width = 100 + (diskSize * 40); // Discos maiores são mais largos
+                disk.style.width = `${width}px`;
+                disk.style.background = diskColors[colorIndex % diskColors.length];
+                
+                // Adicionar número ao disco (opcional)
+                disk.textContent = diskSize;
+                
+                // Adicionar à primeira torre
+                document.getElementById('container-1').appendChild(disk);
+            }
+        }
+
+        // Renderizar discos nas torres
+        function renderDisks() {
+            // Limpar todos os containers
+            document.querySelectorAll('.disk-container').forEach(container => {
+                container.innerHTML = '';
+            });
+            
+            // Adicionar discos aos containers corretos
+            for (let towerIndex = 0; towerIndex < 3; towerIndex++) {
+                const container = document.getElementById(`container-${towerIndex + 1}`);
+                const towerDisks = gameState.towers[towerIndex];
+                
+                // Adicionar discos do maior para o menor (fundo para topo)
+                for (let i = towerDisks.length - 1; i >= 0; i--) {
+                    const diskSize = towerDisks[i];
+                    const disk = document.createElement('div');
+                    disk.className = 'disk';
+                    disk.id = `disk-${diskSize}`;
+                    disk.dataset.size = diskSize;
+                    
+                    // Estilo do disco
+                    const colorIndex = diskSize - 1;
+                    const width = 100 + (diskSize * 40);
+                    disk.style.width = `${width}px`;
+                    disk.style.background = diskColors[colorIndex % diskColors.length];
+                    disk.textContent = diskSize;
+                    
+                    container.appendChild(disk);
+                }
+            }
+        }
+
+        // Atualizar interface do usuário
+        function updateUI() {
+            moveCounterElement.textContent = gameState.moveCount;
+            diskCountElement.textContent = gameState.diskCount;
+            minMovesElement.textContent = Math.pow(2, gameState.diskCount) - 1;
+            
+            // Remover destaque de todas as torres
+            towers.forEach(tower => {
+                tower.classList.remove('highlight');
+            });
+            
+            // Esconder mensagem de vitória
+            if (gameState.isSolved) {
+                winMessage.style.display = 'block';
+                setTimeout(() => {
+                    winMessage.style.display = 'none';
+                }, 3000);
+            } else {
+                winMessage.style.display = 'none';
+            }
+        }
+
+        // Configurar ouvintes de eventos
+        function setupEventListeners() {
+            // Clique nas torres
+            towers.forEach(tower => {
+                tower.addEventListener('click', handleTowerClick);
+            });
+            
+            // Arrastar discos
+            document.addEventListener('mousedown', startDrag);
+            document.addEventListener('mouseup', endDrag);
+            
+            // Botões
+            restartBtn.addEventListener('click', () => {
+                resetGameState();
+                createDisks();
+                renderDisks();
+                updateUI();
+            });
+            
+            changeDisksBtn.addEventListener('click', () => {
+                const newCount = prompt('Quantos discos deseja usar? (3-10)', gameState.diskCount);
+                if (newCount && !isNaN(newCount) && newCount >= 3 && newCount <= 10) {
+                    gameState.diskCount = parseInt(newCount);
+                    resetGameState();
+                    createDisks();
+                    renderDisks();
+                    updateUI();
+                }
+            });
+            
+            hintBtn.addEventListener('click', giveHint);
+        }
+
+        // Manipular clique na torre
+        function handleTowerClick(event) {
+            if (gameState.isSolved) return;
+            
+            const tower = event.currentTarget;
+            const towerIndex = parseInt(tower.dataset.tower) - 1;
+            
+            // Se nenhum disco está selecionado, selecionar o disco do topo
+            if (gameState.selectedDisk === null) {
+                if (gameState.towers[towerIndex].length > 0) {
+                    gameState.selectedTower = towerIndex;
+                    gameState.selectedDisk = gameState.towers[towerIndex][gameState.towers[towerIndex].length - 1];
+                    
+                    // Destacar a torre selecionada
+                    tower.classList.add('highlight');
+                }
+            } 
+            // Se um disco está selecionado, tentar mover para esta torre
+            else {
+                // Verificar se o movimento é válido
+                if (isValidMove(gameState.selectedTower, towerIndex)) {
+                    // Mover o disco
+                    moveDisk(gameState.selectedTower, towerIndex);
+                    
+                    // Verificar se o jogo foi resolvido
+                    if (checkWinCondition()) {
+                        gameState.isSolved = true;
+                    }
+                }
+                
+                // Resetar seleção
+                gameState.selectedDisk = null;
+                gameState.selectedTower = null;
+                
+                // Remover destaque de todas as torres
+                towers.forEach(tower => {
+                    tower.classList.remove('highlight');
+                });
+                
+                // Atualizar interface
+                renderDisks();
+                updateUI();
+            }
+        }
+
+        // Verificar se um movimento é válido
+        function isValidMove(fromTower, toTower) {
+            // Não pode mover de uma torre vazia
+            if (gameState.towers[fromTower].length === 0) return false;
+            
+            // Não pode mover para a mesma torre
+            if (fromTower === toTower) return false;
+            
+            const diskToMove = gameState.towers[fromTower][gameState.towers[fromTower].length - 1];
+            const targetTowerTop = gameState.towers[toTower].length > 0 
+                ? gameState.towers[toTower][gameState.towers[toTower].length - 1] 
+                : 0;
+            
+            // Só pode mover se a torre de destino estiver vazia ou tiver um disco maior no topo
+            return targetTowerTop === 0 || diskToMove < targetTowerTop;
+        }
+
+        // Mover disco de uma torre para outra
+        function moveDisk(fromTower, toTower) {
+            const disk = gameState.towers[fromTower].pop();
+            gameState.towers[toTower].push(disk);
+            gameState.moveCount++;
+        }
+
+        // Verificar condição de vitória
+        function checkWinCondition() {
+            // O jogo é resolvido quando todos os discos estão na última torre
+            return gameState.towers[2].length === gameState.diskCount;
+        }
+
+        // Sistema de arrastar e soltar
+        let draggedDisk = null;
+        let sourceTower = null;
+
+        function startDrag(event) {
+            if (gameState.isSolved) return;
+            
+            // Verificar se o elemento clicado é um disco
+            if (event.target.classList.contains('disk')) {
+                draggedDisk = event.target;
+                sourceTower = getTowerOfDisk(draggedDisk);
+                
+                // Adicionar classe de arrastando
+                draggedDisk.classList.add('dragging');
+            }
+        }
+
+        function endDrag(event) {
+            if (!draggedDisk) return;
+            
+            // Remover classe de arrastando
+            draggedDisk.classList.remove('dragging');
+            
+            // Encontrar a torre de destino
+            const targetTower = findTowerAtPosition(event.clientX, event.clientY);
+            
+            if (targetTower !== null && sourceTower !== null) {
+                const sourceIndex = parseInt(sourceTower.dataset.tower) - 1;
+                const targetIndex = parseInt(targetTower.dataset.tower) - 1;
+                
+                // Verificar se o movimento é válido
+                if (isValidMove(sourceIndex, targetIndex)) {
+                    moveDisk(sourceIndex, targetIndex);
+                    
+                    // Verificar se o jogo foi resolvido
+                    if (checkWinCondition()) {
+                        gameState.isSolved = true;
+                    }
+                    
+                    // Atualizar interface
+                    renderDisks();
+                    updateUI();
+                }
+            }
+            
+            // Resetar
+            draggedDisk = null;
+            sourceTower = null;
+        }
+
+        function getTowerOfDisk(disk) {
+            // Encontrar a torre que contém o disco
+            let container = disk.parentElement;
+            while (container && !container.classList.contains('disk-container')) {
+                container = container.parentElement;
+            }
+            
+            if (container) {
+                return container.parentElement;
+            }
+            
+            return null;
+        }
+
+        function findTowerAtPosition(x, y) {
+            // Encontrar a torre na posição (x, y)
+            for (const tower of towers) {
+                const rect = tower.getBoundingClientRect();
+                if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+                    return tower;
+                }
+            }
+            
+            return null;
+        }
+
+        // Dar uma dica ao jogador
+        function giveHint() {
+            if (gameState.isSolved) return;
+            
+            // Encontrar um movimento válido para sugerir
+            let bestMove = null;
+            
+            // Verificar todos os movimentos possíveis
+            for (let from = 0; from < 3; from++) {
+                for (let to = 0; to < 3; to++) {
+                    if (from !== to && isValidMove(from, to)) {
+                        bestMove = { from, to };
+                        
+                        // Preferir mover para a torre de destino final
+                        if (to === 2) {
+                            break;
+                        }
+                    }
+                }
+                if (bestMove) break;
+            }
+            
+            if (bestMove) {
+                // Destacar as torres envolvidas no movimento sugerido
+                towers.forEach(tower => {
+                    tower.classList.remove('highlight');
+                });
+                
+                const fromTower = document.getElementById(`tower-${bestMove.from + 1}`);
+                const toTower = document.getElementById(`tower-${bestMove.to + 1}`);
+                
+                fromTower.classList.add('highlight');
+                toTower.classList.add('highlight');
+                
+                // Remover o destaque após 2 segundos
+                setTimeout(() => {
+                    fromTower.classList.remove('highlight');
+                    toTower.classList.remove('highlight');
+                }, 2000);
+                
+                // Mostrar mensagem de dica
+                alert(`Dica: Mova um disco da Torre ${String.fromCharCode(65 + bestMove.from)} para a Torre ${String.fromCharCode(65 + bestMove.to)}`);
+            }
+        }
+
+        // Inicializar o jogo quando a página carregar
+        window.addEventListener('DOMContentLoaded', initGame);
+    </script>
+
+
+
+</body>
+</html>

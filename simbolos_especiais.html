@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mestre do Teclado ABNT2 - Plataforma de Aprendizagem Gamificada</title>
+    <style>
+        /* ==========================================================================
+           1. VARIÁVEIS DE DESIGN & TEMAS (Acessibilidade e Modernidade)
+           ========================================================================== */
+        :root {
+            --bg-main: #f0f4f8;
+            --bg-surface: #ffffff;
+            --border-color: #d1d9e6;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #dbeafe;
+            
+            --success: #10b981;
+            --success-light: #ecfdf5;
+            --error: #ef4444;
+            --error-light: #fef2f2;
+            --warning: #f59e0b;
+            --accent: #8b5cf6;
+            
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.08);
+            
+            --font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+            --transition: all 0.25s ease;
+        }
+
+        /* Tema de Alto Contraste */
+        [data-theme="high-contrast"] {
+            --bg-main: #000000;
+            --bg-surface: #121212;
+            --border-color: #ffffff;
+            --text-main: #ffffff;
+            --text-muted: #ffff00;
+            --primary: #ffff00;
+            --primary-hover: #ffffff;
+            --primary-light: #1a1a00;
+            --success: #00ff00;
+            --success-light: #002200;
+            --error: #ff0000;
+            --error-light: #220000;
+            --warning: #ffff00;
+            --accent: #00ffff;
+            --shadow: none;
+            --shadow-md: none;
+        }
+
+        /* RESET & ESTILOS GERAIS */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.5;
+            transition: var(--transition);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ==========================================================================
+           2. LAYOUT & COMPONENTES GERAIS
+           ========================================================================== */
+        header {
+            background-color: var(--bg-surface);
+            border-bottom: 2px solid var(--border-color);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-section h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-section span {
+            font-size: 12px;
+            background: var(--text-muted);
+            color: var(--bg-surface);
+            padding: 2px 6px;
+            border-radius: 4px;
+            vertical-align: middle;
+        }
+
+        .stats-bar {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-badge {
+            background-color: var(--bg-main);
+            padding: 6px 14px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 14px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-badge.xp { color: var(--accent); }
+        .stat-badge.level { color: var(--primary); }
+        .stat-badge.streak { color: var(--warning); }
+
+        .controls-panel {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            cursor: pointer;
+            padding: 10px 18px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-surface);
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 14px;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            background-color: var(--primary-light);
+            border-color: var(--primary);
+        }
+
+        button.btn-primary {
+            background-color: var(--primary);
+            color: #ffffff;
+            border: none;
+        }
+
+        button.btn-primary:hover {
+            background-color: var(--primary-hover);
+            color: #ffffff;
+        }
+
+        .main-container {
+            max-width: 1280px;
+            width: 100%;
+            margin: 20px auto;
+            padding: 0 20px;
+            flex-grow: 1;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        /* DASHBOARD PRINCIPAL */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+
+        @media (min-width: 900px) {
+            .dashboard { grid-template-columns: 3fr 1fr; }
+        }
+
+        .modes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .mode-card {
+            background-color: var(--bg-surface);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .mode-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .mode-card h3 {
+            color: var(--primary);
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .mode-card p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+
+        .sidebar-panel {
+            background-color: var(--bg-surface);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .sidebar-panel h3 {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        /* ==========================================================================
+           3. INTERFACE DA ÁREA DE JOGO ATIVA
+           ========================================================================== */
+        .game-view {
+            display: none;
+            background-color: var(--bg-surface);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 25px;
+            box-shadow: var(--shadow-md);
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .game-workspace {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 850px) {
+            .game-workspace { grid-template-columns: 1.2fr 0.8fr; }
+        }
+
+        .interactive-card {
+            background: var(--bg-main);
+            border-radius: var(--radius-md);
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+            text-align: center;
+            position: relative;
+        }
+
+        .phrase-container {
+            font-size: 22px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .phrase-container span.blank {
+            display: inline-block;
+            border-bottom: 3px solid var(--primary);
+            min-width: 40px;
+            color: var(--primary);
+            font-weight: 700;
+            text-align: center;
+            padding: 0 5px;
+        }
+
+        .instruction-text {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin-top: 10px;
+        }
+
+        .pedagogical-panel {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+        }
+
+        .symbol-badge-big {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--primary);
+            background: var(--bg-main);
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-md);
+            margin: 0 auto 15px auto;
+            border: 2px solid var(--border-color);
+        }
+
+        .game-input-field {
+            position: absolute;
+            opacity: 0;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: default;
+        }
+
+        .feedback-message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            display: none;
+            text-align: left;
+            width: 100%;
+        }
+
+        .feedback-message.success { background-color: var(--success-light); color: var(--success); border-left: 5px solid var(--success); }
+        .feedback-message.error { background-color: var(--error-light); color: var(--error); border-left: 5px solid var(--error); }
+
+        /* ==========================================================================
+           4. O TECLADO INTERATIVO VIRTUAL (Foco ABNT2 Realista)
+           ========================================================================== */
+        .keyboard-container {
+            background-color: #1e293b;
+            padding: 15px;
+            border-radius: var(--radius-lg);
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            user-select: none;
+            margin-top: 10px;
+            width: 100%;
+            max-width: 980px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        [data-theme="high-contrast"] .keyboard-container {
+            background-color: #000000;
+            border: 3px solid #ffffff;
+        }
+
+        .keyboard-row {
+            display: flex;
+            width: 100%;
+            gap: 5px;
+        }
+
+        .key {
+            background-color: #334155;
+            color: #f8fafc;
+            border-radius: var(--radius-sm);
+            height: 48px;
+            flex-grow: 1;
+            flex-shrink: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 5px 7px;
+            font-size: 11px;
+            font-weight: 600;
+            box-shadow: 0 2px 0px #0f172a;
+            position: relative;
+            transition: background-color 0.1s, transform 0.05s;
+            min-width: 25px;
+        }
+
+        [data-theme="high-contrast"] .key {
+            background-color: #121212;
+            color: #ffffff;
+            border: 1px solid #ffffff;
+            box-shadow: none;
+        }
+
+        .key-legend-top { align-self: flex-start; }
+        .key-legend-bottom { align-self: flex-start; }
+        .key-legend-altgr { position: absolute; bottom: 4px; right: 6px; color: var(--warning); font-size: 10px; }
+
+        /* Tamanhos proporcionais baseados no layout físico padrão de teclados */
+        .key.key-backspace { flex-grow: 2.2; }
+        .key.key-tab { flex-grow: 1.5; }
+        .key.key-caps { flex-grow: 1.8; }
+        .key.key-enter { flex-grow: 2.3; background-color: #1e3a8a; }
+        .key.key-lshift { flex-grow: 1.4; }
+        .key.key-rshift { flex-grow: 2.8; }
+        .key.key-space { flex-grow: 8; }
+        .key.key-ctrl { flex-grow: 1.5; }
+        .key.key-modifier { flex-grow: 1.2; }
+
+        /* Estados de Iluminação Pedagógica */
+        .key.active-target {
+            background-color: var(--primary) !important;
+            color: white !important;
+            animation: pulse-key 1.2s infinite alternate;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 0px var(--primary-hover) !important;
+            z-index: 10;
+        }
+        .key.active-modifier {
+            background-color: var(--accent) !important;
+            color: white !important;
+            box-shadow: 0 2px 0px #4c1d95 !important;
+        }
+        .key.pressed {
+            background-color: var(--success) !important;
+            transform: translateY(2px);
+            box-shadow: none !important;
+        }
+
+        @keyframes pulse-key {
+            0% { box-shadow: 0 0 4px var(--primary); filter: brightness(1); }
+            100% { box-shadow: 0 0 15px var(--primary); filter: brightness(1.2); }
+        }
+
+        /* CONQUISTAS E MEDALHAS */
+        .badge-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .badge-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: var(--bg-main);
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 500;
+            opacity: 0.4;
+            transition: var(--transition);
+        }
+        .badge-item.unlocked {
+            opacity: 1;
+            border-left: 3px solid var(--success);
+            background: var(--success-light);
+        }
+        .badge-icon { font-size: 18px; }
+
+        /* LISTA DE RANKING LOCAL */
+        .ranking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .ranking-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 4px 0;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        /* PROGRESSO DE SÍMBOLOS */
+        .symbol-tag {
+            display: inline-block;
+            padding: 2px 6px;
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 11px;
+            margin: 2px;
+            font-family: monospace;
+        }
+        .symbol-tag.mastered {
+            background: var(--success-light);
+            color: var(--success);
+            border-color: var(--success);
+        }
+
+        /* TIMER PARA DESAFIO RÁPIDO */
+        .timer-track {
+            width: 100%;
+            height: 6px;
+            background: var(--border-color);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .timer-bar {
+            width: 100%;
+            height: 100%;
+            background: var(--warning);
+            transition: width 0.1s linear;
+        }
+
+        /* EFEITO CONFETE SIMPLIFICADO */
+        #confetti-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 999; display: none;
+        }
+    </style>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2958125315260710" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <header>
+        <div class="brand-section">
+            <h1 id="main-logo-btn" style="cursor:pointer;">⌨️ Mestre do Teclado <span>ABNT2</span></h1>
+        </div>
+        
+        <div class="stats-bar">
+            <div class="stat-badge level" title="Seu Nível Atual">🏅 Nível: <span id="stat-level">1</span></div>
+            <div class="stat-badge xp" title="Pontos de Experiência">✨ XP: <span id="stat-xp">0</span></div>
+            <div class="stat-badge streak" title="Sequência de acertos seguidos">🔥 Combo: <span id="stat-streak">0</span>x</div>
+        </div>
+
+        <div class="controls-panel">
+            <button id="btn-sound" title="Alternar Efeitos Sonoros">🔊 Som: Ativo</button>
+            <button id="btn-voice" title="Alternar Leitura por Voz">🗣️ Voz: Desativada</button>
+            <button id="btn-contrast" title="Alternar Alto Contraste">🌓 Alto Contraste</button>
+            <button id="btn-reset" style="border-color: var(--error); color: var(--error);" title="Zerar Progresso Local">🔄 Reiniciar</button>
+        </div>
+    </header>
+
+    <main class="main-container">
+        
+        <section id="view-dashboard" class="dashboard">
+            <div>
+                <h2 style="margin-bottom: 20px;">Escolha um Módulo Pedagógico</h2>
+                <div class="modes-grid">
+                    
+                    <div class="mode-card" onclick="gameEngine.startMode('learning')">
+                        <div>
+                            <h3>1. Modo Aprendizado</h3>
+                            <p>Aprenda a mecânica passo a passo, explore a posição física de cada símbolo e veja sua real utilidade prática diária.</p>
+                        </div>
+                        <button class="btn-primary">Iniciar Exploração</button>
+                    </div>
+
+                    <div class="mode-card" onclick="gameEngine.startMode('phrase')">
+                        <div>
+                            <h3>2. Complete a Frase</h3>
+                            <p>Preencha os espaços em branco de documentos reais e frases cotidianas usando as combinações corretas.</p>
+                        </div>
+                        <button class="btn-primary">Praticar Contexto</button>
+                    </div>
+
+                    <div class="mode-card" onclick="gameEngine.startMode('speed')">
+                        <div>
+                            <h3>3. Desafio Rápido</h3>
+                            <p>Corra contra o relógio! Digite o maior número de símbolos especiais que conseguir antes que o tempo acabe.</p>
+                        </div>
+                        <button class="btn-primary">Enfrentar o Tempo</button>
+                    </div>
+
+                    <div class="mode-card" onclick="gameEngine.startMode('hunt')">
+                        <div>
+                            <h3>4. Caça ao Símbolo</h3>
+                            <p>O sistema lhe dará uma pista conceitual (Ex: "Símbolo de Moeda Americana"). Você deve deduzir e digitar.</p>
+                        </div>
+                        <button class="btn-primary">Caçar Símbolos</button>
+                    </div>
+
+                    <div class="mode-card" onclick="gameEngine.startMode('correction')">
+                        <div>
+                            <h3>5. Corrija o Erro</h3>
+                            <p>Identifique frases mal digitadas no cotidiano comercial e adicione os caracteres normativos corretos.</p>
+                        </div>
+                        <button class="btn-primary">Corrigir Textos</button>
+                    </div>
+
+                    <div class="mode-card" onclick="gameEngine.startMode('altcode')">
+                        <div>
+                            <h3>6. Módulo Alt + Código</h3>
+                            <p>Aprenda a tabela avançada usando a tecla ALT pressionada em conjunto com códigos numéricos do teclado.</p>
+                        </div>
+                        <button class="btn-primary">Treinar Atalhos Alt</button>
+                    </div>
+
+                    <div class="mode-card" onclick="gameEngine.startMode('free')">
+                        <div>
+                            <h3>7. Treinamento Livre</h3>
+                            <p>Digite qualquer tecla ou atalho do seu teclado físico e veja em tempo real o reconhecimento no mapa visual.</p>
+                        </div>
+                        <button class="btn-primary">Abrir Laboratório</button>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="sidebar-panel">
+                <h3>🎖️ Suas Conquistas</h3>
+                <div class="badge-grid" id="achievements-container">
+                    </div>
+
+                <h3 style="margin-top:25px;">📊 Melhores Pontuações</h3>
+                <div class="ranking-list" id="ranking-container">
+                    </div>
+
+                <h3 style="margin-top:25px;">🎯 Status de Domínio</h3>
+                <div id="mastery-container" style="max-height: 150px; overflow-y: auto;">
+                    </div>
+            </div>
+        </section>
+
+        <section id="view-game" class="game-view">
+            <div class="game-header">
+                <div>
+                    <h2 id="game-mode-title">Modo de Jogo</h2>
+                    <p id="game-mode-desc" style="font-size:13px; color:var(--text-muted);">Instruções do modo atual</p>
+                </div>
+                <button onclick="gameEngine.exitToDashboard()">🔙 Voltar ao Painel</button>
+            </div>
+
+            <div id="speed-timer-container" class="timer-track" style="display:none;">
+                <div id="speed-timer-bar" class="timer-bar"></div>
+            </div>
+
+            <div class="game-workspace">
+                <div class="interactive-card" id="interaction-card">
+                    <input type="text" id="hidden-game-input" class="game-input-field" autocomplete="off" autofocus>
+                    
+                    <div id="display-area-challenge">
+                        </div>
+
+                    <div id="feedback-box" class="feedback-message"></div>
+                    
+                    <p class="instruction-text" id="click-focus-notice">💡 Clique nesta área cinza para ativar a digitação se parar de funcionar.</p>
+                </div>
+
+                <div class="pedagogical-panel" id="pedagogical-sidebar">
+                    <div class="symbol-badge-big" id="pedagogy-badge">-</div>
+                    <h3 id="pedagogy-name" style="text-align:center; margin-bottom:10px; color:var(--primary);">Nome do Caractere</h3>
+                    <div id="pedagogy-details" style="font-size:13px; display:flex; flex-direction:column; gap:8px;">
+                        </div>
+                </div>
+            </div>
+
+            <div class="keyboard-container" id="visual-keyboard">
+                <div class="keyboard-row">
+                    <div class="key" data-keycode="Quote" data-primary="'" data-shift='"'>
+                        <span class="key-legend-top">"</span><span class="key-legend-bottom">'</span>
+                    </div>
+                    <div class="key" data-keycode="Digit1" data-primary="1" data-shift="!" data-altgr="¹">
+                        <span class="key-legend-top">!</span><span class="key-legend-bottom">1</span><span class="key-legend-altgr">¹</span>
+                    </div>
+                    <div class="key" data-keycode="Digit2" data-primary="2" data-shift="@" data-altgr="²">
+                        <span class="key-legend-top">@</span><span class="key-legend-bottom">2</span><span class="key-legend-altgr">²</span>
+                    </div>
+                    <div class="key" data-keycode="Digit3" data-primary="3" data-shift="#" data-altgr="³">
+                        <span class="key-legend-top">#</span><span class="key-legend-bottom">3</span><span class="key-legend-altgr">³</span>
+                    </div>
+                    <div class="key" data-keycode="Digit4" data-primary="4" data-shift="$" data-altgr="£">
+                        <span class="key-legend-top">$</span><span class="key-legend-bottom">4</span><span class="key-legend-altgr">£</span>
+                    </div>
+                    <div class="key" data-keycode="Digit5" data-primary="5" data-shift="%" data-altgr="¢">
+                        <span class="key-legend-top">%</span><span class="key-legend-bottom">5</span><span class="key-legend-altgr">¢</span>
+                    </div>
+                    <div class="key" data-keycode="Digit6" data-primary="6" data-shift="¨" data-altgr="¬">
+                        <span class="key-legend-top">¨</span><span class="key-legend-bottom">6</span><span class="key-legend-altgr">¬</span>
+                    </div>
+                    <div class="key" data-keycode="Digit7" data-primary="7" data-shift="&">
+                        <span class="key-legend-top">&amp;</span><span class="key-legend-bottom">7</span>
+                    </div>
+                    <div class="key" data-keycode="Digit8" data-primary="8" data-shift="*">
+                        <span class="key-legend-top">*</span><span class="key-legend-bottom">8</span>
+                    </div>
+                    <div class="key" data-keycode="Digit9" data-primary="9" data-shift="(">
+                        <span class="key-legend-top">(</span><span class="key-legend-bottom">9</span>
+                    </div>
+                    <div class="key" data-keycode="Digit0" data-primary="0" data-shift=")">
+                        <span class="key-legend-top">)</span><span class="key-legend-bottom">0</span>
+                    </div>
+                    <div class="key" data-keycode="Minus" data-primary="-" data-shift="_">
+                        <span class="key-legend-top">_</span><span class="key-legend-bottom">-</span>
+                    </div>
+                    <div class="key" data-keycode="Equal" data-primary="=" data-shift="+" data-altgr="§">
+                        <span class="key-legend-top">+</span><span class="key-legend-bottom">=</span><span class="key-legend-altgr">§</span>
+                    </div>
+                    <div class="key key-backspace" data-keycode="Backspace">
+                        <span class="key-legend-bottom">← Backspace</span>
+                    </div>
+                </div>
+
+                <div class="keyboard-row">
+                    <div class="key key-tab" data-keycode="Tab"><span class="key-legend-bottom">Tab ↹</span></div>
+                    <div class="key" data-keycode="KeyQ" data-primary="q" data-shift="Q" data-altgr="/">
+                        <span class="key-legend-top">Q</span><span class="key-legend-altgr">/</span>
+                    </div>
+                    <div class="key" data-keycode="KeyW" data-primary="w" data-shift="W" data-altgr="?">
+                        <span class="key-legend-top">W</span><span class="key-legend-altgr">?</span>
+                    </div>
+                    <div class="key" data-keycode="KeyE" data-primary="e" data-shift="E" data-altgr="€">
+                        <span class="key-legend-top">E</span><span class="key-legend-altgr">€</span>
+                    </div>
+                    <div class="key" data-keycode="KeyR" data-primary="r" data-shift="R"><span class="key-legend-top">R</span></div>
+                    <div class="key" data-keycode="KeyT" data-primary="t" data-shift="T"><span class="key-legend-top">T</span></div>
+                    <div class="key" data-keycode="KeyY" data-primary="y" data-shift="Y"><span class="key-legend-top">Y</span></div>
+                    <div class="key" data-keycode="KeyU" data-primary="u" data-shift="U"><span class="key-legend-top">U</span></div>
+                    <div class="key" data-keycode="KeyI" data-primary="i" data-shift="I"><span class="key-legend-top">I</span></div>
+                    <div class="key" data-keycode="KeyO" data-primary="o" data-shift="O"><span class="key-legend-top">O</span></div>
+                    <div class="key" data-keycode="KeyP" data-primary="p" data-shift="P"><span class="key-legend-top">P</span></div>
+                    <div class="key" data-keycode="Semicolon" data-primary="´" data-shift="`">
+                        <span class="key-legend-top">`</span><span class="key-legend-bottom">´</span>
+                    </div>
+                    <div class="key" data-keycode="BracketLeft" data-primary="[" data-shift="{" data-altgr="ª">
+                        <span class="key-legend-top">{</span><span class="key-legend-bottom">[</span><span class="key-legend-altgr">ª</span>
+                    </div>
+                    <div class="key key-enter" data-keycode="Enter"><span class="key-legend-bottom">Enter ↵</span></div>
+                </div>
+
+                <div class="keyboard-row">
+                    <div class="key key-caps" data-keycode="CapsLock"><span class="key-legend-bottom">Fixa / Caps</span></div>
+                    <div class="key" data-keycode="KeyA" data-primary="a" data-shift="A"><span class="key-legend-top">A</span></div>
+                    <div class="key" data-keycode="KeyS" data-primary="s" data-shift="S"><span class="key-legend-top">S</span></div>
+                    <div class="key" data-keycode="KeyD" data-primary="d" data-shift="D"><span class="key-legend-top">D</span></div>
+                    <div class="key" data-keycode="KeyF" data-primary="f" data-shift="F"><span class="key-legend-top">F</span></div>
+                    <div class="key" data-keycode="KeyG" data-primary="g" data-shift="G"><span class="key-legend-top">G</span></div>
+                    <div class="key" data-keycode="KeyH" data-primary="h" data-shift="H"><span class="key-legend-top">H</span></div>
+                    <div class="key" data-keycode="KeyJ" data-primary="j" data-shift="J"><span class="key-legend-top">J</span></div>
+                    <div class="key" data-keycode="KeyK" data-primary="k" data-shift="K"><span class="key-legend-top">K</span></div>
+                    <div class="key" data-keycode="KeyL" data-primary="l" data-shift="L"><span class="key-legend-top">L</span></div>
+                    <div class="key" data-keycode="Semicolon" data-primary="ç" data-shift="Ç"><span class="key-legend-top">Ç</span></div>
+                    <div class="key" data-keycode="Quote" data-primary="~" data-shift="^">
+                        <span class="key-legend-top">^</span><span class="key-legend-bottom">~</span>
+                    </div>
+                    <div class="key" data-keycode="BracketRight" data-primary="]" data-shift="}" data-altgr="º">
+                        <span class="key-legend-top">}</span><span class="key-legend-bottom">]</span><span class="key-legend-altgr">º</span>
+                    </div>
+                </div>
+
+                <div class="keyboard-row">
+                    <div class="key key-lshift" data-keycode="ShiftLeft"><span class="key-legend-bottom">⇧ Shift</span></div>
+                    <div class="key" data-keycode="Backslash" data-primary="\" data-shift="|">
+                        <span class="key-legend-top">|</span><span class="key-legend-bottom">\</span>
+                    </div>
+                    <div class="key" data-keycode="KeyZ" data-primary="z" data-shift="Z"><span class="key-legend-top">Z</span></div>
+                    <div class="key" data-keycode="KeyX" data-primary="x" data-shift="X"><span class="key-legend-top">X</span></div>
+                    <div class="key" data-keycode="KeyC" data-primary="c" data-shift="C" data-altgr="₢">
+                        <span class="key-legend-top">C</span><span class="key-legend-altgr">₢</span>
+                    </div>
+                    <div class="key" data-keycode="KeyV" data-primary="v" data-shift="V"><span class="key-legend-top">V</span></div>
+                    <div class="key" data-keycode="KeyB" data-primary="b" data-shift="B"><span class="key-legend-top">B</span></div>
+                    <div class="key" data-keycode="KeyN" data-primary="n" data-shift="N"><span class="key-legend-top">N</span></div>
+                    <div class="key" data-keycode="KeyM" data-primary="m" data-shift="M"><span class="key-legend-top">M</span></div>
+                    <div class="key" data-keycode="Comma" data-primary="," data-shift="<">
+                        <span class="key-legend-top">&lt;</span><span class="key-legend-bottom">,</span>
+                    </div>
+                    <div class="key" data-keycode="Period" data-primary="." data-shift=">">
+                        <span class="key-legend-top">&gt;</span><span class="key-legend-bottom">.</span>
+                    </div>
+                    <div class="key" data-keycode="Slash" data-primary=";" data-shift=":">
+                        <span class="key-legend-top">:</span><span class="key-legend-bottom">;</span>
+                    </div>
+                    <div class="key" data-keycode="IntlRo" data-primary="/" data-shift="?">
+                        <span class="key-legend-top">?</span><span class="key-legend-bottom">/</span>
+                    </div>
+                    <div class="key key-rshift" data-keycode="ShiftRight"><span class="key-legend-bottom">⇧ Shift</span></div>
+                </div>
+
+                <div class="keyboard-row">
+                    <div class="key key-ctrl" data-keycode="ControlLeft"><span class="key-legend-bottom">Ctrl</span></div>
+                    <div class="key key-modifier" data-keycode="MetaLeft"><span class="key-legend-bottom">Win</span></div>
+                    <div class="key key-modifier" data-keycode="AltLeft"><span class="key-legend-bottom">Alt</span></div>
+                    <div class="key key-space" data-keycode="Space"><span class="key-legend-bottom">Espaço</span></div>
+                    <div class="key key-modifier" data-keycode="AltRight"><span class="key-legend-bottom">AltGr</span></div>
+                    <div class="key key-modifier" data-keycode="MetaRight"><span class="key-legend-bottom">Win</span></div>
+                    <div class="key key-modifier" data-keycode="ContextMenu"><span class="key-legend-bottom">Menu</span></div>
+                    <div class="key key-ctrl" data-keycode="ControlRight"><span class="key-legend-bottom">Ctrl</span></div>
+                </div>
+            </div>
+            
+            <p style="font-size:12px; color:var(--text-muted); text-align:center;">
+                💡 Nota Pedagógica: O teclado físico do seu computador operacional deve estar configurado no idioma "Português Brasil (ABNT2)" para compatibilidade perfeita.
+            </p>
+        </section>
+    </main>
+
+    <script>
+        
+        /* BANCO DE DADOS PEDAGÓGICO DE SÍMBOLO E MAPAS DE ENTRADA CORRESPONDENTE */
+        const SYMBOL_DATABASE = {
+            "@": { name: "Arroba", combo: "AltGr + Q ou Shift + 2 (dependendo do modelo antigo)", context: "Endereços de E-mail e marcações de usuários em redes sociais.", useCase: "contato@empresa.com", commonError: "Confundir com a tecla 'A' ou esquecer de segurar AltGr.", keycodeTarget: "KeyQ", requiresShift: false, requiresAltGr: true },
+            "%": { name: "Porcentagem", combo: "Shift + 5", context: "Utilizado para denotar frações centesimais, juros, descontos comerciais e dados estatísticos.", useCase: "Desconto de 50% na loja", commonError: "Apertar apenas o número 5 sem segurar o comando modificador Shift.", keycodeTarget: "Digit5", requiresShift: true, requiresAltGr: false },
+            "º": { name: "Indicador Ordinal Masculino", combo: "AltGr + ] ou Alt + 167", context: "Abreviatura de numerais ordinais masculinos em listas ou classificações.", useCase: "Ele terminou em 1º lugar", commonError: "Confundir com o símbolo de Grau (°), que fica ao lado ou requer outra combinação.", keycodeTarget: "BracketRight", requiresShift: false, requiresAltGr: true },
+            "ª": { name: "Indicador Ordinal Feminino", combo: "AltGr + [ ou Alt + 166", context: "Abreviatura de numerais ordinais femininos em designação de séries ou posições.", useCase: "Ela estuda na 3ª série", commonError: "Tentar fazer usando a letra 'A' minúscula normal.", keycodeTarget: "BracketLeft", requiresShift: false, requiresAltGr: true },
+            "²": { name: "Expoente Quadrado", combo: "AltGr + 2", context: "Fórmulas matemáticas de área, potenciação e notações de unidades de metros quadrados.", useCase: "A sala possui 25 m²", commonError: "Escrever o número 2 normal em tamanho grande.", keycodeTarget: "Digit2", requiresShift: false, requiresAltGr: true },
+            "³": { name: "Expoente Cúbico", combo: "AltGr + 3", context: "Cálculos matemáticos de volume tridimensional, metros cúbicos ou geometria.", useCase: "O reservatório tem 5 m³", commonError: "Digitar o algarismo 3 padrão.", keycodeTarget: "Digit3", requiresShift: false, requiresAltGr: true },
+            "&": { name: "E comercial (Ampersand)", combo: "Shift + 7", context: "Usado em marcas, nomes de empresas corporativas e em programação de computadores como operador lógico.", useCase: "Johnson & Johnson", commonError: "Apertar a tecla 7 isolada.", keycodeTarget: "Digit7", requiresShift: true, requiresAltGr: false },
+            "#": { name: "Hashtag ou Cerquilha", combo: "Shift + 3", context: "Metadados de busca em mídias digitais, tags de categorias e marcação de números telefônicos.", useCase: "#EstudosTeclado", commonError: "Tentar o comando AltGr ao invés de Shift.", keycodeTarget: "Digit3", requiresShift: true, requiresAltGr: false },
+            "$": { name: "Cifrão", combo: "Shift + 4", context: "Sinal monetário oficial indicativo de moedas financeiras como o Real (R$) e o Dólar ($).", useCase: "Isso custa $10 dólares", commonError: "Esquecer que o R do Real é digitado separadamente.", keycodeTarget: "Digit4", requiresShift: true, requiresAltGr: false },
+            "¢": { name: "Centavo", combo: "AltGr + 5", context: "Indicação de frações de moedas monetárias em documentos contábeis.", useCase: "Valor residual de 50¢", commonError: "Procurar visualmente e não ver a gravação na carcaça plástica.", keycodeTarget: "Digit5", requiresShift: false, requiresAltGr: true },
+            "£": { name: "Libra Esterlina", combo: "AltGr + 4", context: "Símbolo da moeda oficial do Reino Unido.", useCase: "Passagem por £500", commonError: "Confundir com o cifrão comum.", keycodeTarget: "Digit4", requiresShift: false, requiresAltGr: true },
+            "¬": { name: "Negação Lógica", combo: "AltGr + 6", context: "Operador lógico booleano de negação matemática ou computacional.", useCase: "Expressão: ¬A", commonError: "Raramente ensinado em cookies básicos, causando desconhecimento total.", keycodeTarget: "Digit6", requiresShift: false, requiresAltGr: true },
+            "§": { name: "Parágrafo", combo: "AltGr + = ou Alt + 21", context: "Uso estritamente jurídico e acadêmico para segmentação de artigos de leis.", useCase: "Conforme o § 1º do Artigo 5", commonError: "Confundir com a letra S repetida.", keycodeTarget: "Equal", requiresShift: false, requiresAltGr: true },
+            "°": { name: "Grau", combo: "AltGr + E (em alguns modelos) ou Alt + 0176", context: "Indicação física de medidas de temperatura ou ângulos geométricos.", useCase: "A água ferve a 100°C", commonError: "Confundir com o indicador ordinal º (que possui um traço embaixo).", keycodeTarget: "BracketRight", requiresShift: false, requiresAltGr: true },
+            "€": { name: "Euro", combo: "AltGr + E", context: "Símbolo oficial da moeda unificada da União Europeia.", useCase: "Custo de €20 euros", commonError: "Esquecer do comando AltGr específico à direita da barra de espaço.", keycodeTarget: "KeyE", requiresShift: false, requiresAltGr: true },
+            "®": { name: "Marca Registrada", combo: "Alt + 0174 (Código Alt)", context: "Sinal de proteção legal internacional de patentes e marcas.", useCase: "Empresa de Tecnologia®", commonError: "Tentar fazer apenas combinando Shift com letras.", keycodeTarget: "KeyR", requiresShift: false, requiresAltGr: false, isAltCode: true, altCodeNum: "0174" },
+            "©": { name: "Direitos Autorais (Copyright)", combo: "Alt + 0169 (Código Alt)", context: "Proteção jurídica de propriedade intelectual e direitos de autor.", useCase: "© 2026 Todos os direitos reservados", commonError: "Digitar parênteses com a letra C dentro.", keycodeTarget: "KeyC", requiresShift: false, requiresAltGr: false, isAltCode: true, altCodeNum: "0169" },
+            "™": { name: "Trade Mark (Marca Comercial)", combo: "Alt + 0153 (Código Alt)", context: "Sinal indicativo de marca de comércio internacional não necessariamente registrada.", useCase: "MegaEngine™ Games", commonError: "Digitar as letras T e M normais.", keycodeTarget: "KeyT", requiresShift: false, requiresAltGr: false, isAltCode: true, altCodeNum: "0153" },
+            "?": { name: "Interrogação", combo: "Tecla específica ao lado do Shift direito ou AltGr + W", context: "Pontuação final obrigatória em sentenças interrogativas diretas.", useCase: "Qual é o seu nome?", commonError: "Em notebooks compactos, necessita da combinação AltGr + W.", keycodeTarget: "IntlRo", shortcutAlternative: "KeyW" },
+            "/": { name: "Barra Oblíqua", combo: "Tecla específica ou AltGr + Q", context: "Divisão matemática, separação de datas numéricas ou links de internet.", useCase: "09/06/2026", commonError: "Confundir com a barra invertida (\\).", keycodeTarget: "IntlRo", shortcutAlternative: "KeyQ" },
+            "\\": { name: "Barra Invertida (Backslash)", combo: "Tecla localizada ao lado do Shift Esquerdo", context: "Diretórios internos de sistemas de arquivos Windows e strings de programação.", useCase: "C:\\Arquivos\\Sistema", commonError: "Confundir a inclinação física com a barra normal.", keycodeTarget: "Backslash", requiresShift: false },
+            "|": { name: "Pipe ou Barra Vertical", combo: "Shift + Barra Invertida", context: "Filtros de comandos de terminal de computador ou operador lógico 'OU' em programação.", useCase: "Comando: ls | grep texto", commonError: "Esquecer de acionar o Shift.", keycodeTarget: "Backslash", requiresShift: true }
+        };
+
+        /* BANCO DE FRASES E DESAFIOS PEDAGÓGICOS POR CATEGORIAS */
+        const EXERCISE_PHRASES = [
+            { phrase: "Meu e-mail profissional é contato__empresa.com.br", answer: "@", category: "Internet" },
+            { phrase: "A nova promoção concede 30__ de desconto real na matrícula.", answer: "%", category: "Matemática" },
+            { phrase: "O corredor brasileiro garantiu o 1__ lugar no pódio mundial.", answer: "º", category: "Esporte" },
+            { phrase: "Minha filha mais velha foi aprovada para a 5__ série escolar.", answer: "ª", category: "Escola" },
+            { phrase: "O terreno comprado tem uma área total medida de 250 m__", answer: "²", category: "Matemática" },
+            { phrase: "A caixa d'água cilíndrica comporta exatamente 3 metros metros__ de volume.", answer: "³", category: "Ciência" },
+            { phrase: "A fusão das marcas deu origem à famosa firma Smith __ Sons.", answer: "&", category: "Empresas" },
+            { phrase: "Acesse os comentários usando a tag __EstudosFocados.", answer: "#", category: "Redes Sociais" },
+            { phrase: "A passagem internacional custou o montante de __350 dólares americanos.", answer: "$", category: "Dinheiro" },
+            { phrase: "O troco calculado sobrou apenas 25__ de resíduo monetário.", answer: "¢", category: "Dinheiro" },
+            { phrase: "A passagem de trem na Inglaterra custou __45 libras esterlinas.", answer: "£", category: "Dinheiro" },
+            { phrase: "Em lógica computacional, a expressão __A inverte o valor da variável.", answer: "¬", category: "Informática" },
+            { phrase: "Consulte o regulamento no __ 4º da constituição federal vigente.", answer: "§", category: "Documentos" },
+            { phrase: "O termômetro digital da praça principal registrou 32__C no verão.", answer: "°", category: "Temperatura" },
+            { phrase: "A viagem corporativa para a Alemanha custará __120 por dia de hospedagem.", answer: "€", category: "Dinheiro" },
+            { phrase: "A marca comercial do refrigerante internacional possui o selo legal __", answer: "®", category: "Empresas" },
+            { phrase: "A publicação literária está protegida pelas leis vigentes de __ do autor.", answer: "©", category: "Textos" },
+            { phrase: "O novo motor gráfico de jogos eletrônicos chama-se RenderMax__", answer: "™", category: "Tecnologia" },
+            { phrase: "Qual o seu nível de fluência no teclado comercial__", answer: "?", category: "Cotidiano" },
+            { phrase: "Acesse o site oficial digitando google.com__brasil no seu navegador.", answer: "/", category: "Internet" },
+            { phrase: "O caminho do arquivo de configuração do sistema operacional é C:__Windows", answer: "\\", category: "Informática" },
+            { phrase: "O operador __ une as duas condições lógicas no código fonte.", answer: "|", category: "Informática" }
+        ];
+
+        /* CAÇA AO SÍMBOLO (PISTAS CONCEITUAIS) */
+        const HUNT_DATA = [
+            { hint: "Digite o símbolo de ARROBA usado mundialmente em correios eletrônicos.", answer: "@" },
+            { hint: "Digite o símbolo matemático de PORCENTAGEM.", answer: "%" },
+            { hint: "Digite o indicador ordinal MASCULINO para criar expressões como 1º.", answer: "º" },
+            { hint: "Digite o indicador ordinal FEMININO para criar expressões como 2ª.", answer: "ª" },
+            { hint: "Digite o símbolo de EXPOENTE QUADRADO para metros quadrados.", answer: "²" },
+            { hint: "Digite o símbolo de EXPOENTE CÚBICO para volumes.", answer: "³" },
+            { hint: "Digite o símbolo 'E COMERCIAL' amplamente usado em logotipos de sociedades.", answer: "&" },
+            { hint: "Digite o símbolo de HASHTAG ou CERQUILHA.", answer: "#" },
+            { hint: "Digite o símbolo monetário geral do CIFRÃO.", answer: "$" },
+            { hint: "Digite o símbolo de CENTAVO europeu/americano antigo.", answer: "¢" },
+            { hint: "Digite o símbolo da moeda LIBRA ESTERLINA.", answer: "£" },
+            { hint: "Digite o símbolo jurídico de PARÁGRAFO.", answer: "§" },
+            { hint: "Digite o símbolo de GRAU centígrado usado em escalas de temperatura.", answer: "°" },
+            { hint: "Digite o símbolo da moeda EURO.", answer: "€" },
+            { hint: "Digite o símbolo final de uma PERGUNTA comercial.", answer: "?" },
+            { hint: "Digite a BARRA INVERTIDA usada em caminhos de pastas de rede.", answer: "\\" }
+        ];
+
+        /* CORREÇÃO DE TEXTOS MAL DIGITADOS */
+        const CORRECTION_DATA = [
+            { wrong: "João ficou em 1 lugar na corrida", fixed: "1º", targetSymbol: "º", textHint: "Troque o espaço pelo indicador ordinal masculino correto." },
+            { wrong: "Ela cursa a 3 serie do ensino fundamental", fixed: "3ª", targetSymbol: "ª", textHint: "Adicione o indicador ordinal feminino na abreviação da série." },
+            { wrong: "Hoje a temperatura ambiente marcou 30 C na praia", fixed: "30°C", targetSymbol: "°", textHint: "Substitua o espaço pela notação internacional de grau de temperatura." },
+            { wrong: "O e-mail dele é contato gmail.com", fixed: "@", targetSymbol: "@", textHint: "Insira o caractere de arroba separador de domínio obrigatório." },
+            { wrong: "A sala mede exatamente 16 m2", fixed: "16m²", targetSymbol: "²", textHint: "Ajuste a unidade física de metros quadrados com o expoente correto." }
+        ];
+
+        /* ==========================================================================
+           6. GERENCIADOR DE ESTADO E MECÂNICA DO JOGO (GAME ENGINE)
+           ========================================================================== */
+        const gameEngine = {
+            // Perfil de Progresso do Aluno
+            userProfile: {
+                xp: 0,
+                level: 1,
+                streak: 0,
+                unlockedBadges: [],
+                errorMatrix: {}, // Rastreabilidade adaptativa de falhas
+                historyLeaderboard: []
+            },
+
+            currentMode: null,
+            currentChallenge: null,
+            speedTimerInterval: null,
+            speedTimeLeft: 0,
+            activeTargetSymbol: "",
+            altCodeBuffer: "", // Buffer acumulador para correção do atalho Alt
+
+            init() {
+                this.loadProgress();
+                this.bindGlobalEvents();
+                this.renderDashboardStats();
+                this.exitToDashboard();
+                
+                // Configuração inicial de acessibilidade visual
+                if(localStorage.getItem("theme-contrast") === "high") {
+                    document.body.setAttribute("data-theme", "high-contrast");
+                }
+            },
+
+            bindGlobalEvents() {
+                // Eventos de Botões de Configurações superiores
+                document.getElementById("btn-sound").addEventListener("click", () => {
+                    AudioEngine.soundEnabled = !AudioEngine.soundEnabled;
+                    document.getElementById("btn-sound").innerText = AudioEngine.soundEnabled ? "🔊 Som: Ativo" : "🔇 Som: Mudo";
+                    AudioEngine.playTone(440, "sine", 0.05);
+                });
+
+                document.getElementById("btn-voice").addEventListener("click", () => {
+                    AudioEngine.voiceEnabled = !AudioEngine.voiceEnabled;
+                    document.getElementById("btn-voice").innerText = AudioEngine.voiceEnabled ? "🗣️ Voz: Ativa" : "🗣️ Voz: Desativada";
+                    if(AudioEngine.voiceEnabled) AudioEngine.speak("Voz ativada com sucesso.");
+                });
+
+                document.getElementById("btn-contrast").addEventListener("click", () => {
+                    let activeTheme = document.body.getAttribute("data-theme");
+                    if (activeTheme === "high-contrast") {
+                        document.body.removeAttribute("data-theme");
+                        localStorage.setItem("theme-contrast", "normal");
+                    } else {
+                        document.body.setAttribute("data-theme", "high-contrast");
+                        localStorage.setItem("theme-contrast", "high");
+                    }
+                });
+
+                document.getElementById("btn-reset").addEventListener("click", () => {
+                    if(confirm("Deseja realmente apagar todo o seu histórico e notas de progresso?")) {
+                        localStorage.clear();
+                        location.reload();
+                    }
+                });
+
+                document.getElementById("main-logo-btn").addEventListener("click", () => {
+                    this.exitToDashboard();
+                });
+
+                // Foco permanente na área de digitação oculta ao interagir com o Card
+                const hiddenInput = document.getElementById("hidden-game-input");
+                document.getElementById("interaction-card").addEventListener("click", () => {
+                    hiddenInput.focus();
+                });
+
+                // Ouvinte principal de processamento de entrada de digitação física real
+                hiddenInput.addEventListener("keydown", (e) => this.handlePhysicalKeyDown(e));
+                hiddenInput.addEventListener("keyup", (e) => this.handlePhysicalKeyUp(e));
+            },
+
+            loadProgress() {
+                let saved = localStorage.getItem("mestre_teclado_pro_profile");
+                if(saved) {
+                    try {
+                        this.userProfile = Object.assign(this.userProfile, JSON.parse(saved));
+                    } catch(e) { console.error("Erro carregando progresso salvo.", e); }
+                }
+            },
+
+            saveProgress() {
+                localStorage.setItem("mestre_teclado_pro_profile", JSON.stringify(this.userProfile));
+                this.renderDashboardStats();
+            },
+
+            renderDashboardStats() {
+                document.getElementById("stat-level").innerText = this.userProfile.level;
+                document.getElementById("stat-xp").innerText = this.userProfile.xp;
+                document.getElementById("stat-streak").innerText = this.userProfile.streak;
+
+                // Renderiza Conquistas do Painel Lateral
+                const achievementsContainer = document.getElementById("achievements-container");
+                achievementsContainer.innerHTML = "";
+                
+                const badgesDefinition = [
+                    { id: "b1", name: "Iniciante", icon: "🌱", desc: "Começou a jornada" },
+                    { id: "b2", name: "Rei do Shift", icon: "⚡", desc: "Dominou Shift" },
+                    { id: "b3", name: "Mestre AltGr", icon: "🔮", desc: "Dominou AltGr" },
+                    { id: "b4", name: "Expert Alt", icon: "🏛️", desc: "Códigos Numéricos" }
+                ];
+
+                badgesDefinition.forEach(badge => {
+                    let isUnlocked = this.userProfile.unlockedBadges.includes(badge.id);
+                    let div = document.createElement("div");
+                    div.className = `badge-item ${isUnlocked ? 'unlocked' : ''}`;
+                    div.title = `${badge.name}: ${badge.desc}`;
+                    div.innerHTML = `<span class="badge-icon">${badge.icon}</span> <div><strong>${badge.name}</strong></div>`;
+                    achievementsContainer.appendChild(div);
+                });
+
+                // Renderiza Status de Maestria (Dificuldade Adaptativa)
+                const masteryContainer = document.getElementById("mastery-container");
+                masteryContainer.innerHTML = "";
+                Object.keys(SYMBOL_DATABASE).forEach(sym => {
+                    let errors = this.userProfile.errorMatrix[sym] || 0;
+                    let span = document.createElement("span");
+                    span.className = `symbol-tag ${errors === 0 && this.userProfile.xp > 50 ? 'mastered' : ''}`;
+                    span.innerText = `${sym} (${errors} ⚠️)`;
+                    masteryContainer.appendChild(span);
+                });
+
+                // Renderiza Ranking Local Histórico
+                const rankingContainer = document.getElementById("ranking-container");
+                rankingContainer.innerHTML = `
+                    <div class="ranking-item"><span>1. Você (Atual)</span><strong>${this.userProfile.xp} XP</strong></div>
+                    <div class="ranking-item"><span>2. Professor Instrutor</span><strong>1500 XP</strong></div>
+                    <div class="ranking-item"><span>3. Aluno Sobral</span><strong>450 XP</strong></div>
+                `;
+            },
+
+            checkAndUnlockBadges() {
+                if (this.userProfile.xp >= 10 && !this.userProfile.unlockedBadges.includes("b1")) {
+                    this.userProfile.unlockedBadges.push("b1");
+                    this.triggerConfetti();
+                }
+                if (this.userProfile.xp >= 150 && !this.userProfile.unlockedBadges.includes("b2")) {
+                    this.userProfile.unlockedBadges.push("b2");
+                    this.triggerConfetti();
+                }
+                if (this.userProfile.xp >= 300 && !this.userProfile.unlockedBadges.includes("b3")) {
+                    this.userProfile.unlockedBadges.push("b3");
+                    this.triggerConfetti();
+                }
+                if (this.currentMode === "altcode" && this.userProfile.xp >= 100 && !this.userProfile.unlockedBadges.includes("b4")) {
+                    this.userProfile.unlockedBadges.push("b4");
+                    this.triggerConfetti();
+                }
+            },
+
+            exitToDashboard() {
+                clearInterval(this.speedTimerInterval);
+                this.currentMode = null;
+                document.getElementById("view-game").style.display = "none";
+                document.getElementById("view-dashboard").style.display = "grid";
+                this.clearKeyboardHighlights();
+            },
+
+            /* MUDANÇA DE ESTADO: INICIAR UM MODO DE JOGO */
+            startMode(modeName) {
+                this.currentMode = modeName;
+                document.getElementById("view-dashboard").style.display = "none";
+                document.getElementById("view-game").style.display = "flex";
+                
+                // Configurações de UI baseadas no modo selecionado
+                document.getElementById("speed-timer-container").style.display = (modeName === "speed") ? "block" : "none";
+                document.getElementById("click-focus-notice").style.display = (modeName === "free") ? "none" : "block";
+
+                const titleElem = document.getElementById("game-mode-title");
+                const descElem = document.getElementById("game-mode-desc");
+
+                if(modeName === 'learning') {
+                    titleElem.innerText = "Modo Aprendizado Guiado";
+                    descElem.innerText = "Explore a anatomia e a correta digitação de cada símbolo essencial da norma ABNT2.";
+                } else if(modeName === 'phrase') {
+                    titleElem.innerText = "Modo Complete a Frase";
+                    descElem.innerText = "Insira o caractere omitido no contexto real apresentado na tela.";
+                } else if(modeName === 'speed') {
+                    titleElem.innerText = "Modo Desafio Contra o Tempo";
+                    descElem.innerText = "Você tem 45 segundos para digitar o máximo de símbolos corretos solicitados.";
+                    this.startSpeedTimer();
+                } else if(modeName === 'hunt') {
+                    titleElem.innerText = "Modo Caça ao Símbolo";
+                    descElem.innerText = "Leia a definição conceitual ou utilidade prática e descubra qual é o caractere.";
+                } else if(modeName === 'correction') {
+                    titleElem.innerText = "Modo Corrija o Erro Gramatical";
+                    descElem.innerText = "Conserte a grafia popular adicionando ou ajustando o caractere de norma técnica.";
+                } else if(modeName === 'altcode') {
+                    titleElem.innerText = "Módulo Especial Alt + Código";
+                    descElem.innerText = "Mantenha a tecla ALT esquerda pressionada e digite a sequência numérica solicitada.";
+                } else if(modeName === 'free') {
+                    titleElem.innerText = "Laboratório de Digitação Livre";
+                    descElem.innerText = "Pressione qualquer conjunto de teclas em seu computador físico para testar o mapeamento de circuitos do driver.";
+                    this.setupFreeMode();
+                    return;
+                }
+
+                this.generateNextChallenge();
+                document.getElementById("hidden-game-input").focus();
+            },
+
+            /* SISTEMA ADAPTATIVO: ESCOLHA INTELIGENTE DE PRÓXIMO DESAFIO */
+            generateNextChallenge() {
+                document.getElementById("feedback-box").style.display = "none";
+                document.getElementById("hidden-game-input").value = "";
+                this.clearKeyboardHighlights();
+
+                // Algoritmo de filtragem adaptativo baseado em erros passados do perfil
+                let worstSymbols = Object.keys(this.userProfile.errorMatrix).filter(k => this.userProfile.errorMatrix[k] > 1);
+                let forceWeakness = (worstSymbols.length > 0 && Math.random() < 0.45); // 45% de chance de forçar revisão de erro
+
+                let selectedSymbol = "";
+                if(forceWeakness) {
+                    selectedSymbol = worstSymbols[Math.floor(Math.random() * worstSymbols.length)];
+                } else {
+                    let keys = Object.keys(SYMBOL_DATABASE);
+                    selectedSymbol = keys[Math.floor(Math.random() * keys.length)];
+                }
+
+                this.activeTargetSymbol = selectedSymbol;
+                let staticData = SYMBOL_DATABASE[selectedSymbol];
+
+                // INJEÇÃO DE CONTEÚDO DEPENDENDO DO MODO ATIVO
+                if(this.currentMode === "learning") {
+                    this.currentChallenge = { answer: selectedSymbol };
+                    document.getElementById("display-area-challenge").innerHTML = `
+                        <div style="font-size: 18px; margin-bottom:10px; color: var(--text-muted);">Símbolo Alvo Atual</div>
+                        <div style="font-size: 72px; font-weight:800; color:var(--primary);">${selectedSymbol}</div>
+                        <p style="font-size:16px; font-weight:600;">Pressione esta combinação no seu teclado para avançar.</p>
+                    `;
+                    this.updatePedagogicalSidebar(selectedSymbol);
+                    this.highlightTargetOnVisualKeyboard(selectedSymbol);
+                    AudioEngine.speak(`Pressione o símbolo ${staticData.name}`);
+
+                } else if(this.currentMode === "phrase") {
+                    let filtered = EXERCISE_PHRASES.filter(f => f.answer === selectedSymbol);
+                    let item = filtered.length > 0 ? filtered[Math.floor(Math.random() * filtered.length)] : EXERCISE_PHRASES[Math.floor(Math.random() * EXERCISE_PHRASES.length)];
+                    this.currentChallenge = item;
+                    this.activeTargetSymbol = item.answer;
+
+                    document.getElementById("display-area-challenge").innerHTML = `
+                        <div style="font-size:14px; text-transform:uppercase; color:var(--accent); font-weight:700; margin-bottom:10px;">Categoria: ${item.category}</div>
+                        <div class="phrase-container">${item.phrase.replace("__", "<span class='blank'>?</span>")}</div>
+                        <p style="font-size:14px; color:var(--text-muted);">Complete a frase digitando o caractere correto oculto.</p>
+                    `;
+                    this.updatePedagogicalSidebar(this.activeTargetSymbol);
+                    this.highlightTargetOnVisualKeyboard(this.activeTargetSymbol);
+                    AudioEngine.speak("Complete a frase inserindo o caractere correto.");
+
+                } else if(this.currentMode === "hunt") {
+                    let filtered = HUNT_DATA.filter(h => h.answer === selectedSymbol);
+                    let item = filtered.length > 0 ? filtered[Math.floor(Math.random() * filtered.length)] : HUNT_DATA[Math.floor(Math.random() * HUNT_DATA.length)];
+                    this.currentChallenge = item;
+                    this.activeTargetSymbol = item.answer;
+
+                    document.getElementById("display-area-challenge").innerHTML = `
+                        <div style="font-size:24px; font-weight:600; padding:15px; color:var(--text-main);">${item.hint}</div>
+                        <p style="font-size:14px; color:var(--text-muted);">Qual é o caractere descrito acima? Digite-o diretamente.</p>
+                    `;
+                    this.updatePedagogicalSidebar(this.activeTargetSymbol);
+                    AudioEngine.speak(item.hint);
+
+                } else if(this.currentMode === "speed") {
+                    this.currentChallenge = { answer: selectedSymbol };
+                    document.getElementById("display-area-challenge").innerHTML = `
+                        <div style="font-size: 16px; color: var(--text-muted);">DIGITE RÁPIDO!</div>
+                        <div style="font-size: 84px; font-weight:900; color:var(--warning);">${selectedSymbol}</div>
+                        <div style="font-size: 16px; font-weight:bold;">Símbolo: ${staticData.name}</div>
+                    `;
+                    this.updatePedagogicalSidebar(selectedSymbol);
+                    this.highlightTargetOnVisualKeyboard(selectedSymbol);
+
+                } else if(this.currentMode === "correction") {
+                    let item = CORRECTION_DATA[Math.floor(Math.random() * CORRECTION_DATA.length)];
+                    this.currentChallenge = item;
+                    this.activeTargetSymbol = item.targetSymbol;
+
+                    document.getElementById("display-area-challenge").innerHTML = `
+                        <div style="font-size:14px; font-weight:bold; color:var(--error); margin-bottom:5px;">Texto Incorreto Encontrado:</div>
+                        <div style="font-size:20px; font-style:italic; margin-bottom:15px; background:#e2e8f0; padding:10px; border-radius:6px;">"${item.wrong}"</div>
+                        <div style="font-size:15px; font-weight:600; color:var(--text-main);">${item.textHint}</div>
+                        <p style="font-size:13px; margin-top:10px; color:var(--text-muted);">Digite o símbolo de correção para prosseguir.</p>
+                    `;
+                    this.updatePedagogicalSidebar(this.activeTargetSymbol);
+                
+                } else if(this.currentMode === "altcode") {
+                    let altSymbols = Object.keys(SYMBOL_DATABASE).filter(k => SYMBOL_DATABASE[k].isAltCode);
+                    let picked = altSymbols[Math.floor(Math.random() * altSymbols.length)];
+                    let dataAlt = SYMBOL_DATABASE[picked];
+                    
+                    this.currentChallenge = { answer: picked, isAltMode: true, altCodeNum: dataAlt.altCodeNum };
+                    this.activeTargetSymbol = picked;
+                    this.altCodeBuffer = ""; // Reseta buffer inicial
+
+                    document.getElementById("display-area-challenge").innerHTML = `
+                        <div style="font-size:16px; color:var(--text-muted); margin-bottom:10px;">Desafio de Atalho Numérico Avançado</div>
+                        <div style="font-size:24px; font-weight:bold; margin-bottom:10px;">Como gerar o caractere <span style="color:var(--primary); font-size:36px;">${picked}</span> (${dataAlt.name})?</div>
+                        <div style="background-color:var(--primary-light); padding:15px; border-radius:8px; font-size:18px; font-weight:bold;">
+                            Mantenha pressionado [ALT LEFT] + Digite o código: <span style="color:var(--error); font-size:24px; font-family:monospace;">${dataAlt.altCodeNum}</span>
+                        </div>
+                        <p style="font-size:12px; color:var(--text-muted); margin-top:12px;">⚠️ Nota: Requer o uso do Teclado Numérico Lateral (ou mapeamento numérico) com NumLock ativado.</p>
+                    `;
+                    this.updatePedagogicalSidebar(picked);
+                    
+                    let altKey = document.querySelector(`.key[data-keycode="AltLeft"]`);
+                    if(altKey) altKey.classList.add("active-modifier");
+                }
+            },
+
+            setupFreeMode() {
+                document.getElementById("display-area-challenge").innerHTML = `
+                    <div style="font-size:22px; font-weight:bold; color:var(--success); margin-bottom:10px;">Laboratório Livre Ativado</div>
+                    <p style="font-size:16px; max-width:500px; margin:0 auto;">Pressione qualquer combinação de teclas ou modificadores no seu teclado físico e veja a resposta do driver mapeada graficamente abaixo.</p>
+                    <div id="free-mode-live-detect" style="margin-top:20px; font-size:36px; font-weight:800; color:var(--primary); min-height:50px;">-</div>
+                `;
+                document.getElementById("pedagogy-badge").innerText = "★";
+                document.getElementById("pedagogy-name").innerText = "Modo Livre";
+                document.getElementById("pedagogy-details").innerHTML = "<p>Pressione e experimente teclas como Shift, AltGr, acentos e caracteres de controle.</p>";
+            },
+
+            /* ATUALIZAÇÃO DO PAINEL PEDAGÓGICO LATERAL */
+            updatePedagogicalSidebar(symbol) {
+                let data = SYMBOL_DATABASE[symbol];
+                if(!data) return;
+
+                document.getElementById("pedagogy-badge").innerText = symbol;
+                document.getElementById("pedagogy-name").innerText = data.name;
+                
+                let html = `
+                    <div><strong>Como digitar:</strong> <span style="background:var(--primary-light); padding:2px 6px; border-radius:4px; font-family:monospace; font-weight:bold;">${data.combo}</span></div>
+                    <div><strong>Onde é utilizado:</strong> ${data.context}</div>
+                    <div style="background:#f8fafc; padding:8px; border-radius:6px; border-left:3px solid var(--primary);">
+                        <strong>Exemplo Prático:</strong><br><span style="font-family:monospace; font-size:14px;">${data.useCase}</span>
+                    </div>
+                    <div style="color:var(--error);"><strong>Erro Comum:</strong> ${data.commonError}</div>
+                `;
+                document.getElementById("pedagogy-details").innerHTML = html;
+            },
+
+            /* PROGRAMA PEDAGÓGICO DE ILUMINAÇÃO DE TECLAS DO MAPA */
+            highlightTargetOnVisualKeyboard(symbol) {
+                this.clearKeyboardHighlights();
+                let data = SYMBOL_DATABASE[symbol];
+                if(!data) return;
+
+                let primaryKey = document.querySelector(`.key[data-keycode="${data.keycodeTarget}"]`);
+                if(!primaryKey && data.shortcutAlternative) {
+                    primaryKey = document.querySelector(`.key[data-keycode="${data.shortcutAlternative}"]`);
+                }
+
+                if(primaryKey) {
+                    primaryKey.classList.add("active-target");
+                }
+
+                if(data.requiresShift) {
+                    let shifts = document.querySelectorAll(`.key[data-keycode="ShiftLeft"], .key[data-keycode="ShiftRight"]`);
+                    shifts.forEach(s => s.classList.add("active-modifier"));
+                }
+                if(data.requiresAltGr) {
+                    let altgr = document.querySelector(`.key[data-keycode="AltRight"]`);
+                    if(altgr) altgr.classList.add("active-modifier");
+                }
+            },
+
+            clearKeyboardHighlights() {
+                let keys = document.querySelectorAll(".key");
+                keys.forEach(k => {
+                    k.classList.remove("active-target", "active-modifier", "pressed");
+                });
+            },
+
+            /* RELÓGIO DE CONTROLE DE TEMPO DO MODO SPEED RUN */
+            startSpeedTimer() {
+                clearInterval(this.speedTimerInterval);
+                this.speedTimeLeft = 45;
+                const bar = document.getElementById("speed-timer-bar");
+                bar.style.width = "100%";
+
+                this.speedTimerInterval = setInterval(() => {
+                    this.speedTimeLeft -= 1;
+                    let percentage = (this.speedTimeLeft / 45) * 100;
+                    bar.style.width = `${percentage}%`;
+
+                    if(this.speedTimeLeft <= 0) {
+                        clearInterval(this.speedTimerInterval);
+                        AudioEngine.playError();
+                        alert(`Fim de tempo! Você acumulou um total temporário neste ciclo de ${this.userProfile.xp} XP.`);
+                        this.exitToDashboard();
+                    }
+                }, 1000);
+            },
+
+            /* PROCESSADOR DE FLUXO DE DIGITAÇÃO: CAPTURA DO TECLADO FÍSICO REAL */
+            handlePhysicalKeyDown(e) {
+                if(e.key === "Tab" || (e.key === "/" && this.currentMode !== "free") || (e.key === "'" && this.currentMode !== "free")) {
+                    e.preventDefault();
+                }
+
+                let visualKey = document.querySelector(`.key[data-keycode="${e.code}"]`);
+                if(visualKey) {
+                    visualKey.classList.add("pressed");
+                }
+
+                let pressedCharacter = e.key;
+
+                if(this.currentMode === "free") {
+                    document.getElementById("free-mode-live-detect").innerText = `Caractere capturado: "${pressedCharacter}" [Código de Hardware: ${e.code}]`;
+                    return;
+                }
+
+                // INTERCEPTAÇÃO EXCLUSIVA DO MÓDULO ALT + CÓDIGO (Acumulador Dinâmico de Buffer)
+                if(this.currentMode === "altcode" && this.currentChallenge && this.currentChallenge.isAltMode) {
+                    if(e.code === "AltLeft") {
+                        this.altCodeBuffer = "";
+                        return;
+                    }
+                    
+                    if(e.altKey && (e.code.startsWith("Numpad") || e.code.startsWith("Digit"))) {
+                        let digit = e.code.replace("Numpad", "").replace("Digit", "");
+                        
+                        if(/^[0-9]$/.test(digit)) {
+                            if(!this.altCodeBuffer) this.altCodeBuffer = "";
+                            this.altCodeBuffer += digit;
+                            return; // Retorna sem processar erro falso instantâneo
+                        }
+                    }
+                }
+
+                // VALIDAÇÃO DIRETA CONTRA O ALVO DEFINIDO (Para os modos convencionais)
+                if(pressedCharacter === this.activeTargetSymbol) {
+                    this.processCorrectAnswer();
+                } else {
+                    if(pressedCharacter.length === 1 && !e.altKey) {
+                        this.processWrongAnswer(pressedCharacter);
+                    }
+                }
+            },
+
+            handlePhysicalKeyUp(e) {
+                let visualKey = document.querySelector(`.key[data-keycode="${e.code}"]`);
+                if(visualKey) {
+                    visualKey.classList.remove("pressed");
+                }
+
+                // SINAL DE LIBERAÇÃO DA TECLA ALT: VERIFICAÇÃO FINAL DO BUFFER ACUMULADO
+                if(this.currentMode === "altcode" && e.code === "AltLeft" && this.currentChallenge && this.currentChallenge.isAltMode) {
+                    let finalCode = this.altCodeBuffer || "";
+                    
+                    if(finalCode === this.currentChallenge.altCodeNum) {
+                        this.processCorrectAnswer();
+                    } else if(finalCode.length > 0) {
+                        this.processWrongAnswer(`Alt + ${finalCode}`);
+                    }
+                    this.altCodeBuffer = ""; // Reseta estado do buffer
+                }
+            },
+
+            /* FLUXO PEDAGÓGICO DE SUCESSO */
+            processCorrectAnswer() {
+                AudioEngine.playSuccess();
+                
+                this.userProfile.streak += 1;
+                let bonusCombo = Math.floor(this.userProfile.streak / 5);
+                let earnedXp = 10 + bonusCombo;
+                this.userProfile.xp += earnedXp;
+
+                let oldLevel = this.userProfile.level;
+                this.userProfile.level = Math.floor(this.userProfile.xp / 100) + 1;
+                if(this.userProfile.level > oldLevel) {
+                    AudioEngine.playLevelUp();
+                    this.triggerConfetti();
+                }
+
+                if(this.userProfile.errorMatrix[this.activeTargetSymbol] > 0) {
+                    this.userProfile.errorMatrix[this.activeTargetSymbol] -= 1;
+                }
+
+                this.checkAndUnlockBadges();
+                this.saveProgress();
+
+                const feedbackBox = document.getElementById("feedback-box");
+                feedbackBox.className = "feedback-message success";
+                feedbackBox.style.display = "block";
+                feedbackBox.innerText = `✨ Perfeito! Sequência ou caractere identificado com sucesso. (+${earnedXp} XP)`;
+
+                setTimeout(() => {
+                    this.generateNextChallenge();
+                }, 900);
+            },
+
+            /* FLUXO PEDAGÓGICO DE FEEDBACK DE ERRO */
+            processWrongAnswer(charDigitado) {
+                AudioEngine.playError();
+                this.userProfile.streak = 0; 
+                
+                if(!this.userProfile.errorMatrix[this.activeTargetSymbol]) {
+                    this.userProfile.errorMatrix[this.activeTargetSymbol] = 0;
+                }
+                this.userProfile.errorMatrix[this.activeTargetSymbol] += 1;
+                this.saveProgress();
+
+                let dataTarget = SYMBOL_DATABASE[this.activeTargetSymbol];
+                const feedbackBox = document.getElementById("feedback-box");
+                feedbackBox.className = "feedback-message error";
+                feedbackBox.style.display = "block";
+                feedbackBox.innerHTML = `
+                    ❌ Comando incorreto. Comando registrado na tentativa: "<strong>${charDigitado}</strong>".<br>
+                    💡 <strong>Dica do Instrutor:</strong> Para gerar o símbolo <strong>${this.activeTargetSymbol}</strong> (${dataTarget.name}), use o atalho físico: <span style="background:var(--bg-surface); padding:2px 4px; border-radius:4px; border:1px solid var(--border-color); font-weight:bold;">${dataTarget.combo}</span>
+                `;
+
+                this.highlightTargetOnVisualKeyboard(this.activeTargetSymbol);
+            },
+
+            /* SISTEMA DE CONFETES NATIVO CANVAS */
+            triggerConfetti() {
+                const canvas = document.getElementById("confetti-canvas");
+                const ctx = canvas.getContext("2d");
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                canvas.style.display = "block";
+
+                let particles = [];
+                for (let i = 0; i < 70; i++) {
+                    particles.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height - canvas.height,
+                        r: Math.random() * 6 + 4,
+                        d: Math.random() * canvas.height,
+                        color: `rgba(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)}, 0.8)`,
+                        tilt: Math.random() * 10 - 5
+                    });
+                }
+
+                let animationFrameId;
+                let startTime = Date.now();
+
+                function draw() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    let finished = true;
+
+                    particles.forEach(p => {
+                        ctx.beginPath();
+                        ctx.lineWidth = p.r;
+                        ctx.strokeStyle = p.color;
+                        ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+                        ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+                        ctx.stroke();
+
+                        p.y += Math.random() * 2 + 3;
+                        p.x += Math.sin(p.d) * 0.5;
+                        
+                        if (p.y < canvas.height) finished = false;
+                    });
+
+                    if (Date.now() - startTime < 2500 && !finished) {
+                        animationFrameId = requestAnimationFrame(draw);
+                    } else {
+                        canvas.style.display = "none";
+                        cancelAnimationFrame(animationFrameId);
+                    }
+                }
+                draw();
+            }
+        };
+
+        /* ==========================================================================
+           7. MOTOR DE ÁUDIO NATIVO (WEB AUDIO & SPEECH SYNTHESIS)
+           ========================================================================== */
+        const AudioEngine = {
+            ctx: null,
+            soundEnabled: true,
+            voiceEnabled: false,
+
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
+            
+            playTone(freq, type, duration) {
+                if (!this.soundEnabled) return;
+                try {
+                    this.init();
+                    let osc = this.ctx.createOscillator();
+                    let gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.00001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e) { console.log("Audio Error", e); }
+            },
+
+            playSuccess() {
+                this.playTone(523.25, "sine", 0.15); 
+                setTimeout(() => this.playTone(659.25, "sine", 0.2), 100); 
+            },
+
+            playError() {
+                this.playTone(180, "sawtooth", 0.35); 
+            },
+
+            playLevelUp() {
+                this.playTone(261.63, "sine", 0.1);
+                setTimeout(() => this.playTone(329.63, "sine", 0.1), 80);
+                setTimeout(() => this.playTone(392.00, "sine", 0.1), 160);
+                setTimeout(() => this.playTone(523.25, "sine", 0.4), 240);
+            },
+
+            speak(text) {
+                if (!this.voiceEnabled || !('speechSynthesis' in window)) return;
+                window.speechSynthesis.cancel(); 
+                let utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'pt-BR';
+                utterance.rate = 1.1;
+                window.speechSynthesis.speak(utterance);
+            }
+        };
+
+        window.addEventListener("DOMContentLoaded", () => {
+            gameEngine.init();
+        });
+    </script>
+
+
+</body>
+</html>
