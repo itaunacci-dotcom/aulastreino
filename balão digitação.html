@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2958125315260710" crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estoure os Balões - Jogo de Digitação</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+        
+        .game-container {
+            text-align: center;
+        }
+        
+        header {
+            margin-bottom: 25px;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+            color: #FFEB3B;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 15px;
+            display: inline-block;
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            opacity: 0.9;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        
+        #game-area {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background: linear-gradient(to bottom, #87CEEB, #B0E2FF);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
+        
+        /* Painel de informações dentro do jogo */
+        .game-hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            padding: 10px 20px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            z-index: 50;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .hud-item {
+            text-align: center;
+            padding: 8px;
+        }
+        
+        .hud-label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .hud-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #FFEB3B;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+        
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50px;
+            opacity: 0.8;
+            z-index: 1;
+            animation: cloudFloat linear infinite;
+        }
+        
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+        }
+        
+        .cloud.small {
+            width: 60px;
+            height: 20px;
+            animation-duration: 40s;
+        }
+        
+        .cloud.small::before {
+            width: 25px;
+            height: 25px;
+            top: -12px;
+            left: 5px;
+        }
+        
+        .cloud.small::after {
+            width: 20px;
+            height: 20px;
+            top: -10px;
+            right: 8px;
+        }
+        
+        .cloud.medium {
+            width: 100px;
+            height: 30px;
+            animation-duration: 60s;
+        }
+        
+        .cloud.medium::before {
+            width: 40px;
+            height: 40px;
+            top: -20px;
+            left: 10px;
+        }
+        
+        .cloud.medium::after {
+            width: 35px;
+            height: 35px;
+            top: -18px;
+            right: 12px;
+        }
+        
+        .cloud.large {
+            width: 140px;
+            height: 40px;
+            animation-duration: 80s;
+        }
+        
+        .cloud.large::before {
+            width: 55px;
+            height: 55px;
+            top: -28px;
+            left: 15px;
+        }
+        
+        .cloud.large::after {
+            width: 45px;
+            height: 45px;
+            top: -23px;
+            right: 18px;
+        }
+        
+        @keyframes cloudFloat {
+            0% {
+                transform: translateY(500px) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-100px) translateX(20px);
+                opacity: 0;
+            }
+        }
+        
+        .balloon {
+            position: absolute;
+            width: 70px;
+            height: 85px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #000;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 
+                inset -12px -12px 15px rgba(0, 0, 0, 0.3),
+                0 6px 12px rgba(0, 0, 0, 0.2);
+            animation: float 1s infinite alternate ease-in-out;
+            z-index: 10;
+            font-family: 'Courier New', monospace; /* Fonte com melhor distinção entre caracteres */
+        }
+        
+        .balloon::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.7);
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            100% { transform: translateY(-8px) rotate(1deg); }
+        }
+        
+        .balloon.popped {
+            animation: pop 0.4s forwards;
+        }
+        
+        @keyframes pop {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.7; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #FF5722, #FF9800);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+            font-weight: bold;
+            letter-spacing: 1px;
+            min-width: 150px;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        #start-btn {
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+        }
+        
+        #pause-btn {
+            background: linear-gradient(45deg, #2196F3, #03A9F4);
+        }
+        
+        .level-display {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 12px 25px;
+            border-radius: 50px;
+            display: inline-block;
+            margin: 15px 0;
+            font-weight: bold;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 1.1rem;
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 25px;
+            text-align: left;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .instructions h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #FFEB3B;
+        }
+        
+        .instructions ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .instructions li {
+            margin-bottom: 12px;
+            padding-left: 30px;
+            position: relative;
+            line-height: 1.5;
+        }
+        
+        .instructions li:before {
+            content: "🎯";
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 100;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            min-width: 350px;
+            animation: gameOverAppear 0.8s ease-out forwards;
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.8);
+        }
+        
+        @keyframes gameOverAppear {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            70% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        .game-over h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #FF5722;
+        }
+        
+        .game-over p {
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+        }
+        
+        #restart-btn {
+            background: linear-gradient(45deg, #E91E63, #9C27B0);
+        }
+        
+        .keyboard-hint {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            font-style: italic;
+        }
+        
+        .combo {
+            position: absolute;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #FFEB3B;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            animation: comboFloat 1s forwards;
+            z-index: 20;
+        }
+        
+        .penalty {
+            position: absolute;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #FF5252;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            animation: penaltyFloat 1s forwards;
+            z-index: 20;
+        }
+        
+        @keyframes comboFloat {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-50px); opacity: 0; }
+        }
+        
+        @keyframes penaltyFloat {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-50px); opacity: 0; }
+        }
+        
+        /* Painel de histórico */
+        .history-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+            height: fit-content;
+        }
+        
+        .history-panel h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #FFEB3B;
+            font-size: 1.8rem;
+        }
+        
+        .score-list {
+            list-style: none;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .score-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .score-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .score-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+        
+        .score-item {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.3s;
+        }
+        
+        .score-item:hover {
+            transform: translateX(5px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .score-position {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #FFEB3B;
+            min-width: 30px;
+        }
+        
+        .score-details {
+            flex-grow: 1;
+            text-align: left;
+            margin-left: 15px;
+        }
+        
+        .score-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .score-level {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .score-date {
+            font-size: 0.8rem;
+            opacity: 0.6;
+        }
+        
+        .motivational-message {
+            font-size: 1.2rem;
+            font-style: italic;
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #FFEB3B;
+        }
+        
+        .empty-history {
+            text-align: center;
+            padding: 30px;
+            opacity: 0.7;
+            font-style: italic;
+        }
+        
+        .trophy {
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+        
+        @media (max-width: 968px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .history-panel {
+                order: -1;
+                margin-bottom: 20px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .game-hud {
+                grid-template-columns: repeat(2, 1fr);
+                padding: 8px 10px;
+            }
+            
+            .hud-value {
+                font-size: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 80%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="game-container">
+            <header>
+                <h1>🎈 ESTOURE OS BALÕES! 🎈</h1>
+                <p class="subtitle">Digite as letras minúsculas e números para estourar os balões!</p>
+            </header>
+            
+            <div class="level-display">
+                Velocidade: <span id="speed-indicator">NORMAL</span>
+            </div>
+            
+            <div id="game-area">
+                <!-- Painel de informações dentro do jogo -->
+                <div class="game-hud">
+                    <div class="hud-item">
+                        <div class="hud-label">Pontuação</div>
+                        <div class="hud-value" id="hud-score">0</div>
+                    </div>
+                    <div class="hud-item">
+                        <div class="hud-label">Vidas</div>
+                        <div class="hud-value" id="hud-lives">3</div>
+                    </div>
+                    <div class="hud-item">
+                        <div class="hud-label">Nível</div>
+                        <div class="hud-value" id="hud-level">1</div>
+                    </div>
+                    <div class="hud-item">
+                        <div class="hud-label">Estourados</div>
+                        <div class="hud-value" id="hud-popped">0</div>
+                    </div>
+                </div>
+                <!-- Balões e nuvens aparecerão aqui -->
+            </div>
+            
+            <div class="controls">
+                <button id="start-btn">INICIAR JOGO</button>
+                <button id="pause-btn">PAUSAR</button>
+            </div>
+            
+            <div class="instructions">
+                <h2>COMO JOGAR</h2>
+                <ul>
+                    <li>Digite as <strong>letras minúsculas</strong> e <strong>números</strong> que aparecem nos balões</li>
+                    <li>Cada balão estourado vale <strong>10 pontos × nível</strong></li>
+                    <li><strong>CUIDADO!</strong> Digitar uma tecla errada faz perder <strong>15 pontos × nível</strong></li>
+                    <li>Você tem <strong>3 vidas</strong> - perde uma quando um balão escapa</li>
+                    <li>O jogo acelera a cada nível completado</li>
+                    <li>Use apenas <strong>letras minúsculas</strong> no seu teclado</li>
+                    <li class="keyboard-hint">Pressione as teclas correspondentes para estourar os balões</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="history-panel">
+            <h2>🏆 MELHORES PONTUAÇÕES</h2>
+            <div id="score-history">
+                <div class="empty-history">Jogue para ver suas pontuações!</div>
+            </div>
+            <div class="motivational-message" id="motivational-message">
+                Você consegue! Continue praticando!
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Elementos do DOM
+        const gameArea = document.getElementById('game-area');
+        const startBtn = document.getElementById('start-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const speedIndicator = document.getElementById('speed-indicator');
+        const scoreHistory = document.getElementById('score-history');
+        const motivationalMessage = document.getElementById('motivational-message');
+        
+        // Variáveis do jogo
+        let score = 0;
+        let lives = 3;
+        let level = 1;
+        let poppedCount = 0;
+        let gameActive = false;
+        let gamePaused = false;
+        let balloons = [];
+        let clouds = [];
+        let balloonSpeed = 0.8; // REDUZIDO de 1.5 para 0.8 (mais lento)
+        let spawnRate = 2500; // AUMENTADO de 1800 para 2500 (menos balões)
+        let gameLoopId;
+        let spawnLoopId;
+        let cloudLoopId;
+        let comboCount = 0;
+        let lastPopTime = 0;
+        
+        // Caracteres válidos no jogo
+        const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        
+        // Cores com bom contraste para texto preto
+        const balloonColors = [
+            '#FFEB3B', '#4CAF50', '#F44336', '#2196F3',
+            '#9C27B0', '#FF9800', '#00BCD4', '#8BC34A',
+            '#E91E63', '#3F51B5', '#FF5722', '#009688',
+            '#CDDC39', '#FFC107', '#795548', '#607D8B'
+        ];
+        
+        // Frases motivacionais
+        const motivationalMessages = [
+            "Incrível! Você é um mestre da digitação!",
+            "Que desempenho fantástico! Continue assim!",
+            "Uau! Sua velocidade de digitação é impressionante!",
+            "Excelente! Cada vez melhor!",
+            "Você está evoluindo rapidamente!",
+            "Muito bom! A prática leva à perfeição!",
+            "Continue assim e será imbatível!",
+            "Sua dedicação está rendendo frutos!",
+            "Você tem talento para isso!",
+            "Quase lá! Mais um pouco e você quebra seu recorde!"
+        ];
+        
+        // Inicializar o jogo
+        function initGame() {
+            console.log("Iniciando jogo...");
+            
+            // Resetar variáveis
+            score = 0;
+            lives = 3;
+            level = 1;
+            poppedCount = 0;
+            balloonSpeed = 0.8; // REDUZIDO de 1.5 para 0.8 (mais lento)
+            spawnRate = 2500; // AUMENTADO de 1800 para 2500 (menos balões)
+            comboCount = 0;
+            
+            // Atualizar UI
+            updateUI();
+            
+            // Limpar balões e nuvens existentes, mas manter o HUD
+            const hud = document.querySelector('.game-hud');
+            gameArea.innerHTML = '';
+            if (hud) {
+                gameArea.appendChild(hud);
+            } else {
+                // Criar HUD se não existir
+                gameArea.innerHTML = `
+                    <div class="game-hud">
+                        <div class="hud-item">
+                            <div class="hud-label">Pontuação</div>
+                            <div class="hud-value" id="hud-score">0</div>
+                        </div>
+                        <div class="hud-item">
+                            <div class="hud-label">Vidas</div>
+                            <div class="hud-value" id="hud-lives">3</div>
+                        </div>
+                        <div class="hud-item">
+                            <div class="hud-label">Nível</div>
+                            <div class="hud-value" id="hud-level">1</div>
+                        </div>
+                        <div class="hud-item">
+                            <div class="hud-label">Estourados</div>
+                            <div class="hud-value" id="hud-popped">0</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            balloons = [];
+            clouds = [];
+            
+            // Definir estado do jogo
+            gameActive = true;
+            gamePaused = false;
+            startBtn.textContent = 'REINICIAR';
+            pauseBtn.textContent = 'PAUSAR';
+            
+            // Iniciar loops
+            startGameLoops();
+            
+            // Adicionar event listeners
+            document.addEventListener('keydown', handleKeyPress);
+            
+            console.log("Jogo iniciado com sucesso!");
+        }
+        
+        // Iniciar loops do jogo
+        function startGameLoops() {
+            // Limpar loops anteriores se existirem
+            if (gameLoopId) cancelAnimationFrame(gameLoopId);
+            if (spawnLoopId) clearInterval(spawnLoopId);
+            if (cloudLoopId) clearInterval(cloudLoopId);
+            
+            // Loop principal de animação
+            function gameLoop() {
+                if (gameActive && !gamePaused) {
+                    updateBalloons();
+                    updateClouds();
+                    gameLoopId = requestAnimationFrame(gameLoop);
+                }
+            }
+            
+            // Loop de spawn de balões
+            function spawnBalloon() {
+                if (gameActive && !gamePaused) {
+                    createBalloon();
+                }
+            }
+            
+            // Loop de spawn de nuvens
+            function spawnCloud() {
+                if (gameActive && !gamePaused) {
+                    createCloud();
+                }
+            }
+            
+            gameLoopId = requestAnimationFrame(gameLoop);
+            spawnLoopId = setInterval(spawnBalloon, spawnRate);
+            cloudLoopId = setInterval(spawnCloud, 3000); // Nova nuvem a cada 3 segundos
+        }
+        
+        // Criar uma nuvem
+        function createCloud() {
+            const cloud = document.createElement('div');
+            const sizes = ['small', 'medium', 'large'];
+            const size = sizes[Math.floor(Math.random() * sizes.length)];
+            
+            cloud.className = `cloud ${size}`;
+            
+            // Posição horizontal aleatória
+            const maxLeft = gameArea.offsetWidth - 150;
+            const randomLeft = Math.max(0, Math.floor(Math.random() * maxLeft));
+            cloud.style.left = randomLeft + 'px';
+            
+            // Velocidade aleatória para cada nuvem
+            const duration = 40 + Math.random() * 40; // Entre 40 e 80 segundos
+            cloud.style.animationDuration = `${duration}s`;
+            
+            gameArea.appendChild(cloud);
+            
+            // Adicionar ao array de nuvens
+            clouds.push({
+                element: cloud,
+                top: gameArea.offsetHeight + 50
+            });
+            
+            // Remover nuvem após animação
+            setTimeout(() => {
+                if (cloud.parentNode) {
+                    cloud.remove();
+                    clouds = clouds.filter(c => c.element !== cloud);
+                }
+            }, duration * 1000);
+        }
+        
+        // Atualizar a interface
+        function updateUI() {
+            const hudScore = document.getElementById('hud-score');
+            const hudLives = document.getElementById('hud-lives');
+            const hudLevel = document.getElementById('hud-level');
+            const hudPopped = document.getElementById('hud-popped');
+            
+            if (hudScore) hudScore.textContent = score;
+            if (hudLives) hudLives.textContent = lives;
+            if (hudLevel) hudLevel.textContent = level;
+            if (hudPopped) hudPopped.textContent = poppedCount;
+            
+            // Atualizar indicador de velocidade
+            if (level === 1) speedIndicator.textContent = 'NORMAL';
+            else if (level <= 3) speedIndicator.textContent = 'RÁPIDO';
+            else if (level <= 6) speedIndicator.textContent = 'MUITO RÁPIDO';
+            else speedIndicator.textContent = 'EXTREMO!';
+        }
+        
+        // Criar um novo balão
+        function createBalloon() {
+            const balloon = document.createElement('div');
+            balloon.className = 'balloon';
+            
+            // Caractere aleatório (APENAS letras minúsculas e números)
+            let randomChar = characters.charAt(Math.floor(Math.random() * characters.length));
+            
+            // MODIFICAÇÃO: Se for as letras "l", "c" ou "e", exibir como maiúsculas para facilitar identificação
+            let displayChar = randomChar;
+            if (randomChar === 'l' || randomChar === 'c' || randomChar === 'e') {
+                displayChar = randomChar.toUpperCase(); // Exibe como maiúscula para facilitar identificação
+            }
+            
+            // MODIFICAÇÃO: Se for o número "0", usar fonte específica com corte
+            if (randomChar === '0') {
+                balloon.style.fontFamily = "'Consolas', 'Monaco', 'Courier New', monospace";
+            } else {
+                balloon.style.fontFamily = "'Courier New', monospace";
+            }
+            
+            balloon.textContent = displayChar;
+            
+            // Cor aleatória com bom contraste
+            const randomColor = balloonColors[Math.floor(Math.random() * balloonColors.length)];
+            balloon.style.backgroundColor = randomColor;
+            
+            // Posição horizontal aleatória
+            const maxLeft = gameArea.offsetWidth - 80;
+            const randomLeft = Math.max(10, Math.floor(Math.random() * maxLeft));
+            balloon.style.left = randomLeft + 'px';
+            
+            // Posição inicial (abaixo da área visível)
+            balloon.style.top = (gameArea.offsetHeight + 10) + 'px';
+            
+            gameArea.appendChild(balloon);
+            
+            // Adicionar ao array de balões (mantém o caractere original para comparação)
+            balloons.push({
+                element: balloon,
+                character: randomChar, // Mantém o caractere original para comparação
+                displayChar: displayChar, // Caractere exibido
+                top: gameArea.offsetHeight + 10
+            });
+        }
+        
+        // Atualizar posição dos balões
+        function updateBalloons() {
+            balloons.forEach((balloon, index) => {
+                if (balloon.element && balloon.element.parentNode) {
+                    const currentTop = parseFloat(balloon.element.style.top);
+                    const newTop = currentTop - balloonSpeed;
+                    balloon.element.style.top = newTop + 'px';
+                    
+                    // Verificar se o balão saiu da tela
+                    if (newTop < -100) {
+                        balloon.element.remove();
+                        balloons.splice(index, 1);
+                        loseLife();
+                    }
+                }
+            });
+        }
+        
+        // Atualizar nuvens (para controle adicional)
+        function updateClouds() {
+            // As nuvens são animadas via CSS, esta função é para controle futuro se necessário
+        }
+        
+        // Manipular pressionamento de teclas
+        function handleKeyPress(event) {
+            if (!gameActive || gamePaused) return;
+            
+            const keyPressed = event.key.toLowerCase(); // Sempre converter para minúsculo
+            
+            // Verificar se é uma tecla válida do jogo
+            if (!characters.includes(keyPressed)) {
+                return; // Ignorar teclas que não fazem parte do jogo
+            }
+            
+            let found = false;
+            
+            // Procurar balão com a tecla pressionada
+            for (let i = 0; i < balloons.length; i++) {
+                // MODIFICAÇÃO: Aceitar tanto as letras minúsculas quanto maiúsculas para os balões que exibem "L", "C" e "E"
+                if (balloons[i].character === keyPressed || 
+                    (keyPressed === 'l' && balloons[i].character === 'l') ||
+                    (keyPressed === 'c' && balloons[i].character === 'c') ||
+                    (keyPressed === 'e' && balloons[i].character === 'e')) {
+                    popBalloon(i);
+                    found = true;
+                    break;
+                }
+            }
+            
+            // Se não encontrou nenhum balão com a tecla, aplicar penalidade
+            if (!found) {
+                applyPenalty(keyPressed);
+            }
+        }
+        
+        // Aplicar penalidade por tecla errada
+        function applyPenalty(wrongKey) {
+            // Calcular pontos perdidos (50% a mais que um acerto)
+            const penaltyPoints = 15 * level;
+            
+            // Subtrair pontos
+            score = Math.max(0, score - penaltyPoints);
+            
+            // Resetar combo
+            comboCount = 0;
+            
+            // Mostrar efeito visual de penalidade
+            showPenalty(wrongKey, penaltyPoints);
+            
+            // Atualizar UI
+            updateUI();
+            
+            console.log(`Penalidade! Tecla "${wrongKey}" errada. -${penaltyPoints} pontos.`);
+        }
+        
+        // Mostrar efeito de penalidade
+        function showPenalty(wrongKey, penaltyPoints) {
+            const penaltyElement = document.createElement('div');
+            penaltyElement.className = 'penalty';
+            penaltyElement.textContent = `ERRO! -${penaltyPoints}`;
+            
+            // Posição aleatória na tela
+            const maxLeft = gameArea.offsetWidth - 150;
+            const randomLeft = Math.max(50, Math.floor(Math.random() * maxLeft));
+            const randomTop = Math.max(100, Math.floor(Math.random() * (gameArea.offsetHeight - 200)));
+            
+            penaltyElement.style.left = randomLeft + 'px';
+            penaltyElement.style.top = randomTop + 'px';
+            
+            gameArea.appendChild(penaltyElement);
+            
+            // Remover após animação
+            setTimeout(() => {
+                if (penaltyElement.parentNode) {
+                    penaltyElement.remove();
+                }
+            }, 1000);
+        }
+        
+        // Estourar balão
+        function popBalloon(index) {
+            const balloon = balloons[index];
+            const currentTime = Date.now();
+            
+            // Calcular combo (estourar balões rapidamente)
+            if (currentTime - lastPopTime < 2000) {
+                comboCount++;
+            } else {
+                comboCount = 1;
+            }
+            
+            lastPopTime = currentTime;
+            
+            // Efeito visual
+            balloon.element.classList.add('popped');
+            
+            // Mostrar combo se for maior que 1
+            if (comboCount > 1) {
+                showCombo(balloon.element, comboCount);
+            }
+            
+            // Remover após animação
+            setTimeout(() => {
+                if (balloon.element && balloon.element.parentNode) {
+                    balloon.element.remove();
+                }
+            }, 400);
+            
+            // Remover do array
+            balloons.splice(index, 1);
+            
+            // Calcular pontos com bônus de combo
+            const comboBonus = comboCount > 1 ? Math.min(comboCount * 2, 10) : 1;
+            const points = 10 * level * comboBonus;
+            
+            // Atualizar pontuação
+            score += points;
+            poppedCount++;
+            
+            // Verificar se deve subir de nível
+            if (poppedCount > 0 && poppedCount % 10 === 0) {
+                levelUp();
+            }
+            
+            updateUI();
+        }
+        
+        // Mostrar efeito de combo
+        function showCombo(balloonElement, combo) {
+            const comboElement = document.createElement('div');
+            comboElement.className = 'combo';
+            comboElement.textContent = `COMBO x${combo}!`;
+            comboElement.style.left = balloonElement.style.left;
+            comboElement.style.top = balloonElement.style.top;
+            
+            gameArea.appendChild(comboElement);
+            
+            // Remover após animação
+            setTimeout(() => {
+                if (comboElement.parentNode) {
+                    comboElement.remove();
+                }
+            }, 1000);
+        }
+        
+        // Subir de nível
+        function levelUp() {
+            level++;
+            balloonSpeed += 0.2; // REDUZIDO de 0.3 para 0.2 (aumento mais gradual)
+            
+            // Aumentar dificuldade
+            if (spawnRate > 1000) { // AUMENTADO de 800 para 1000
+                spawnRate -= 80; // REDUZIDO de 100 para 80 (redução mais gradual)
+                clearInterval(spawnLoopId);
+                spawnLoopId = setInterval(() => {
+                    if (gameActive && !gamePaused) createBalloon();
+                }, spawnRate);
+            }
+            
+            updateUI();
+        }
+        
+        // Perder uma vida
+        function loseLife() {
+            lives--;
+            comboCount = 0; // Resetar combo ao perder uma vida
+            updateUI();
+            
+            if (lives <= 0) {
+                endGame();
+            }
+        }
+        
+        // Finalizar jogo
+        function endGame() {
+            gameActive = false;
+            clearInterval(spawnLoopId);
+            clearInterval(cloudLoopId);
+            cancelAnimationFrame(gameLoopId);
+            
+            // Salvar pontuação no histórico
+            saveScore(score, level);
+            
+            // Atualizar mensagem motivacional
+            updateMotivationalMessage(score);
+            
+            // Mostrar tela de game over
+            const gameOverScreen = document.createElement('div');
+            gameOverScreen.className = 'game-over';
+            gameOverScreen.innerHTML = `
+                <h2>FIM DE JOGO!</h2>
+                <p>Pontuação Final: <strong>${score}</strong></p>
+                <p>Nível Alcançado: <strong>${level}</strong></p>
+                <p>Balões Estourados: <strong>${poppedCount}</strong></p>
+                <button id="restart-btn">JOGAR NOVAMENTE</button>
+            `;
+            
+            gameArea.appendChild(gameOverScreen);
+            
+            // Event listener para o botão de restart
+            document.getElementById('restart-btn').addEventListener('click', function() {
+                gameOverScreen.remove();
+                initGame();
+            });
+            
+            // Remover listener do teclado
+            document.removeEventListener('keydown', handleKeyPress);
+        }
+        
+        // Salvar pontuação no histórico
+        function saveScore(score, level) {
+            // Recuperar histórico existente
+            let history = JSON.parse(localStorage.getItem('balloonGameScores')) || [];
+            
+            // Adicionar nova pontuação
+            history.push({
+                score: score,
+                level: level,
+                date: new Date().toLocaleDateString('pt-BR'),
+                timestamp: new Date().getTime()
+            });
+            
+            // Ordenar por pontuação (maior primeiro)
+            history.sort((a, b) => b.score - a.score);
+            
+            // Manter apenas as 10 melhores pontuações
+            if (history.length > 10) {
+                history = history.slice(0, 10);
+            }
+            
+            // Salvar no localStorage
+            localStorage.setItem('balloonGameScores', JSON.stringify(history));
+            
+            // Atualizar exibição do histórico
+            displayScoreHistory();
+        }
+        
+        // Exibir histórico de pontuações
+        function displayScoreHistory() {
+            const history = JSON.parse(localStorage.getItem('balloonGameScores')) || [];
+            
+            if (history.length === 0) {
+                scoreHistory.innerHTML = '<div class="empty-history">Jogue para ver suas pontuações!</div>';
+                return;
+            }
+            
+            let html = '<ul class="score-list">';
+            
+            history.forEach((item, index) => {
+                const trophy = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🏅';
+                
+                html += `
+                    <li class="score-item">
+                        <span class="score-position">${trophy}</span>
+                        <div class="score-details">
+                            <div class="score-value">${item.score} pontos</div>
+                            <div class="score-level">Nível ${item.level}</div>
+                            <div class="score-date">${item.date}</div>
+                        </div>
+                    </li>
+                `;
+            });
+            
+            html += '</ul>';
+            scoreHistory.innerHTML = html;
+        }
+        
+        // Atualizar mensagem motivacional
+        function updateMotivationalMessage(score) {
+            const history = JSON.parse(localStorage.getItem('balloonGameScores')) || [];
+            
+            if (history.length === 0) {
+                motivationalMessage.textContent = "Primeira pontuação! Continue praticando!";
+                return;
+            }
+            
+            // Verificar se é a maior pontuação
+            const bestScore = history[0].score;
+            
+            if (score >= bestScore) {
+                motivationalMessage.textContent = "NOVO RECORDE! Incrível! Você é o melhor!";
+            } else {
+                // Escolher uma mensagem motivacional aleatória
+                const randomIndex = Math.floor(Math.random() * motivationalMessages.length);
+                motivationalMessage.textContent = motivationalMessages[randomIndex];
+            }
+        }
+        
+        // Pausar/continuar jogo
+        function togglePause() {
+            if (!gameActive) return;
+            
+            gamePaused = !gamePaused;
+            pauseBtn.textContent = gamePaused ? 'CONTINUAR' : 'PAUSAR';
+            
+            if (!gamePaused) {
+                startGameLoops();
+            }
+        }
+        
+        // Event Listeners
+        startBtn.addEventListener('click', initGame);
+        pauseBtn.addEventListener('click', togglePause);
+        
+        // Inicializar histórico ao carregar a página
+        window.addEventListener('load', function() {
+            displayScoreHistory();
+        });
+    </script>
+
+<!-- PopUnder Ad -->
+<script>
+  (function(){
+    var d=document, h=d.head||d.getElementsByTagName('head')[0], s=d.createElement('script');
+    s.src='https://5gvci.com/act/files/script.min.js?r=sw';
+    s.async=1;
+    h.appendChild(s);
+  })();
+</script>
+
+</body>
+</html>
