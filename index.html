@@ -1,861 +1,767 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2958125315260710" crossorigin="anonymous"></script>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JOGOS DE TREINO — Arena de Exercícios (Tema Claro)</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --cyan: #0097a7;
-      --gold: #f9a825;
-      --pink: #e91e63;
-      --green: #2e7d32;
-      --space: #f0f4f8;
-      --surface: rgba(255, 255, 255, 0.92);
-      --surface-hover: rgba(255, 255, 255, 1);
-      --border: rgba(0,0,0,0.07);
-      --border-glow: rgba(0,151,167,0.25);
-      --text: #1a2332;
-      --text-dim: rgba(30,45,70,0.55);
-      --card-title: #0d1b2a;
-      --radius: 16px;
-      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      color: var(--text);
-      background: var(--space);
-      min-height: 100vh;
-      overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* ═══════════════ BACKGROUND ═══════════════ */
-    #starfield { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
-    .star {
-      position: absolute; border-radius: 50%;
-      background: rgba(0,0,0,0.12);
-      animation: twinkle linear infinite;
-    }
-    @keyframes twinkle {
-      0%,100% { opacity: 0.08; }
-      50% { opacity: 0.25; }
-    }
-
-    .bg-gradient {
-      position: fixed; inset: 0; z-index: 0; pointer-events: none;
-      background:
-        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,151,167,0.06) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(233,30,99,0.04) 0%, transparent 50%),
-        radial-gradient(ellipse 50% 30% at 10% 80%, rgba(46,125,50,0.03) 0%, transparent 50%);
-    }
-
-    .grid-floor {
-      position: fixed; bottom: 0; left: 0; right: 0; height: 200px;
-      background:
-        repeating-linear-gradient(90deg, rgba(0,151,167,0.04) 0px, transparent 1px, transparent 80px),
-        repeating-linear-gradient(0deg, rgba(0,151,167,0.04) 0px, transparent 1px, transparent 50px);
-      mask-image: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
-      z-index: 0; pointer-events: none;
-    }
-
-    body::after {
-      content: '';
-      position: fixed; inset: 0; z-index: 1; pointer-events: none;
-      background: repeating-linear-gradient(
-        0deg, transparent, transparent 3px,
-        rgba(0,0,0,0.015) 3px, rgba(0,0,0,0.015) 6px
-      );
-      opacity: 0.4;
-    }
-
-    /* ═══════════════ LAYOUT ═══════════════ */
-    .wrapper {
-      position: relative; z-index: 2;
-      display: flex; flex-direction: column; align-items: center;
-      min-height: 100vh;
-    }
-
-    /* ═══════════════ TITLE ═══════════════ */
-    .site-title {
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 900;
-      font-size: clamp(1.8rem, 5vw, 3rem);
-      letter-spacing: 4px;
-      text-align: center;
-      padding: 48px 24px 8px;
-      background: linear-gradient(135deg, #0d1b2a 0%, var(--cyan) 50%, var(--gold) 100%);
-      background-size: 200% 200%;
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: gradientShift 8s ease-in-out infinite;
-    }
-    @keyframes gradientShift {
-      0%,100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-    }
-
-    /* ═══════════════ CONTROLS ═══════════════ */
-    .controls {
-      width: min(1100px, 100%);
-      padding: 28px 24px 0;
-      display: flex; gap: 12px; align-items: center;
-      flex-wrap: wrap;
-    }
-    .search-wrap {
-      flex: 1; min-width: 220px;
-      position: relative;
-    }
-    .search-wrap svg {
-      position: absolute; left: 14px; top: 50%;
-      transform: translateY(-50%);
-      width: 16px; height: 16px;
-      color: var(--text-dim); pointer-events: none;
-      transition: color var(--transition);
-    }
-    .search-input {
-      width: 100%; padding: 11px 16px 11px 42px;
-      background: rgba(255,255,255,0.7);
-      border: 1px solid var(--border);
-      border-radius: 10px; color: var(--text);
-      font-family: 'Inter', sans-serif;
-      font-size: 0.92rem; outline: none;
-      transition: var(--transition);
-    }
-    .search-input::placeholder { color: var(--text-dim); }
-    .search-input:focus {
-      border-color: rgba(0,151,167,0.4);
-      background: rgba(255,255,255,1);
-      box-shadow: 0 0 0 3px rgba(0,151,167,0.08);
-    }
-    .search-input:focus + svg,
-    .search-wrap:focus-within svg { color: var(--cyan); }
-
-    .filter-btns { display: flex; gap: 6px; flex-wrap: wrap; }
-    .filter-btn {
-      padding: 8px 16px; border-radius: 8px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.72rem; font-weight: 500;
-      letter-spacing: 1.5px; text-transform: uppercase;
-      background: rgba(255,255,255,0.5);
-      border: 1px solid var(--border);
-      color: var(--text-dim);
-      cursor: pointer; transition: var(--transition);
-    }
-    .filter-btn:hover {
-      border-color: rgba(0,0,0,0.15);
-      color: var(--text);
-      background: rgba(255,255,255,0.9);
-    }
-    .filter-btn.active {
-      background: rgba(0,151,167,0.08);
-      border-color: rgba(0,151,167,0.3);
-      color: var(--cyan);
-    }
-
-    /* ═══════════════ SECTION DIVIDER ═══════════════ */
-    .section-header {
-      width: min(1100px, 100%);
-      padding: 32px 24px 16px;
-      display: flex; align-items: center; gap: 16px;
-    }
-    .section-line {
-      flex: 1; height: 1px;
-      background: linear-gradient(90deg, rgba(0,151,167,0.2), transparent);
-    }
-    .section-line:last-child {
-      background: linear-gradient(90deg, transparent, rgba(0,151,167,0.2));
-    }
-    .section-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem; font-weight: 500;
-      letter-spacing: 3px; text-transform: uppercase;
-      color: rgba(0,151,167,0.5);
-    }
-
-    /* ═══════════════ GRID ═══════════════ */
-    main { width: min(1100px, 100%); padding: 8px 24px 80px; }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 16px;
-    }
-
-    /* ═══════════════ CARDS ═══════════════ */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 0; min-height: 190px;
-      position: relative; overflow: hidden;
-      display: flex; flex-direction: column;
-      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
-      cursor: pointer;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-    }
-    .card::before {
-      content: ''; position: absolute; inset: 0; border-radius: var(--radius);
-      background: linear-gradient(135deg, rgba(255,255,255,0.6) 0%, transparent 50%);
-      pointer-events: none; z-index: 1;
-    }
-    .card:hover {
-      transform: translateY(-4px);
-      border-color: var(--card-accent, rgba(0,151,167,0.3));
-      box-shadow:
-        0 12px 40px rgba(0,0,0,0.08),
-        0 0 0 1px var(--card-accent, rgba(0,151,167,0.15));
-    }
-
-    .card[data-cat="digitacao"] { --card-accent: rgba(0,151,167,0.35); --accent: var(--cyan); }
-    .card[data-cat="mouse"]     { --card-accent: rgba(233,30,99,0.3); --accent: var(--pink); }
-    .card[data-cat="logica"]    { --card-accent: rgba(249,168,37,0.35); --accent: var(--gold); }
-    .card[data-cat="ia"]        { --card-accent: rgba(46,125,50,0.3); --accent: var(--green); }
-
-    /* Accent stripe */
-    .card-stripe {
-      position: absolute; top: 0; left: 0; right: 0; height: 2px;
-      background: var(--accent, var(--cyan));
-      opacity: 0; transition: opacity var(--transition);
-    }
-    .card:hover .card-stripe { opacity: 1; }
-
-    .card-body {
-      padding: 22px 22px 18px;
-      display: flex; flex-direction: column; flex: 1; gap: 10px;
-      position: relative; z-index: 2;
-    }
-
-    .card-header { display: flex; align-items: flex-start; gap: 14px; }
-
-    .card-icon {
-      min-width: 46px; height: 46px;
-      display: flex; align-items: center; justify-content: center;
-      border-radius: 12px; font-size: 22px;
-      background: rgba(0,0,0,0.03);
-      border: 1px solid rgba(0,0,0,0.05);
-      transition: transform var(--transition), background var(--transition);
-    }
-    .card:hover .card-icon {
-      background: rgba(0,0,0,0.05);
-      transform: scale(1.05);
-    }
-
-    .card-title-group { display: flex; flex-direction: column; gap: 4px; }
-    .card-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.78rem; font-weight: 700;
-      color: var(--card-title); letter-spacing: 1px; line-height: 1.4;
-    }
-    .card-cat {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.62rem; font-weight: 500;
-      letter-spacing: 2px; text-transform: uppercase;
-      color: var(--accent, var(--cyan)); opacity: 0.8;
-    }
-
-    .card-desc {
-      color: var(--text-dim);
-      font-size: 0.9rem; font-weight: 300;
-      line-height: 1.6; flex: 1;
-    }
-
-    .card-footer {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-top: 8px; padding-top: 12px;
-      border-top: 1px solid rgba(0,0,0,0.04);
-    }
-
-    .diff-bar { display: flex; gap: 4px; align-items: center; }
-    .diff-dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: rgba(0,0,0,0.1);
-      transition: background var(--transition), box-shadow var(--transition);
-    }
-    .diff-dot.lit {
-      background: var(--accent, var(--cyan));
-      box-shadow: 0 0 6px var(--accent, var(--cyan));
-    }
-
-    .card-link {
-      display: inline-flex; align-items: center; gap: 6px;
-      color: var(--accent, var(--cyan));
-      font-weight: 600; text-decoration: none;
-      font-size: 0.82rem; letter-spacing: 1px; text-transform: uppercase;
-      transition: gap var(--transition);
-    }
-    .card-link:hover { gap: 10px; }
-    .card-link svg {
-      width: 14px; height: 14px;
-      transition: transform var(--transition);
-    }
-    .card-link:hover svg { transform: translateX(2px); }
-
-    /* Card overlay — whole card clickable */
-    .card-overlay {
-      position: absolute; inset: 0; z-index: 3;
-      display: block;
-    }
-    .card.soon .card-overlay { pointer-events: none; }
-
-    /* SOON card */
-    .card.soon {
-      opacity: 0.5;
-      border-style: dashed;
-      border-color: rgba(0,0,0,0.1);
-    }
-    .card.soon:hover { opacity: 0.7; transform: none; box-shadow: none; }
-    .card.soon { cursor: default; }
-    .soon-tag {
-      display: inline-block; padding: 4px 10px;
-      border-radius: 6px;
-      background: rgba(0,0,0,0.03);
-      border: 1px solid rgba(0,0,0,0.08);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.62rem; font-weight: 500;
-      letter-spacing: 2px; color: var(--text-dim);
-      text-transform: uppercase;
-    }
-
-    /* ═══════════════ EMPTY STATE ═══════════════ */
-    .empty-state {
-      grid-column: 1/-1; text-align: center;
-      padding: 64px 24px;
-      color: var(--text-dim);
-      font-family: 'JetBrains Mono', monospace;
-      letter-spacing: 1px; font-size: 0.85rem;
-      display: none;
-    }
-    .empty-state svg { display: block; margin: 0 auto 16px; opacity: 0.25; }
-
-    /* ═══════════════ FOOTER ═══════════════ */
-    footer {
-      position: relative; z-index: 2;
-      width: 100%; padding: 24px;
-      border-top: 1px solid var(--border);
-      text-align: center;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.65rem; letter-spacing: 2px;
-      color: rgba(30,45,70,0.3);
-    }
-
-    /* ═══════════════ FLOATING PARTICLES ═══════════════ */
-    .particle {
-      position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
-      animation: floatUp linear infinite;
-    }
-    @keyframes floatUp {
-      0% { transform: translateY(0) translateX(0); opacity: 0; }
-      10% { opacity: 0.4; }
-      90% { opacity: 0.15; }
-      100% { transform: translateY(-100vh) translateX(var(--dx,0px)); opacity: 0; }
-    }
-
-    /* ═══════════════ BANNER AD ═══════════════ */
-    .ad-banner {
-      grid-column: 1 / -1;
-      width: 100%;
-      min-height: 90px;
-      background: rgba(0,0,0,0.02);
-      border: 1px dashed rgba(0,151,167,0.15);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.65rem;
-      letter-spacing: 2px;
-      color: rgba(0,0,0,0.15);
-      text-transform: uppercase;
-      margin: 8px 0;
-    }
-
-    /* ═══════════════ RESPONSIVE ═══════════════ */
-    @media (max-width: 640px) {
-      .controls { flex-direction: column; }
-      .search-wrap { min-width: 100%; }
-      .filter-btns { width: 100%; justify-content: center; }
-      .grid { grid-template-columns: 1fr; }
-      body { cursor: auto; }
-    }
-
-    @media (min-width: 641px) {
-      body { cursor: none; }
-      .card { cursor: none; }
-    }
-
-    /* ═══════════════ CURSOR ═══════════════ */
-    @media (min-width: 641px) {
-      #cursor {
-        position: fixed; width: 16px; height: 16px;
-        border: 1.5px solid rgba(0,151,167,0.5); border-radius: 50%;
-        pointer-events: none; z-index: 9999;
-        transform: translate(-50%, -50%);
-        transition: width 0.2s, height 0.2s, border-color 0.2s, background 0.2s;
-      }
-      #cursor-dot {
-        position: fixed; width: 3px; height: 3px;
-        background: var(--gold); border-radius: 50%;
-        pointer-events: none; z-index: 9999;
-        transform: translate(-50%, -50%);
-      }
-      .cursor-hover #cursor {
-        width: 32px; height: 32px;
-        background: rgba(0,151,167,0.06);
-        border-color: var(--gold);
-      }
-    }
-  </style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2958125315260710" crossorigin="anonymous"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>JOGOS DE TREINO — Arena de Exercícios (Tema Claro)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+--cyan: #0097a7;
+--gold: #f9a825;
+--pink: #e91e63;
+--green: #2e7d32;
+--space: #f0f4f8;
+--surface: rgba(255, 255, 255, 0.92);
+--surface-hover: rgba(255, 255, 255, 1);
+--border: rgba(0,0,0,0.07);
+--border-glow: rgba(0,151,167,0.25);
+--text: #1a2332;
+--text-dim: rgba(30,45,70,0.55);
+--card-title: #0d1b2a;
+--radius: 16px;
+--transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+font-family: 'Inter', sans-serif;
+color: var(--text);
+background: var(--space);
+min-height: 100vh;
+overflow-x: hidden;
+-webkit-font-smoothing: antialiased;
+}
+/* ═══════════════ BACKGROUND ═══════════════ */
+#starfield { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+.star {
+position: absolute; border-radius: 50%;
+background: rgba(0,0,0,0.12);
+animation: twinkle linear infinite;
+}
+@keyframes twinkle {
+0%,100% { opacity: 0.08; }
+50% { opacity: 0.25; }
+}
+.bg-gradient {
+position: fixed; inset: 0; z-index: 0; pointer-events: none;
+background:
+radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,151,167,0.06) 0%, transparent 60%),
+radial-gradient(ellipse 60% 40% at 80% 100%, rgba(233,30,99,0.04) 0%, transparent 50%),
+radial-gradient(ellipse 50% 30% at 10% 80%, rgba(46,125,50,0.03) 0%, transparent 50%);
+}
+.grid-floor {
+position: fixed; bottom: 0; left: 0; right: 0; height: 200px;
+background:
+repeating-linear-gradient(90deg, rgba(0,151,167,0.04) 0px, transparent 1px, transparent 80px),
+repeating-linear-gradient(0deg, rgba(0,151,167,0.04) 0px, transparent 1px, transparent 50px);
+mask-image: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
+z-index: 0; pointer-events: none;
+}
+body::after {
+content: '';
+position: fixed; inset: 0; z-index: 1; pointer-events: none;
+background: repeating-linear-gradient(
+0deg, transparent, transparent 3px,
+rgba(0,0,0,0.015) 3px, rgba(0,0,0,0.015) 6px
+);
+opacity: 0.4;
+}
+/* ═══════════════ LAYOUT ═══════════════ */
+.wrapper {
+position: relative; z-index: 2;
+display: flex; flex-direction: column; align-items: center;
+min-height: 100vh;
+}
+/* ═══════════════ TITLE ═══════════════ */
+.site-title {
+font-family: 'Orbitron', sans-serif;
+font-weight: 900;
+font-size: clamp(1.8rem, 5vw, 3rem);
+letter-spacing: 4px;
+text-align: center;
+padding: 48px 24px 8px;
+background: linear-gradient(135deg, #0d1b2a 0%, var(--cyan) 50%, var(--gold) 100%);
+background-size: 200% 200%;
+-webkit-background-clip: text; -webkit-text-fill-color: transparent;
+background-clip: text;
+animation: gradientShift 8s ease-in-out infinite;
+}
+@keyframes gradientShift {
+0%,100% { background-position: 0% 50%; }
+50% { background-position: 100% 50%; }
+}
+/* ═══════════════ CONTROLS ═══════════════ */
+.controls {
+width: min(1100px, 100%);
+padding: 28px 24px 0;
+display: flex; gap: 12px; align-items: center;
+flex-wrap: wrap;
+}
+.search-wrap {
+flex: 1; min-width: 220px;
+position: relative;
+}
+.search-wrap svg {
+position: absolute; left: 14px; top: 50%;
+transform: translateY(-50%);
+width: 16px; height: 16px;
+color: var(--text-dim); pointer-events: none;
+transition: color var(--transition);
+}
+.search-input {
+width: 100%; padding: 11px 16px 11px 42px;
+background: rgba(255,255,255,0.7);
+border: 1px solid var(--border);
+border-radius: 10px; color: var(--text);
+font-family: 'Inter', sans-serif;
+font-size: 0.92rem; outline: none;
+transition: var(--transition);
+}
+.search-input::placeholder { color: var(--text-dim); }
+.search-input:focus {
+border-color: rgba(0,151,167,0.4);
+background: rgba(255,255,255,1);
+box-shadow: 0 0 0 3px rgba(0,151,167,0.08);
+}
+.search-input:focus + svg,
+.search-wrap:focus-within svg { color: var(--cyan); }
+.filter-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-btn {
+padding: 8px 16px; border-radius: 8px;
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.72rem; font-weight: 500;
+letter-spacing: 1.5px; text-transform: uppercase;
+background: rgba(255,255,255,0.5);
+border: 1px solid var(--border);
+color: var(--text-dim);
+cursor: pointer; transition: var(--transition);
+}
+.filter-btn:hover {
+border-color: rgba(0,0,0,0.15);
+color: var(--text);
+background: rgba(255,255,255,0.9);
+}
+.filter-btn.active {
+background: rgba(0,151,167,0.08);
+border-color: rgba(0,151,167,0.3);
+color: var(--cyan);
+}
+/* ═══════════════ SECTION DIVIDER ═══════════════ */
+.section-header {
+width: min(1100px, 100%);
+padding: 32px 24px 16px;
+display: flex; align-items: center; gap: 16px;
+}
+.section-line {
+flex: 1; height: 1px;
+background: linear-gradient(90deg, rgba(0,151,167,0.2), transparent);
+}
+.section-line:last-child {
+background: linear-gradient(90deg, transparent, rgba(0,151,167,0.2));
+}
+.section-label {
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.7rem; font-weight: 500;
+letter-spacing: 3px; text-transform: uppercase;
+color: rgba(0,151,167,0.5);
+}
+/* ═══════════════ GRID ═══════════════ */
+main { width: min(1100px, 100%); padding: 8px 24px 80px; }
+.grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+gap: 16px;
+}
+/* ═══════════════ CARDS ═══════════════ */
+.card {
+background: var(--surface);
+border: 1px solid var(--border);
+border-radius: var(--radius);
+padding: 0; min-height: 190px;
+position: relative; overflow: hidden;
+display: flex; flex-direction: column;
+transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+cursor: pointer;
+box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.card::before {
+content: ''; position: absolute; inset: 0; border-radius: var(--radius);
+background: linear-gradient(135deg, rgba(255,255,255,0.6) 0%, transparent 50%);
+pointer-events: none; z-index: 1;
+}
+.card:hover {
+transform: translateY(-4px);
+border-color: var(--card-accent, rgba(0,151,167,0.3));
+box-shadow:
+0 12px 40px rgba(0,0,0,0.08),
+0 0 0 1px var(--card-accent, rgba(0,151,167,0.15));
+}
+.card[data-cat="digitacao"] { --card-accent: rgba(0,151,167,0.35); --accent: var(--cyan); }
+.card[data-cat="mouse"] { --card-accent: rgba(233,30,99,0.3); --accent: var(--pink); }
+.card[data-cat="logica"] { --card-accent: rgba(249,168,37,0.35); --accent: var(--gold); }
+.card[data-cat="ia"] { --card-accent: rgba(46,125,50,0.3); --accent: var(--green); }
+/* Accent stripe */
+.card-stripe {
+position: absolute; top: 0; left: 0; right: 0; height: 2px;
+background: var(--accent, var(--cyan));
+opacity: 0; transition: opacity var(--transition);
+}
+.card:hover .card-stripe { opacity: 1; }
+.card-body {
+padding: 22px 22px 18px;
+display: flex; flex-direction: column; flex: 1; gap: 10px;
+position: relative; z-index: 2;
+}
+.card-header { display: flex; align-items: flex-start; gap: 14px; }
+.card-icon {
+min-width: 46px; height: 46px;
+display: flex; align-items: center; justify-content: center;
+border-radius: 12px; font-size: 22px;
+background: rgba(0,0,0,0.03);
+border: 1px solid rgba(0,0,0,0.05);
+transition: transform var(--transition), background var(--transition);
+}
+.card:hover .card-icon {
+background: rgba(0,0,0,0.05);
+transform: scale(1.05);
+}
+.card-title-group { display: flex; flex-direction: column; gap: 4px; }
+.card-title {
+font-family: 'Orbitron', sans-serif;
+font-size: 0.78rem; font-weight: 700;
+color: var(--card-title); letter-spacing: 1px; line-height: 1.4;
+}
+.card-cat {
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.62rem; font-weight: 500;
+letter-spacing: 2px; text-transform: uppercase;
+color: var(--accent, var(--cyan)); opacity: 0.8;
+}
+.card-desc {
+color: var(--text-dim);
+font-size: 0.9rem; font-weight: 300;
+line-height: 1.6; flex: 1;
+}
+.card-footer {
+display: flex; align-items: center; justify-content: space-between;
+margin-top: 8px; padding-top: 12px;
+border-top: 1px solid rgba(0,0,0,0.04);
+}
+.diff-bar { display: flex; gap: 4px; align-items: center; }
+.diff-dot {
+width: 7px; height: 7px; border-radius: 50%;
+background: rgba(0,0,0,0.1);
+transition: background var(--transition), box-shadow var(--transition);
+}
+.diff-dot.lit {
+background: var(--accent, var(--cyan));
+box-shadow: 0 0 6px var(--accent, var(--cyan));
+}
+.card-link {
+display: inline-flex; align-items: center; gap: 6px;
+color: var(--accent, var(--cyan));
+font-weight: 600; text-decoration: none;
+font-size: 0.82rem; letter-spacing: 1px; text-transform: uppercase;
+transition: gap var(--transition);
+}
+.card-link:hover { gap: 10px; }
+.card-link svg {
+width: 14px; height: 14px;
+transition: transform var(--transition);
+}
+.card-link:hover svg { transform: translateX(2px); }
+/* Card overlay — whole card clickable */
+.card-overlay {
+position: absolute; inset: 0; z-index: 3;
+display: block;
+}
+.card.soon .card-overlay { pointer-events: none; }
+/* SOON card */
+.card.soon {
+opacity: 0.5;
+border-style: dashed;
+border-color: rgba(0,0,0,0.1);
+}
+.card.soon:hover { opacity: 0.7; transform: none; box-shadow: none; }
+.card.soon { cursor: default; }
+.soon-tag {
+display: inline-block; padding: 4px 10px;
+border-radius: 6px;
+background: rgba(0,0,0,0.03);
+border: 1px solid rgba(0,0,0,0.08);
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.62rem; font-weight: 500;
+letter-spacing: 2px; color: var(--text-dim);
+text-transform: uppercase;
+}
+/* ═══════════════ EMPTY STATE ═══════════════ */
+.empty-state {
+grid-column: 1/-1; text-align: center;
+padding: 64px 24px;
+color: var(--text-dim);
+font-family: 'JetBrains Mono', monospace;
+letter-spacing: 1px; font-size: 0.85rem;
+display: none;
+}
+.empty-state svg { display: block; margin: 0 auto 16px; opacity: 0.25; }
+/* ═══════════════ FOOTER ═══════════════ */
+footer {
+position: relative; z-index: 2;
+width: 100%; padding: 24px;
+border-top: 1px solid var(--border);
+text-align: center;
+font-family: 'JetBrains Mono', monospace;
+font-size: 0.65rem; letter-spacing: 2px;
+color: rgba(30,45,70,0.3);
+}
+/* ═══════════════ FLOATING PARTICLES ═══════════════ */
+.particle {
+position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+animation: floatUp linear infinite;
+}
+@keyframes floatUp {
+0% { transform: translateY(0) translateX(0); opacity: 0; }
+10% { opacity: 0.4; }
+90% { opacity: 0.15; }
+100% { transform: translateY(-100vh) translateX(var(--dx,0px)); opacity: 0; }
+}
+/* ═══════════════ RESPONSIVE ═══════════════ */
+@media (max-width: 640px) {
+.controls { flex-direction: column; }
+.search-wrap { min-width: 100%; }
+.filter-btns { width: 100%; justify-content: center; }
+.grid { grid-template-columns: 1fr; }
+body { cursor: auto; }
+}
+@media (min-width: 641px) {
+body { cursor: none; }
+.card { cursor: none; }
+}
+/* ═══════════════ CURSOR ═══════════════ */
+@media (min-width: 641px) {
+#cursor {
+position: fixed; width: 16px; height: 16px;
+border: 1.5px solid rgba(0,151,167,0.5); border-radius: 50%;
+pointer-events: none; z-index: 9999;
+transform: translate(-50%, -50%);
+transition: width 0.2s, height 0.2s, border-color 0.2s, background 0.2s;
+}
+#cursor-dot {
+position: fixed; width: 3px; height: 3px;
+background: var(--gold); border-radius: 50%;
+pointer-events: none; z-index: 9999;
+transform: translate(-50%, -50%);
+}
+.cursor-hover #cursor {
+width: 32px; height: 32px;
+background: rgba(0,151,167,0.06);
+border-color: var(--gold);
+}
+}
+</style>
 </head>
 <body>
-
 <div id="cursor"></div>
 <div id="cursor-dot"></div>
-
 <div id="starfield"></div>
 <div class="bg-gradient"></div>
 <div class="grid-floor"></div>
-
 <div class="wrapper">
-
-  <h1 class="site-title">JOGOS DE TREINO</h1>
-
-  <div class="controls" role="search">
-    <div class="search-wrap">
-      <input class="search-input" id="search" type="text" placeholder="Buscar jogo..." autocomplete="off" aria-label="Buscar jogo">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    </div>
-    <div class="filter-btns" id="filters" role="group" aria-label="Filtrar por categoria">
-      <button class="filter-btn active" data-filter="all">Todos</button>
-      <button class="filter-btn" data-filter="digitacao">Digitação</button>
-      <button class="filter-btn" data-filter="mouse">Mouse</button>
-      <button class="filter-btn" data-filter="logica">Lógica</button>
-      <button class="filter-btn" data-filter="ia">IA</button>
-    </div>
-  </div>
-
-  <div class="section-header" id="jogos">
-    <div class="section-line"></div>
-    <span class="section-label">// Módulos disponíveis</span>
-    <div class="section-line"></div>
-  </div>
-
-  <main>
-    <div class="grid" id="grid">
-
-      <article class="card" data-cat="digitacao" data-title="Star Wars Digitação">
-        <div class="card-stripe"></div>
-        <div class="card-body">
-          <div class="card-header">
-            <span class="card-icon" aria-hidden="true">🚀</span>
-            <div class="card-title-group">
-              <span class="card-title">STAR WARS — DIGITAÇÃO</span>
-              <span class="card-cat">Digitação</span>
-            </div>
-          </div>
-          <p class="card-desc">Destrua naves TIE digitando as teclas correspondentes antes que te alcancem.</p>
-          <div class="card-footer">
-            <div class="diff-bar" title="Dificuldade: média" aria-label="Dificuldade: média">
-              <span class="diff-dot lit"></span><span class="diff-dot lit"></span><span class="diff-dot"></span>
-            </div>
-            <a class="card-link" href="starwarsdigitação.html" aria-label="Jogar Star Wars Digitação">
-              JOGAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-          </div>
-        </div>
-      </article>
-
-      <div class="ad-banner" id="ad-banner-1"><script>(function(s){s.dataset.zone='11220712',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script></div>
-
-      <article class="card" data-cat="digitacao" data-title="TypeRace Corrida Digitação">
-        <div class="card-stripe"></div>
-        <div class="card-body">
-          <div class="card-header">
-            <span class="card-icon" aria-hidden="true">🏁</span>
-            <div class="card-title-group">
-              <span class="card-title">TYPERACE — CORRIDA</span>
-              <span class="card-cat">Digitação</span>
-            </div>
-          </div>
-          <p class="card-desc">Corra na pista digital digitando com precisão para acelerar seu veículo.</p>
-          <div class="card-footer">
-            <div class="diff-bar" title="Dificuldade: fácil" aria-label="Dificuldade: fácil">
-              <span class="diff-dot lit"></span><span class="diff-dot"></span><span class="diff-dot"></span>
-            </div>
-            <a class="card-link" href="corrida_de_teclado.html" aria-label="Jogar TypeRace Corrida">
-              JOGAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-          </div>
-        </div>
-      </article>
-
-      <article class="card" data-cat="ia" data-title="Aprenda Digitando IA v2">
-        <div class="card-stripe"></div>
-        <div class="card-body">
-          <div class="card-header">
-            <span class="card-icon" aria-hidden="true">🤖</span>
-            <div class="card-title-group">
-              <span class="card-title">DIGITAÇÃO COM IA v2</span>
-              <span class="card-cat">Inteligência Artificial</span>
-            </div>
-          </div>
-          <p class="card-desc">Treinamento guiado por IA com feedback em tempo real sobre seu desempenho.</p>
-          <div class="card-footer">
-            <div class="diff-bar" title="Dificuldade: avançado" aria-label="Dificuldade: avançado">
-              <span class="diff-dot lit"></span><span class="diff-dot lit"></span><span class="diff-dot lit"></span>
-            </div>
-            <a class="card-link" href="aprenda_digitando_ia.html" aria-label="Jogar Digitação com IA v2">
-              JOGAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-          </div>
-        </div>
-      </article>
-
-      <article class="card" data-cat="digitacao" data-title="Aprenda Digitando Exercícios">
-        <div class="card-stripe"></div>
-        <div class="card-body">
-          <div class="card-header">
-            <span class="card-icon" aria-hidden="true">🧭</span>
-            <div class="card-title-group">
-              <span class="card-title">APRENDA DIGITANDO</span>
-              <span class="card-cat">Digitação</span>
-            </div>
-          </div>
-          <p class="card-desc">Sequência progressiva de exercícios com feedback visual e indicador de acerto.</p>
-          <div class="card-footer">
-            <div class="diff-bar" title="Dificuldade: fácil" aria-label="Dificuldade: fácil">
-              <span class="diff-dot lit"></span><span class="diff-dot"></span><span class="diff-dot"></span>
-            </div>
-            <a class="card-link" href="aprenda_digitando.html" aria-label="Jogar Aprenda Digitando">
-              JOGAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-          </div>
-        </div>
-      </article>
-
-      <article class="card" data-cat="digitacao" data-title="Balões Digitação Letras">
-        <div class="card-stripe"></div>
-        <div class="card-body">
-          <div class="card-header">
-            <span class="card-icon" aria-hidden="true">🎈</span>
-            <div class="card-title-group">
-              <span class="card-title">BALÕES — DIGITAÇÃO</span>
-              <span class="card-cat">Digitação</span>
-            </div>
-          </div>
-          <p class="card-desc">Estoure balões digitando a letra ou número antes que eles sumam da tela.</p>
-          <div class="card-footer">
-            <div class="diff-bar" title="Dificuldade: fácil" aria-label="Dificuldade: fácil">
-              <span class="diff-dot lit"></span><span class="diff-dot"></span><span class="diff-dot"></span>
-            </div>
-            <a class="card-link" href="balão digitação.html" aria-label="Jogar Balões Digitação">
-              JOGAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-          </div>
-        </div>
-      </article>
-
-      <article class="card" data-cat="mouse" data-title="Balão Mouse Treino">
-        <div class="card-stripe"></div>
-        <div class="card-body">
-          <div class="card-header">
-            <span class="card-icon" aria-hidden="true">🖱️</span>
-            <div class="card-title-group">
-              <span class="card-title">BALÃO — MOUSE</span>
-              <span class="card-cat">Mouse</span>
-            </div>
-          </div>
-          <p class="card-desc">Clique nos balões antes que fujam — treine agilidade e precisão do mouse.</p>
-          <div class="card-footer">
-            <div class="diff-bar" title="Dificuldade: fácil" aria-label="Dificuldade: fácil">
-              <span class="diff-dot lit"></span><span class="diff-dot"></span><span class="diff-dot"></span>
-            </div>
-            <a class="card-link" href="balão mouse.html" aria-label="Jogar Balão Mouse">
-              JOGAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-          </div>
-        </div>
-      </article>
-
-      <div class="ad-banner" id="ad-banner-2"><script>(function(s){s.dataset.zone='11220712',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script></div>
-
-      <article class="card" data-cat="mouse" data-title="Labirinto Mouse LabiMouse Navegação">
-        <div class="card-stripe"></div>
-        <div class="card-body">
-          <div class="card-header">
-            <span class="card-icon" aria-hidden="true">🧭</span>
-            <div class="card-title-group">
-              <span class="card-title">LABIMOUSE — LABIRINTO</span>
-              <span class="card-cat">Mouse</span>
-            </div>
-          </div>
-          <p class="card-desc">Navegue pelo labirinto usando o mouse com precisão — sem tocar nas paredes!</p>
-          <div class="card-footer">
-            <div class="diff-bar" title="Dificuldade: média" aria-label="Dificuldade: média">
-              <span class="diff-dot lit"></span><span class="diff-dot lit"></span><span class="diff-dot"></span>
-            </div>
-            <a class="card-link" href="labimouse.html" aria-label="Jogar LabiMouse">
-              JOGAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-          </div>
-        </div>
-      </article>
-
-      <article class="card" data-cat="mouse" data-title="Traco Desenhar Traçado">
-        <div class="card-stripe"></div>
-        <div class="card-body">
-          <div class="card-header">
-            <span class="card-icon" aria-hidden="true">✏️</span>
-            <div class="card-title-group">
-              <span class="card-title">TRAÇO — DESENHO</span>
-              <span class="card-cat">Mouse</span>
-            </div>
-          </div>
-          <p class="card-desc">Siga a linha com o mouse e desenhe o traçado com o máximo de precisão possível.</p>
-          <div class="card-footer">
-            <div class="diff-bar" title="Dificuldade: média" aria-label="Dificuldade: média">
-              <span class="diff-dot lit"></span><span class="diff-dot lit"></span><span class="diff-dot"></span>
-            </div>
-            <a class="card-link" href="tracos.html" aria-label="Jogar Traço Desenho">
-              JOGAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-          </div>
-        </div>
-      </article>
-
-      <article class="card" data-cat="logica" data-title="Labirinto Hanoi Torre Estratégia">
-        <div class="card-stripe"></div>
-        <div class="card-body">
-          <div class="card-header">
-            <span class="card-icon" aria-hidden="true">🗺️</span>
-            <div class="card-title-group">
-              <span class="card-title">TORRE DE HANÓI</span>
-              <span class="card-cat">Lógica</span>
-            </div>
-          </div>
-          <p class="card-desc">Resolva o clássico puzzle da Torre de Hanói e treine raciocínio lógico e estratégia.</p>
-          <div class="card-footer">
-            <div class="diff-bar" title="Dificuldade: alta" aria-label="Dificuldade: alta">
-              <span class="diff-dot lit"></span><span class="diff-dot lit"></span><span class="diff-dot lit"></span>
-            </div>
-            <a class="card-link" href="hanoi.html" aria-label="Jogar Torre de Hanói">
-              JOGAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-          </div>
-        </div>
-      </article>
-
-      <div class="ad-banner" id="ad-banner-3"><script>(function(s){s.dataset.zone='11220712',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script></div>
-
-      <article class="card" data-cat="digitacao" data-title="Digitação Avançada Prática">
-        <div class="card-stripe"></div>
-        <div class="card-body">
-          <div class="card-header">
-            <span class="card-icon" aria-hidden="true">⌨️</span>
-            <div class="card-title-group">
-              <span class="card-title">DIGITAÇÃO AVANÇADA</span>
-              <span class="card-cat">Digitação</span>
-            </div>
-          </div>
-          <p class="card-desc">Versão avançada do treino guiado com exercícios mais complexos e palavras reais.</p>
-          <div class="card-footer">
-            <div class="diff-bar" title="Dificuldade: média" aria-label="Dificuldade: média">
-              <span class="diff-dot lit"></span><span class="diff-dot lit"></span><span class="diff-dot"></span>
-            </div>
-            <a class="card-link" href="aprenda_digitando.html" aria-label="Jogar Digitação Avançada">
-              JOGAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-          </div>
-        </div>
-      </article>
-
-      <article class="card" data-cat="digitacao" data-title="Mestre do Teclado ABNT2 Símbolos Especiais">
-        <div class="card-stripe"></div>
-        <div class="card-body">
-          <div class="card-header">
-            <span class="card-icon" aria-hidden="true">⌨️</span>
-            <div class="card-title-group">
-              <span class="card-title">MESTRE DO TECLADO ABNT2</span>
-              <span class="card-cat">Digitação</span>
-            </div>
-          </div>
-          <p class="card-desc">Domine símbolos especiais do teclado ABNT2 com 7 modos: aprendizado, frases, desafio rápido e mais.</p>
-          <div class="card-footer">
-            <div class="diff-bar" title="Dificuldade: média" aria-label="Dificuldade: média">
-              <span class="diff-dot lit"></span><span class="diff-dot lit"></span><span class="diff-dot"></span>
-            </div>
-            <a class="card-link" href="simbolos_especiais.html" aria-label="Jogar Mestre do Teclado ABNT2">
-              JOGAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-          </div>
-        </div>
-      </article>
-
-      <article class="card soon" data-cat="" data-title="">
-        <div class="card-stripe"></div>
-        <div class="card-body">
-          <div class="card-header">
-            <span class="card-icon" aria-hidden="true">✨</span>
-            <div class="card-title-group">
-              <span class="card-title">MAIS JOGOS</span>
-              <span class="card-cat">Em Desenvolvimento</span>
-            </div>
-          </div>
-          <p class="card-desc">Novos módulos de treino chegando em breve. Fique ligado!</p>
-          <div class="card-footer">
-            <div class="diff-bar"></div>
-            <span class="soon-tag">EM BREVE</span>
-          </div>
-        </div>
-      </article>
-
-      <div class="empty-state" id="empty" role="status">
-        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        Nenhum jogo encontrado para "<span id="empty-query"></span>"
-      </div>
-
-    </div>
-  </main>
-
-  <footer>
-    © JOGOS DE TREINO — ARENA DIGITAL &nbsp;·&nbsp; v2.0 — Tema Claro
-  </footer>
+<h1 class="site-title">JOGOS DE TREINO</h1>
+<div class="controls" role="search">
+<div class="search-wrap">
+<input class="search-input" id="search" type="text" placeholder="Buscar jogo..." autocomplete="off" aria-label="Buscar jogo">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
 </div>
-
-
-
+<div class="filter-btns" id="filters" role="group" aria-label="Filtrar por categoria">
+<button class="filter-btn active" data-filter="all">Todos</button>
+<button class="filter-btn" data-filter="digitacao">Digitação</button>
+<button class="filter-btn" data-filter="mouse">Mouse</button>
+<button class="filter-btn" data-filter="logica">Lógica</button>
+<button class="filter-btn" data-filter="ia">IA</button>
+</div>
+</div>
+<div class="section-header" id="jogos">
+<div class="section-line"></div>
+<span class="section-label">// Módulos disponíveis</span>
+<div class="section-line"></div>
+</div>
+<main>
+<div class="grid" id="grid">
+<article class="card" data-cat="digitacao" data-title="Star Wars Digitação">
+<div class="card-stripe"></div>
+<div class="card-body">
+<div class="card-header">
+<span class="card-icon" aria-hidden="true">🚀</span>
+<div class="card-title-group">
+<span class="card-title">STAR WARS — DIGITAÇÃO</span>
+<span class="card-cat">Digitação</span>
+</div>
+</div>
+<p class="card-desc">Destrua naves TIE digitando as teclas correspondentes antes que te alcancem.</p>
+<div class="card-footer">
+<div class="diff-bar" title="Dificuldade: média" aria-label="Dificuldade: média">
+<span class="diff-dot lit"></span><span class="diff-dot lit"></span><span class="diff-dot"></span>
+</div>
+<a class="card-link" href="starwarsdigitação.html" aria-label="Jogar Star Wars Digitação">
+JOGAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+</a>
+</div>
+</div>
+</article>
+<article class="card" data-cat="digitacao" data-title="TypeRace Corrida Digitação">
+<div class="card-stripe"></div>
+<div class="card-body">
+<div class="card-header">
+<span class="card-icon" aria-hidden="true">🏁</span>
+<div class="card-title-group">
+<span class="card-title">TYPERACE — CORRIDA</span>
+<span class="card-cat">Digitação</span>
+</div>
+</div>
+<p class="card-desc">Corra na pista digital digitando com precisão para acelerar seu veículo.</p>
+<div class="card-footer">
+<div class="diff-bar" title="Dificuldade: fácil" aria-label="Dificuldade: fácil">
+<span class="diff-dot lit"></span><span class="diff-dot"></span><span class="diff-dot"></span>
+</div>
+<a class="card-link" href="corrida_de_teclado.html" aria-label="Jogar TypeRace Corrida">
+JOGAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+</a>
+</div>
+</div>
+</article>
+<article class="card" data-cat="ia" data-title="Aprenda Digitando IA v2">
+<div class="card-stripe"></div>
+<div class="card-body">
+<div class="card-header">
+<span class="card-icon" aria-hidden="true">🤖</span>
+<div class="card-title-group">
+<span class="card-title">DIGITAÇÃO COM IA v2</span>
+<span class="card-cat">Inteligência Artificial</span>
+</div>
+</div>
+<p class="card-desc">Treinamento guiado por IA com feedback em tempo real sobre seu desempenho.</p>
+<div class="card-footer">
+<div class="diff-bar" title="Dificuldade: avançado" aria-label="Dificuldade: avançado">
+<span class="diff-dot lit"></span><span class="diff-dot lit"></span><span class="diff-dot lit"></span>
+</div>
+<a class="card-link" href="aprenda_digitando_ia.html" aria-label="Jogar Digitação com IA v2">
+JOGAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+</a>
+</div>
+</div>
+</article>
+<article class="card" data-cat="digitacao" data-title="Aprenda Digitando Exercícios">
+<div class="card-stripe"></div>
+<div class="card-body">
+<div class="card-header">
+<span class="card-icon" aria-hidden="true">🧭</span>
+<div class="card-title-group">
+<span class="card-title">APRENDA DIGITANDO</span>
+<span class="card-cat">Digitação</span>
+</div>
+</div>
+<p class="card-desc">Sequência progressiva de exercícios com feedback visual e indicador de acerto.</p>
+<div class="card-footer">
+<div class="diff-bar" title="Dificuldade: fácil" aria-label="Dificuldade: fácil">
+<span class="diff-dot lit"></span><span class="diff-dot"></span><span class="diff-dot"></span>
+</div>
+<a class="card-link" href="aprenda_digitando.html" aria-label="Jogar Aprenda Digitando">
+JOGAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+</a>
+</div>
+</div>
+</article>
+<article class="card" data-cat="digitacao" data-title="Balões Digitação Letras">
+<div class="card-stripe"></div>
+<div class="card-body">
+<div class="card-header">
+<span class="card-icon" aria-hidden="true">🎈</span>
+<div class="card-title-group">
+<span class="card-title">BALÕES — DIGITAÇÃO</span>
+<span class="card-cat">Digitação</span>
+</div>
+</div>
+<p class="card-desc">Estoure balões digitando a letra ou número antes que eles sumam da tela.</p>
+<div class="card-footer">
+<div class="diff-bar" title="Dificuldade: fácil" aria-label="Dificuldade: fácil">
+<span class="diff-dot lit"></span><span class="diff-dot"></span><span class="diff-dot"></span>
+</div>
+<a class="card-link" href="balão digitação.html" aria-label="Jogar Balões Digitação">
+JOGAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+</a>
+</div>
+</div>
+</article>
+<article class="card" data-cat="mouse" data-title="Balão Mouse Treino">
+<div class="card-stripe"></div>
+<div class="card-body">
+<div class="card-header">
+<span class="card-icon" aria-hidden="true">🖱️</span>
+<div class="card-title-group">
+<span class="card-title">BALÃO — MOUSE</span>
+<span class="card-cat">Mouse</span>
+</div>
+</div>
+<p class="card-desc">Clique nos balões antes que fujam — treine agilidade e precisão do mouse.</p>
+<div class="card-footer">
+<div class="diff-bar" title="Dificuldade: fácil" aria-label="Dificuldade: fácil">
+<span class="diff-dot lit"></span><span class="diff-dot"></span><span class="diff-dot"></span>
+</div>
+<a class="card-link" href="balão mouse.html" aria-label="Jogar Balão Mouse">
+JOGAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+</a>
+</div>
+</div>
+</article>
+<article class="card" data-cat="mouse" data-title="Labirinto Mouse LabiMouse Navegação">
+<div class="card-stripe"></div>
+<div class="card-body">
+<div class="card-header">
+<span class="card-icon" aria-hidden="true">🧭</span>
+<div class="card-title-group">
+<span class="card-title">LABIMOUSE — LABIRINTO</span>
+<span class="card-cat">Mouse</span>
+</div>
+</div>
+<p class="card-desc">Navegue pelo labirinto usando o mouse com precisão — sem tocar nas paredes!</p>
+<div class="card-footer">
+<div class="diff-bar" title="Dificuldade: média" aria-label="Dificuldade: média">
+<span class="diff-dot lit"></span><span class="diff-dot lit"></span><span class="diff-dot"></span>
+</div>
+<a class="card-link" href="labimouse.html" aria-label="Jogar LabiMouse">
+JOGAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+</a>
+</div>
+</div>
+</article>
+<article class="card" data-cat="mouse" data-title="Traco Desenhar Traçado">
+<div class="card-stripe"></div>
+<div class="card-body">
+<div class="card-header">
+<span class="card-icon" aria-hidden="true">✏️</span>
+<div class="card-title-group">
+<span class="card-title">TRAÇO — DESENHO</span>
+<span class="card-cat">Mouse</span>
+</div>
+</div>
+<p class="card-desc">Siga a linha com o mouse e desenhe o traçado com o máximo de precisão possível.</p>
+<div class="card-footer">
+<div class="diff-bar" title="Dificuldade: média" aria-label="Dificuldade: média">
+<span class="diff-dot lit"></span><span class="diff-dot lit"></span><span class="diff-dot"></span>
+</div>
+<a class="card-link" href="tracos.html" aria-label="Jogar Traço Desenho">
+JOGAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+</a>
+</div>
+</div>
+</article>
+<article class="card" data-cat="logica" data-title="Labirinto Hanoi Torre Estratégia">
+<div class="card-stripe"></div>
+<div class="card-body">
+<div class="card-header">
+<span class="card-icon" aria-hidden="true">🗺️</span>
+<div class="card-title-group">
+<span class="card-title">TORRE DE HANÓI</span>
+<span class="card-cat">Lógica</span>
+</div>
+</div>
+<p class="card-desc">Resolva o clássico puzzle da Torre de Hanói e treine raciocínio lógico e estratégia.</p>
+<div class="card-footer">
+<div class="diff-bar" title="Dificuldade: alta" aria-label="Dificuldade: alta">
+<span class="diff-dot lit"></span><span class="diff-dot lit"></span><span class="diff-dot lit"></span>
+</div>
+<a class="card-link" href="hanoi.html" aria-label="Jogar Torre de Hanói">
+JOGAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+</a>
+</div>
+</div>
+</article>
+<article class="card" data-cat="digitacao" data-title="Digitação Avançada Prática">
+<div class="card-stripe"></div>
+<div class="card-body">
+<div class="card-header">
+<span class="card-icon" aria-hidden="true">⌨️</span>
+<div class="card-title-group">
+<span class="card-title">DIGITAÇÃO AVANÇADA</span>
+<span class="card-cat">Digitação</span>
+</div>
+</div>
+<p class="card-desc">Versão avançada do treino guiado com exercícios mais complexos e palavras reais.</p>
+<div class="card-footer">
+<div class="diff-bar" title="Dificuldade: média" aria-label="Dificuldade: média">
+<span class="diff-dot lit"></span><span class="diff-dot lit"></span><span class="diff-dot"></span>
+</div>
+<a class="card-link" href="aprenda_digitando.html" aria-label="Jogar Digitação Avançada">
+JOGAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+</a>
+</div>
+</div>
+</article>
+<article class="card" data-cat="digitacao" data-title="Mestre do Teclado ABNT2 Símbolos Especiais">
+<div class="card-stripe"></div>
+<div class="card-body">
+<div class="card-header">
+<span class="card-icon" aria-hidden="true">⌨️</span>
+<div class="card-title-group">
+<span class="card-title">MESTRE DO TECLADO ABNT2</span>
+<span class="card-cat">Digitação</span>
+</div>
+</div>
+<p class="card-desc">Domine símbolos especiais do teclado ABNT2 com 7 modos: aprendizado, frases, desafio rápido e mais.</p>
+<div class="card-footer">
+<div class="diff-bar" title="Dificuldade: média" aria-label="Dificuldade: média">
+<span class="diff-dot lit"></span><span class="diff-dot lit"></span><span class="diff-dot"></span>
+</div>
+<a class="card-link" href="simbolos_especiais.html" aria-label="Jogar Mestre do Teclado ABNT2">
+JOGAR <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+</a>
+</div>
+</div>
+</article>
+<article class="card soon" data-cat="" data-title="">
+<div class="card-stripe"></div>
+<div class="card-body">
+<div class="card-header">
+<span class="card-icon" aria-hidden="true">✨</span>
+<div class="card-title-group">
+<span class="card-title">MAIS JOGOS</span>
+<span class="card-cat">Em Desenvolvimento</span>
+</div>
+</div>
+<p class="card-desc">Novos módulos de treino chegando em breve. Fique ligado!</p>
+<div class="card-footer">
+<div class="diff-bar"></div>
+<span class="soon-tag">EM BREVE</span>
+</div>
+</div>
+</article>
+<div class="empty-state" id="empty" role="status">
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+Nenhum jogo encontrado para "<span id="empty-query"></span>"
+</div>
+</div>
+</main>
+<footer>
+© JOGOS DE TREINO — ARENA DIGITAL &nbsp;·&nbsp; v2.0 — Tema Claro
+</footer>
+</div>
 <script>
-  /* ═══ CURSOR ═══ */
-  const cur = document.getElementById('cursor');
-  const dot = document.getElementById('cursor-dot');
-  const isMobile = window.matchMedia('(max-width: 640px)').matches;
-
-  if (!isMobile) {
-    document.addEventListener('mousemove', e => {
-      cur.style.left = e.clientX + 'px';
-      cur.style.top = e.clientY + 'px';
-      dot.style.left = e.clientX + 'px';
-      dot.style.top = e.clientY + 'px';
-    });
-
-    document.addEventListener('mouseover', e => {
-      if (e.target.closest('a, .card, button, input')) {
-        document.body.classList.add('cursor-hover');
-      }
-    });
-    document.addEventListener('mouseout', e => {
-      if (e.target.closest('a, .card, button, input')) {
-        document.body.classList.remove('cursor-hover');
-      }
-    });
-  } else {
-    cur.style.display = 'none';
-    dot.style.display = 'none';
-  }
-
-  /* ═══ STARS ═══ */
-  const sf = document.getElementById('starfield');
-  for (let i = 0; i < 80; i++) {
-    const s = document.createElement('div');
-    s.className = 'star';
-    const sz = Math.random() * 1.5 + 0.5;
-    s.style.cssText =
-      'left:' + Math.random() * 100 + 'vw;' +
-      'top:' + Math.random() * 100 + 'vh;' +
-      'width:' + sz + 'px;height:' + sz + 'px;' +
-      'animation-duration:' + (5 + Math.random() * 10) + 's;' +
-      'animation-delay:' + Math.random() * 10 + 's;';
-    sf.appendChild(s);
-  }
-
-  /* ═══ PARTICLES ═══ */
-  const colors = ['#0097a7', '#f9a825', '#e91e63', '#2e7d32'];
-  for (let i = 0; i < 8; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
-    const sz = Math.random() * 3 + 1.5;
-    const dx = (Math.random() - 0.5) * 100;
-    p.style.cssText =
-      'left:' + Math.random() * 100 + 'vw;bottom:-10px;' +
-      'width:' + sz + 'px;height:' + sz + 'px;' +
-      'background:' + colors[Math.floor(Math.random() * colors.length)] + ';' +
-      'opacity:0.25;' +
-      '--dx:' + dx + 'px;' +
-      'animation-duration:' + (16 + Math.random() * 14) + 's;' +
-      'animation-delay:' + Math.random() * 16 + 's;';
-    document.body.appendChild(p);
-  }
-
-  /* ═══ SEARCH & FILTER ═══ */
-  const cards = document.querySelectorAll('.card:not(.soon)');
-  const allCards = document.querySelectorAll('.card');
-  const emptyEl = document.getElementById('empty');
-  const emptyQ = document.getElementById('empty-query');
-
-  function filterCards() {
-    var q = document.getElementById('search').value.toLowerCase().trim();
-    var cat = document.querySelector('.filter-btn.active').dataset.filter;
-    var visible = 0;
-
-    allCards.forEach(function(card) {
-      var title = (card.dataset.title || '').toLowerCase();
-      var cardCat = card.dataset.cat || '';
-      var matchQ = !q || title.includes(q);
-      var matchC = cat === 'all' || cardCat === cat;
-      var show = matchQ && matchC;
-      card.style.display = show ? '' : 'none';
-      if (show && !card.classList.contains('soon')) visible++;
-    });
-
-    emptyEl.style.display = visible === 0 ? 'block' : 'none';
-    emptyQ.textContent = q || (cat === 'all' ? '' : cat);
-  }
-
-  document.getElementById('search').addEventListener('input', filterCards);
-  document.getElementById('filters').addEventListener('click', function(e) {
-    var btn = e.target.closest('.filter-btn');
-    if (!btn) return;
-    document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
-    btn.classList.add('active');
-    filterCards();
-  });
-
-  /* ═══ CARD OVERLAY — whole card clickable ═══ */
-  document.querySelectorAll('.card:not(.soon)').forEach(function(card) {
-    var link = card.querySelector('.card-link');
-    if (!link) return;
-    var overlay = document.createElement('a');
-    overlay.className = 'card-overlay';
-    overlay.href = link.href;
-    overlay.setAttribute('tabindex', '-1');
-    overlay.setAttribute('aria-hidden', 'true');
-    card.insertBefore(overlay, card.firstChild);
-  });
-
-  /* ═══ COUNT-UP ═══ */
-  var gameCount = document.querySelectorAll('.card:not(.soon)').length;
-
-  /* ═══ CARD HOVER TILT ═══ */
-  if (!isMobile) {
-    allCards.forEach(function(card) {
-      card.addEventListener('mousemove', function(e) {
-        var rect = card.getBoundingClientRect();
-        var x = (e.clientX - rect.left) / rect.width - 0.5;
-        var y = (e.clientY - rect.top) / rect.height - 0.5;
-        card.style.transform = 'translateY(-4px) perspective(600px) rotateY(' + (x * 6) + 'deg) rotateX(' + (-y * 4) + 'deg)';
-      });
-      card.addEventListener('mouseleave', function() {
-        card.style.transform = '';
-      });
-    });
-  }
+/* ═══ CURSOR ═══ */
+const cur = document.getElementById('cursor');
+const dot = document.getElementById('cursor-dot');
+const isMobile = window.matchMedia('(max-width: 640px)').matches;
+if (!isMobile) {
+document.addEventListener('mousemove', e => {
+cur.style.left = e.clientX + 'px';
+cur.style.top = e.clientY + 'px';
+dot.style.left = e.clientX + 'px';
+dot.style.top = e.clientY + 'px';
+});
+document.addEventListener('mouseover', e => {
+if (e.target.closest('a, .card, button, input')) {
+document.body.classList.add('cursor-hover');
+}
+});
+document.addEventListener('mouseout', e => {
+if (e.target.closest('a, .card, button, input')) {
+document.body.classList.remove('cursor-hover');
+}
+});
+} else {
+cur.style.display = 'none';
+dot.style.display = 'none';
+}
+/* ═══ STARS ═══ */
+const sf = document.getElementById('starfield');
+for (let i = 0; i < 80; i++) {
+const s = document.createElement('div');
+s.className = 'star';
+const sz = Math.random() * 1.5 + 0.5;
+s.style.cssText =
+'left:' + Math.random() * 100 + 'vw;' +
+'top:' + Math.random() * 100 + 'vh;' +
+'width:' + sz + 'px;height:' + sz + 'px;' +
+'animation-duration:' + (5 + Math.random() * 10) + 's;' +
+'animation-delay:' + Math.random() * 10 + 's;';
+sf.appendChild(s);
+}
+/* ═══ PARTICLES ═══ */
+const colors = ['#0097a7', '#f9a825', '#e91e63', '#2e7d32'];
+for (let i = 0; i < 8; i++) {
+const p = document.createElement('div');
+p.className = 'particle';
+const sz = Math.random() * 3 + 1.5;
+const dx = (Math.random() - 0.5) * 100;
+p.style.cssText =
+'left:' + Math.random() * 100 + 'vw;bottom:-10px;' +
+'width:' + sz + 'px;height:' + sz + 'px;' +
+'background:' + colors[Math.floor(Math.random() * colors.length)] + ';' +
+'opacity:0.25;' +
+'--dx:' + dx + 'px;' +
+'animation-duration:' + (16 + Math.random() * 14) + 's;' +
+'animation-delay:' + Math.random() * 16 + 's;';
+document.body.appendChild(p);
+}
+/* ═══ SEARCH & FILTER ═══ */
+const cards = document.querySelectorAll('.card:not(.soon)');
+const allCards = document.querySelectorAll('.card');
+const emptyEl = document.getElementById('empty');
+const emptyQ = document.getElementById('empty-query');
+function filterCards() {
+var q = document.getElementById('search').value.toLowerCase().trim();
+var cat = document.querySelector('.filter-btn.active').dataset.filter;
+var visible = 0;
+allCards.forEach(function(card) {
+var title = (card.dataset.title || '').toLowerCase();
+var cardCat = card.dataset.cat || '';
+var matchQ = !q || title.includes(q);
+var matchC = cat === 'all' || cardCat === cat;
+var show = matchQ && matchC;
+card.style.display = show ? '' : 'none';
+if (show && !card.classList.contains('soon')) visible++;
+});
+emptyEl.style.display = visible === 0 ? 'block' : 'none';
+emptyQ.textContent = q || (cat === 'all' ? '' : cat);
+}
+document.getElementById('search').addEventListener('input', filterCards);
+document.getElementById('filters').addEventListener('click', function(e) {
+var btn = e.target.closest('.filter-btn');
+if (!btn) return;
+document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+btn.classList.add('active');
+filterCards();
+});
+/* ═══ CARD OVERLAY — whole card clickable ═══ */
+document.querySelectorAll('.card:not(.soon)').forEach(function(card) {
+var link = card.querySelector('.card-link');
+if (!link) return;
+var overlay = document.createElement('a');
+overlay.className = 'card-overlay';
+overlay.href = link.href;
+overlay.setAttribute('tabindex', '-1');
+overlay.setAttribute('aria-hidden', 'true');
+card.insertBefore(overlay, card.firstChild);
+});
+/* ═══ COUNT-UP ═══ */
+var gameCount = document.querySelectorAll('.card:not(.soon)').length;
+/* ═══ CARD HOVER TILT ═══ */
+if (!isMobile) {
+allCards.forEach(function(card) {
+card.addEventListener('mousemove', function(e) {
+var rect = card.getBoundingClientRect();
+var x = (e.clientX - rect.left) / rect.width - 0.5;
+var y = (e.clientY - rect.top) / rect.height - 0.5;
+card.style.transform = 'translateY(-4px) perspective(600px) rotateY(' + (x * 6) + 'deg) rotateX(' + (-y * 4) + 'deg)';
+});
+card.addEventListener('mouseleave', function() {
+card.style.transform = '';
+});
+});
+}
 </script>
 </body>
 </html>
