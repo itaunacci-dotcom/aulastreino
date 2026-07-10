@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jogo da Forca — Edição Premium</title>
+    <style>
+        :root {
+            /* Dark theme (default) */
+            --bg-primary: radial-gradient(circle at 20% 30%, #0b0e1a, #03050c);
+            --bg-container: rgba(18, 25, 45, 0.75);
+            --bg-container-border: rgba(255, 255, 255, 0.04);
+            --bg-stats: rgba(0, 0, 0, 0.35);
+            --bg-stats-border: rgba(255, 255, 255, 0.05);
+            --bg-theme-btn: rgba(255, 255, 255, 0.04);
+            --bg-theme-btn-border: rgba(255, 255, 255, 0.08);
+            --bg-theme-btn-hover: rgba(247, 151, 30, 0.12);
+            --bg-hangman: rgba(0, 0, 0, 0.5);
+            --bg-hangman-border: rgba(255, 255, 255, 0.06);
+            --bg-word: rgba(0, 0, 0, 0.3);
+            --bg-word-border: rgba(255, 255, 255, 0.04);
+            --bg-key: rgba(255, 255, 255, 0.07);
+            --bg-key-hover: rgba(247, 151, 30, 0.25);
+            --bg-key-correct: rgba(46, 213, 115, 0.2);
+            --bg-key-wrong: rgba(255, 107, 107, 0.15);
+            --bg-btn-secondary: rgba(255, 255, 255, 0.06);
+            --bg-btn-secondary-hover: rgba(255, 255, 255, 0.12);
+            --text-primary: #fff;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-muted: rgba(255, 255, 255, 0.5);
+            --shadow-main: 0 25px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            --shadow-inner: inset 0 0 40px rgba(0, 0, 0, 0.5);
+            --shadow-key: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            --accent: #f7971e;
+            --accent-secondary: #ffd200;
+            --win-color: #2ed573;
+            --lose-color: #ff6b6b;
+            --score-color: #f9ca24;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: radial-gradient(circle at 20% 30%, #f5f7fa, #e4e8ec);
+            --bg-container: rgba(255, 255, 255, 0.9);
+            --bg-container-border: rgba(0, 0, 0, 0.08);
+            --bg-stats: rgba(0, 0, 0, 0.05);
+            --bg-stats-border: rgba(0, 0, 0, 0.1);
+            --bg-theme-btn: rgba(0, 0, 0, 0.03);
+            --bg-theme-btn-border: rgba(0, 0, 0, 0.08);
+            --bg-theme-btn-hover: rgba(247, 151, 30, 0.15);
+            --bg-hangman: rgba(0, 0, 0, 0.03);
+            --bg-hangman-border: rgba(0, 0, 0, 0.08);
+            --bg-word: rgba(0, 0, 0, 0.04);
+            --bg-word-border: rgba(0, 0, 0, 0.08);
+            --bg-key: rgba(0, 0, 0, 0.04);
+            --bg-key-hover: rgba(247, 151, 30, 0.2);
+            --bg-key-correct: rgba(46, 213, 115, 0.2);
+            --bg-key-wrong: rgba(255, 107, 107, 0.15);
+            --bg-btn-secondary: rgba(0, 0, 0, 0.04);
+            --bg-btn-secondary-hover: rgba(0, 0, 0, 0.08);
+            --text-primary: #1a1a2e;
+            --text-secondary: rgba(26, 26, 46, 0.6);
+            --text-muted: rgba(26, 26, 46, 0.5);
+            --shadow-main: 0 25px 60px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            --shadow-inner: inset 0 0 40px rgba(0, 0, 0, 0.05);
+            --shadow-key: 0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+
+        /* ───────── Reset & Base ───────── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-primary);
+            padding: 20px;
+            margin: 0;
+            transition: background 0.3s ease;
+        }
+
+        /* ───────── Container Principal ───────── */
+        .container {
+            width: 100%;
+            max-width: 820px;
+            background: var(--bg-container);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 48px;
+            padding: 30px 30px 40px;
+            box-shadow: var(--shadow-main);
+            border: 1px solid var(--bg-container-border);
+            transition: all 0.3s ease;
+        }
+
+        /* ───────── Cabeçalho ───────── */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #f7971e, #ffd200);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(247, 151, 30, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        h1 small {
+            font-size: 0.9rem;
+            font-weight: 400;
+            -webkit-text-fill-color: var(--text-muted);
+            background: none;
+        }
+
+        .theme-toggle {
+            width: 44px;
+            height: 44px;
+            border: none;
+            border-radius: 50%;
+            background: var(--bg-stats);
+            border: 1px solid var(--bg-stats-border);
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-key);
+        }
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(15deg);
+            background: var(--bg-theme-btn-hover);
+            border-color: var(--accent);
+        }
+
+        /* ───────── Stats Bar ───────── */
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            background: var(--bg-stats);
+            padding: 8px 18px;
+            border-radius: 60px;
+            border: 1px solid var(--bg-stats-border);
+        }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        .stat-item .icon {
+            font-size: 1.2rem;
+        }
+        .stat-item span:last-child {
+            color: var(--text-primary);
+            font-weight: 700;
+            min-width: 24px;
+        }
+        .stat-wins span:last-child {
+            color: var(--win-color);
+        }
+        .stat-losses span:last-child {
+            color: var(--lose-color);
+        }
+        .stat-score span:last-child {
+            color: var(--score-color);
+            font-size: 1.2rem;
+        }
+
+        /* ───────── Theme Screen ───────── */
+        .theme-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            padding: 12px 0;
+        }
+        .theme-screen h2 {
+            font-size: 1.7rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            letter-spacing: -0.3px;
+        }
+        .theme-screen h2 span {
+            color: var(--accent);
+        }
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 14px;
+            width: 100%;
+            max-width: 700px;
+        }
+        .theme-btn {
+            background: var(--bg-theme-btn);
+            border: 1px solid var(--bg-theme-btn-border);
+            border-radius: 20px;
+            padding: 18px 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        .theme-btn .emoji {
+            font-size: 2.4rem;
+            line-height: 1;
+        }
+        .theme-btn:hover {
+            transform: translateY(-6px) scale(1.02);
+            background: var(--bg-theme-btn-hover);
+            border-color: var(--accent);
+            box-shadow: 0 12px 30px rgba(247, 151, 30, 0.15);
+        }
+        .theme-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* ───────── Game Screen ───────── */
+        .game-area {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+            animation: fadeSlide 0.4s ease;
+        }
+        @keyframes fadeSlide {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hangman-wrapper {
+            background: var(--bg-hangman);
+            border-radius: 32px;
+            padding: 16px 20px 10px;
+            border: 1px solid var(--bg-hangman-border);
+            box-shadow: var(--shadow-inner);
+            width: 100%;
+            max-width: 320px;
+            display: flex;
+            justify-content: center;
+        }
+        .hangman-svg {
+            width: 100%;
+            height: auto;
+            max-height: 240px;
+            display: block;
+        }
+        .hangman-svg line,
+        .hangman-svg circle {
+            stroke: var(--accent);
+            stroke-width: 3.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+            filter: drop-shadow(0 0 6px rgba(247, 151, 30, 0.3));
+        }
+        .hangman-svg .part {
+            transition: opacity 0.25s ease;
+        }
+
+        .theme-label {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: 0.3px;
+            margin-top: -6px;
+        }
+        .theme-label strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* ───────── Word Display ───────── */
+        .word-display {
+            font-size: 2.6rem;
+            font-weight: 700;
+            letter-spacing: 14px;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 4px;
+            padding: 6px 10px;
+            background: var(--bg-word);
+            border-radius: 18px;
+            border: 1px solid var(--bg-word-border);
+            width: 100%;
+        }
+        .word-display span {
+            display: inline-block;
+            min-width: 42px;
+            text-align: center;
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 4px;
+            color: var(--text-primary);
+            text-shadow: 0 0 12px rgba(247, 151, 30, 0.2);
+            transition: all 0.2s ease;
+        }
+        .word-display span.revealed {
+            border-bottom-color: var(--win-color);
+        }
+
+        .wrong-letters {
+            font-size: 1rem;
+            color: var(--text-muted);
+            min-height: 30px;
+        }
+        .wrong-letters span {
+            color: var(--lose-color);
+            font-weight: 700;
+            margin: 0 4px;
+            font-size: 1.2rem;
+        }
+
+        /* ───────── Message ───────── */
+        .message {
+            font-size: 1.4rem;
+            font-weight: 700;
+            padding: 14px 28px;
+            border-radius: 40px;
+            display: none;
+            animation: pop 0.35s ease;
+            width: 100%;
+            text-align: center;
+        }
+        .message.win {
+            display: block;
+            background: rgba(46, 213, 115, 0.15);
+            border: 1px solid var(--win-color);
+            color: var(--win-color);
+            box-shadow: 0 0 30px rgba(46, 213, 115, 0.1);
+        }
+        .message.lose {
+            display: block;
+            background: rgba(255, 107, 107, 0.15);
+            border: 1px solid var(--lose-color);
+            color: var(--lose-color);
+            box-shadow: 0 0 30px rgba(255, 107, 107, 0.1);
+        }
+        @keyframes pop {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* ───────── Keyboard ───────── */
+        .keyboard {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            max-width: 600px;
+            width: 100%;
+            margin: 4px 0;
+        }
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+        .key {
+            width: 48px;
+            height: 48px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 14px;
+            background: var(--bg-key);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: var(--shadow-key);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .key:hover:not(:disabled) {
+            background: var(--bg-key-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(247, 151, 30, 0.2);
+        }
+        .key:active:not(:disabled) {
+            transform: scale(0.92);
+        }
+        .key:disabled {
+            opacity: 0.25;
+            cursor: not-allowed;
+            transform: scale(0.92);
+            filter: grayscale(0.6);
+        }
+        .key.correct {
+            background: var(--bg-key-correct);
+            border-color: var(--win-color);
+        }
+        .key.wrong {
+            background: var(--bg-key-wrong);
+            border-color: var(--lose-color);
+        }
+
+        /* ───────── Buttons ───────── */
+        .actions {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 6px;
+        }
+        .btn {
+            padding: 14px 32px;
+            font-size: 1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 60px;
+            background: var(--bg-btn-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(4px);
+            border: 1px solid var(--bg-stats-border);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #f7971e, #f5a623);
+            color: #0b0e1a;
+            border-color: transparent;
+            box-shadow: 0 8px 24px rgba(247, 151, 30, 0.25);
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 36px rgba(247, 151, 30, 0.35);
+        }
+        .btn-secondary {
+            background: var(--bg-btn-secondary);
+        }
+        .btn-secondary:hover {
+            background: var(--bg-btn-secondary-hover);
+            transform: translateY(-3px);
+        }
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        /* ───────── Score Popup ───────── */
+        .score-popup {
+            position: fixed;
+            font-size: 1.8rem;
+            font-weight: 800;
+            pointer-events: none;
+            z-index: 999;
+            animation: floatUp 1s cubic-bezier(0.2, 0.9, 0.3, 1.2) forwards;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        .score-popup.positive {
+            color: var(--win-color);
+        }
+        .score-popup.negative {
+            color: var(--lose-color);
+        }
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-90px) scale(1.6);
+            }
+        }
+
+        /* ───────── Responsividade ───────── */
+        @media (max-width: 600px) {
+            .container {
+                padding: 18px 16px 28px;
+                border-radius: 32px;
+            }
+            h1 {
+                font-size: 1.6rem;
+            }
+            .stats-bar {
+                padding: 6px 14px;
+                gap: 12px;
+                font-size: 0.8rem;
+            }
+            .word-display {
+                font-size: 1.8rem;
+                letter-spacing: 8px;
+                min-height: 56px;
+            }
+            .word-display span {
+                min-width: 30px;
+            }
+            .key {
+                width: 40px;
+                height: 40px;
+                font-size: 0.95rem;
+                border-radius: 12px;
+            }
+            .keyboard {
+                gap: 6px;
+            }
+            .theme-grid {
+                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+                gap: 10px;
+            }
+            .theme-btn {
+                padding: 14px 8px;
+                font-size: 0.9rem;
+            }
+            .theme-btn .emoji {
+                font-size: 2rem;
+            }
+            .message {
+                font-size: 1.1rem;
+                padding: 12px 18px;
+            }
+            .btn {
+                padding: 12px 22px;
+                font-size: 0.9rem;
+            }
+            .hangman-wrapper {
+                padding: 12px;
+            }
+            .theme-toggle {
+                width: 40px;
+                height: 40px;
+                font-size: 1.1rem;
+            }
+        }
+        @media (max-width: 420px) {
+            .word-display {
+                font-size: 1.4rem;
+                letter-spacing: 6px;
+            }
+            .word-display span {
+                min-width: 24px;
+            }
+            .key {
+                width: 34px;
+                height: 34px;
+                font-size: 0.8rem;
+                border-radius: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Cabeçalho -->
+        <div class="header">
+            <h1>
+                🪢 Forca
+                <small>premium</small>
+            </h1>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="stats-bar">
+                    <div class="stat-item stat-wins">
+                        <span class="icon">🏆</span> <span id="wins">0</span>
+                    </div>
+                    <div class="stat-item stat-losses">
+                        <span class="icon">💀</span> <span id="losses">0</span>
+                    </div>
+                    <div class="stat-item stat-score">
+                        <span class="icon">⭐</span> <span id="score">0</span>
+                    </div>
+                </div>
+                <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Alternar tema" title="Alternar tema claro/escuro">
+                    <span id="themeIcon">🌙</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tela de Temas -->
+        <div id="themeScreen" class="theme-screen">
+            <h2>Escolha um <span>tema</span></h2>
+            <div class="theme-grid" id="themeGrid"></div>
+        </div>
+
+        <!-- Tela do Jogo -->
+        <div id="gameScreen" class="game-area">
+            <div class="hangman-wrapper">
+                <svg class="hangman-svg" viewBox="0 0 200 250" fill="none">
+                    <!-- Base -->
+                    <line x1="20" y1="230" x2="80" y2="230" />
+                    <line x1="50" y1="230" x2="50" y2="30" />
+                    <line x1="50" y1="30" x2="130" y2="30" />
+                    <line x1="130" y1="30" x2="130" y2="50" />
+
+                    <!-- Partes (inicialmente ocultas) -->
+                    <circle cx="130" cy="70" r="20" id="head" class="part" style="display:none;" />
+                    <line x1="130" y1="90" x2="130" y2="150" id="body" class="part" style="display:none;" />
+                    <line x1="130" y1="110" x2="100" y2="130" id="leftArm" class="part" style="display:none;" />
+                    <line x1="130" y1="110" x2="160" y2="130" id="rightArm" class="part" style="display:none;" />
+                    <line x1="130" y1="150" x2="100" y2="190" id="leftLeg" class="part" style="display:none;" />
+                    <line x1="130" y1="150" x2="160" y2="190" id="rightLeg" class="part" style="display:none;" />
+                </svg>
+            </div>
+
+            <div class="theme-label" id="themeLabel">Tema: <strong>—</strong></div>
+
+            <div class="word-display" id="wordDisplay"></div>
+
+            <div class="wrong-letters">
+                ❌ Letras erradas: <span id="wrongLetters"></span>
+            </div>
+
+            <div class="message" id="message"></div>
+
+            <div class="keyboard" id="keyboard"></div>
+
+            <div class="actions">
+                <button class="btn btn-secondary" onclick="showThemes()">🔄 Trocar Tema</button>
+                <button class="btn btn-primary" onclick="startGame()">✨ Nova Palavra</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ─────────────── DADOS ───────────────
+        const categories = {
+            'Animais': {
+                emoji: '🐾',
+                words: ['ELEFANTE', 'GIRAFA', 'LEAO', 'TIGRE', 'MACACO', 'PAPAGAIO', 'CACHORRO', 'GATO', 'CAVALO', 'VACA', 'PORCO', 'COELHO', 'TARTARUGA', 'CORUJA', 'BALEIA', 'GOLFINHO', 'PINGUIM', 'ANTILOPE', 'CROCODILO', 'HIPOPOTAMO']
+            },
+            'Frutas': {
+                emoji: '🍎',
+                words: ['ABACAXI', 'MANGA', 'GOIABA', 'MELANCIA', 'LARANJA', 'BANANA', 'MORANGO', 'UVA', 'ABACATE', 'COCO', 'ACEROLA', 'CAJU', 'AMORA', 'FIGO', 'JABUTICABA', 'MARACUJA', 'TANGERINA', 'PITAYA', 'GRAVIOLA', 'FRAMBOESA']
+            },
+            'Cores': {
+                emoji: '🎨',
+                words: ['AMARELO', 'AZUL', 'VERMELHO', 'VERDE', 'LARANJA', 'ROXO', 'ROSA', 'MARROM', 'PRETO', 'BRANCO', 'CINZA', 'TURQUESA', 'BORDO', 'BEGE', 'DOURADO', 'PRATA', 'CORAL', 'INDIGO', 'MAGENTA', 'CREME']
+            },
+            'Países': {
+                emoji: '🌍',
+                words: ['BRASIL', 'ARGENTINA', 'COLOMBIA', 'CHILE', 'PERU', 'MEXICO', 'VENEZUELA', 'EQUADOR', 'BOLIVIA', 'URUGUAI', 'PARAGUAI', 'COSTARICA', 'PANAMA', 'CUBA', 'JAMAICA', 'HONDURAS', 'GUATEMALA', 'NICARAGUA', 'ELSALVADOR', 'DOMINICANA']
+            },
+            'Profissões': {
+                emoji: '👨‍⚕️',
+                words: ['MEDICO', 'ENFERMEIRO', 'PROFESSOR', 'ADVOGADO', 'ENGENHEIRO', 'PILOTO', 'BOMBEIRO', 'POLICIAL', 'COZINHEIRO', 'JORNALISTA', 'DENTISTA', 'VETERINARIO', 'ARQUITETO', 'FARMACEUTICO', 'PSICOLOGO', 'CONTADOR', 'ELETRICISTA', 'MECANICO', 'PINTOR', 'PEDREIRO']
+            },
+            'Comidas': {
+                emoji: '🍕',
+                words: ['CHOCOLATE', 'LASANHA', 'PIZZA', 'SUSHI', 'FEIJOADA', 'MOQUECA', 'ACARAJE', 'PASTEL', 'COXINHA', 'ESFIRRA', 'EMPANADA', 'CROQUETA', 'RISOTO', 'NHOQUE', 'PANQUECA', 'WAFFLE', 'CREPE', 'SOPA', 'SALADA', 'VINAGRETE']
+            },
+            'Esportes': {
+                emoji: '⚽',
+                words: ['FUTEBOL', 'VOLEI', 'BASQUETE', 'TENIS', 'NATACAO', 'CICLISMO', 'BOXE', 'JUDO', 'KARATE', 'SURFE', 'HANDBOL', 'RUGBI', 'GOLFE', 'BEISEBOL', 'HOQUEI', 'ESGRIMA', 'REMO', 'ESCALADA', 'ARCO', 'PENDULO']
+            },
+            'Música': {
+                emoji: '🎵',
+                words: ['VIOLAO', 'GUITARRA', 'BATERIA', 'TECLADO', 'SAXOFONE', 'TROMPETE', 'FLAUTA', 'CLARINETA', 'ACORDEON', 'SANFONA', 'UKULELE', 'CELLO', 'VIOLINO', 'BAIXO', 'HARMONICA', 'TAMBOR', 'CAIXA', 'TRIANGULO', 'LIRA', 'CAVAQUINHO']
+            },
+            'Natureza': {
+                emoji: '🌿',
+                words: ['MONTANHA', 'RIO', 'FLORESTA', 'DESERTO', 'VULCAO', 'CACHOEIRA', 'LAGOA', 'ILHA', 'PRAIA', 'CAVERNA', 'CANYON', 'BARRAGEM', 'PLANICIE', 'PANTANO', 'FORMACAO', 'COSTEIRA', 'GEISER', 'OASIS', 'BREJO', 'SELVA']
+            },
+            'Objetos': {
+                emoji: '💡',
+                words: ['COMPUTADOR', 'TELEFONE', 'TELEVISAO', 'GELADEIRA', 'MAQUINA', 'LAMPADA', 'RELOGIO', 'CHAVE', 'CADEIRA', 'MESA', 'ESPELHO', 'LIVRO', 'PRATELEIRA', 'CANETA', 'LAPIS', 'TESOURA', 'COLHER', 'GARFO', 'TRAVESSEIRO', 'COBERTOR']
+            },
+            'Transporte': {
+                emoji: '🚗',
+                words: ['CARRO', 'ONIBUS', 'TREM', 'AVIAO', 'NAVIO', 'MOTO', 'BICICLETA', 'CAMINHAO', 'BARCO', 'SUBMARINO', 'HELICOPTERO', 'BONDE', 'TELEFERICO', 'CAIAQUE', 'CANOA', 'BALSA', 'JETSKI', 'PLANADOR', 'FOGUETE', 'CHARRETE']
+            }
+        };
+
+        // ─────────────── ESTADO ───────────────
+        let selectedWord = '';
+        let selectedCategory = '';
+        let guessedLetters = [];
+        let wrongLetters = [];
+        const maxWrong = 6;
+        let gameOver = false;
+        let wins = 0;
+        let losses = 0;
+        let score = 0;
+        const hangmanParts = ['head', 'body', 'leftArm', 'rightArm', 'leftLeg', 'rightLeg'];
+
+        // ─────────────── DOM REFS ───────────────
+        const $ = id => document.getElementById(id);
+        const themeScreen = $('themeScreen');
+        const gameScreen = $('gameScreen');
+        const themeGrid = $('themeGrid');
+        const themeLabel = $('themeLabel');
+        const wordDisplay = $('wordDisplay');
+        const wrongLettersSpan = $('wrongLetters');
+        const messageDiv = $('message');
+        const keyboardDiv = $('keyboard');
+        const winsSpan = $('wins');
+        const lossesSpan = $('losses');
+        const scoreSpan = $('score');
+
+        // ─────────────── INICIALIZAÇÃO ───────────────
+        function init() {
+            themeGrid.innerHTML = '';
+            for (const [name, data] of Object.entries(categories)) {
+                const btn = document.createElement('button');
+                btn.className = 'theme-btn';
+                btn.innerHTML = `<span class="emoji">${data.emoji}</span>${name}`;
+                btn.addEventListener('click', () => selectTheme(name));
+                themeGrid.appendChild(btn);
+            }
+            updateScoreDisplay();
+        }
+
+        function updateScoreDisplay() {
+            winsSpan.textContent = wins;
+            lossesSpan.textContent = losses;
+            scoreSpan.textContent = score;
+        }
+
+        function showScorePopup(points, x, y) {
+            const popup = document.createElement('div');
+            popup.className = `score-popup ${points >= 0 ? 'positive' : 'negative'}`;
+            popup.textContent = (points >= 0 ? '+' : '') + points;
+            popup.style.left = x + 'px';
+            popup.style.top = y + 'px';
+            document.body.appendChild(popup);
+            setTimeout(() => popup.remove(), 1000);
+        }
+
+        // ─────────────── TELAS ───────────────
+        function showThemes() {
+            themeScreen.style.display = 'flex';
+            gameScreen.style.display = 'none';
+        }
+
+        function selectTheme(name) {
+            selectedCategory = name;
+            themeScreen.style.display = 'none';
+            gameScreen.style.display = 'flex';
+            startGame();
+        }
+
+        // ─────────────── JOGO ───────────────
+        function startGame() {
+            const cat = categories[selectedCategory];
+            const ri = Math.floor(Math.random() * cat.words.length);
+            selectedWord = cat.words[ri].toUpperCase();
+            guessedLetters = [];
+            wrongLetters = [];
+            gameOver = false;
+
+            messageDiv.className = 'message';
+            messageDiv.textContent = '';
+            themeLabel.innerHTML = `Tema: <strong>${selectedCategory}</strong> ${cat.emoji}`;
+
+            updateWordDisplay();
+            updateWrongLetters();
+            resetHangman();
+            createKeyboard();
+        }
+
+        function createKeyboard() {
+            keyboardDiv.innerHTML = '';
+            const qwertyRows = [
+                'QWERTYUIOP',
+                'ASDFGHJKL',
+                'ZXCVBNM'
+            ];
+            
+            for (const row of qwertyRows) {
+                const rowDiv = document.createElement('div');
+                rowDiv.style.display = 'flex';
+                rowDiv.style.justifyContent = 'center';
+                rowDiv.style.gap = '8px';
+                rowDiv.style.width = '100%';
+                
+                for (const letter of row) {
+                    const btn = document.createElement('button');
+                    btn.className = 'key';
+                    btn.textContent = letter;
+                    btn.dataset.letter = letter;
+                    btn.addEventListener('click', () => guessLetter(letter));
+                    btn.id = 'key-' + letter;
+                    rowDiv.appendChild(btn);
+                }
+                keyboardDiv.appendChild(rowDiv);
+            }
+        }
+
+        function guessLetter(letter) {
+            if (gameOver) return;
+            if (guessedLetters.includes(letter) || wrongLetters.includes(letter)) return;
+
+            const btn = document.getElementById('key-' + letter);
+            const rect = btn.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top;
+
+            if (selectedWord.includes(letter)) {
+                btn.disabled = true;
+                btn.classList.add('correct');
+                guessedLetters.push(letter);
+                const pts = 10;
+                score += pts;
+                updateScoreDisplay();
+                showScorePopup(pts, cx, cy);
+                updateWordDisplay();
+                checkWin();
+            } else {
+                btn.disabled = true;
+                btn.classList.add('wrong');
+                wrongLetters.push(letter);
+                const pts = -5;
+                score = Math.max(0, score + pts);
+                updateScoreDisplay();
+                showScorePopup(pts, cx, cy);
+                updateWrongLetters();
+                showHangmanPart();
+                checkLose();
+            }
+        }
+
+        function updateWordDisplay() {
+            let html = '';
+            for (const ch of selectedWord) {
+                if (guessedLetters.includes(ch)) {
+                    html += `<span class="revealed">${ch}</span>`;
+                } else {
+                    html += `<span>_</span>`;
+                }
+            }
+            wordDisplay.innerHTML = html;
+        }
+
+        function updateWrongLetters() {
+            wrongLettersSpan.innerHTML = wrongLetters.map(l => `<span>${l}</span>`).join(' ');
+        }
+
+        function resetHangman() {
+            for (const id of hangmanParts) {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            }
+        }
+
+        function showHangmanPart() {
+            const idx = wrongLetters.length - 1;
+            if (idx < hangmanParts.length) {
+                const el = document.getElementById(hangmanParts[idx]);
+                if (el) el.style.display = 'block';
+            }
+        }
+
+        function checkWin() {
+            if (selectedWord.split('').every(ch => guessedLetters.includes(ch))) {
+                gameOver = true;
+                wins++;
+                const bonus = 50 + (maxWrong - wrongLetters.length) * 10;
+                score += bonus;
+                updateScoreDisplay();
+                messageDiv.className = 'message win';
+                messageDiv.textContent = `🎉 Você venceu! +${bonus} bônus!`;
+                disableAllKeys();
+            }
+        }
+
+        function checkLose() {
+            if (wrongLetters.length >= maxWrong) {
+                gameOver = true;
+                losses++;
+                const penalty = 30;
+                score = Math.max(0, score - penalty);
+                updateScoreDisplay();
+                messageDiv.className = 'message lose';
+                messageDiv.textContent = `😵 Perdeu! A palavra era: ${selectedWord}  (-${penalty})`;
+                disableAllKeys();
+            }
+        }
+
+        function disableAllKeys() {
+            document.querySelectorAll('.key').forEach(k => k.disabled = true);
+        }
+
+        // ─────────────── TEMA CLARO/ESCURO ───────────────
+        function initTheme() {
+            const saved = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', saved);
+            updateThemeIcon(saved);
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            updateThemeIcon(next);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('themeIcon');
+            if (icon) icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // ─────────────── SUPORTE A TECLADO ───────────────
+        document.addEventListener('keydown', (e) => {
+            // Só reage se a tela do jogo estiver ativa
+            if (gameScreen.style.display !== 'flex') return;
+            if (gameOver) return;
+
+            const key = e.key.toUpperCase();
+            if (key.length === 1 && key >= 'A' && key <= 'Z') {
+                e.preventDefault();
+                guessLetter(key);
+            }
+        });
+
+        // ─────────────── INICIA ───────────────
+        initTheme();
+        init();
+    </script>
+</body>
+</html>
